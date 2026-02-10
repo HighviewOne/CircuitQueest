@@ -7,11 +7,15 @@ import com.circuitqueest.app.data.content.AcCircuitsContent
 import com.circuitqueest.app.data.content.CapacitorsInductorsContent
 import com.circuitqueest.app.data.content.DigitalLogicContent
 import com.circuitqueest.app.data.content.DiodesContent
+import com.circuitqueest.app.data.content.FiltersContent
 import com.circuitqueest.app.data.content.KirchhoffsContent
+import com.circuitqueest.app.data.content.MosfetsContent
 import com.circuitqueest.app.data.content.OhmsLawContent
 import com.circuitqueest.app.data.content.OpAmpsContent
 import com.circuitqueest.app.data.content.SeriesParallelContent
+import com.circuitqueest.app.data.content.SignalsSystemsContent
 import com.circuitqueest.app.data.content.TheveninNortonContent
+import com.circuitqueest.app.data.content.TransformersContent
 import com.circuitqueest.app.data.content.TransistorsContent
 import com.circuitqueest.app.data.content.Topic
 import com.circuitqueest.app.data.db.entity.TopicProgress
@@ -42,7 +46,11 @@ class HomeViewModel(
             TheveninNortonContent.topic,
             DiodesContent.topic,
             TransistorsContent.topic,
-            DigitalLogicContent.topic
+            DigitalLogicContent.topic,
+            MosfetsContent.topic,
+            FiltersContent.topic,
+            TransformersContent.topic,
+            SignalsSystemsContent.topic
         ).sortedBy { it.order }
     }
 
