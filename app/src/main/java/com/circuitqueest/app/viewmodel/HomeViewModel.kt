@@ -5,10 +5,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.circuitqueest.app.data.content.AcCircuitsContent
 import com.circuitqueest.app.data.content.CapacitorsInductorsContent
+import com.circuitqueest.app.data.content.DigitalLogicContent
+import com.circuitqueest.app.data.content.DiodesContent
 import com.circuitqueest.app.data.content.KirchhoffsContent
 import com.circuitqueest.app.data.content.OhmsLawContent
 import com.circuitqueest.app.data.content.OpAmpsContent
 import com.circuitqueest.app.data.content.SeriesParallelContent
+import com.circuitqueest.app.data.content.TheveninNortonContent
+import com.circuitqueest.app.data.content.TransistorsContent
 import com.circuitqueest.app.data.content.Topic
 import com.circuitqueest.app.data.db.entity.TopicProgress
 import com.circuitqueest.app.data.repository.ProgressRepository
@@ -34,7 +38,11 @@ class HomeViewModel(
             KirchhoffsContent.topic,
             CapacitorsInductorsContent.topic,
             AcCircuitsContent.topic,
-            OpAmpsContent.topic
+            OpAmpsContent.topic,
+            TheveninNortonContent.topic,
+            DiodesContent.topic,
+            TransistorsContent.topic,
+            DigitalLogicContent.topic
         ).sortedBy { it.order }
     }
 
