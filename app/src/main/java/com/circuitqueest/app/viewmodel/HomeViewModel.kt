@@ -3,8 +3,11 @@ package com.circuitqueest.app.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.circuitqueest.app.data.content.AcCircuitsContent
+import com.circuitqueest.app.data.content.CapacitorsInductorsContent
 import com.circuitqueest.app.data.content.KirchhoffsContent
 import com.circuitqueest.app.data.content.OhmsLawContent
+import com.circuitqueest.app.data.content.OpAmpsContent
 import com.circuitqueest.app.data.content.SeriesParallelContent
 import com.circuitqueest.app.data.content.Topic
 import com.circuitqueest.app.data.db.entity.TopicProgress
@@ -28,7 +31,10 @@ class HomeViewModel(
         val allTopics = listOf(
             OhmsLawContent.topic,
             SeriesParallelContent.topic,
-            KirchhoffsContent.topic
+            KirchhoffsContent.topic,
+            CapacitorsInductorsContent.topic,
+            AcCircuitsContent.topic,
+            OpAmpsContent.topic
         ).sortedBy { it.order }
     }
 
