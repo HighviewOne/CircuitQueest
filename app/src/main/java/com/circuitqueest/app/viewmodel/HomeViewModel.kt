@@ -8,13 +8,17 @@ import com.circuitqueest.app.data.content.CapacitorsInductorsContent
 import com.circuitqueest.app.data.content.CommunicationSystemsContent
 import com.circuitqueest.app.data.content.ControlSystemsContent
 import com.circuitqueest.app.data.content.DigitalLogicContent
+import com.circuitqueest.app.data.content.DigitalSystemsContent
 import com.circuitqueest.app.data.content.DiodesContent
+import com.circuitqueest.app.data.content.ElectricMachinesContent
+import com.circuitqueest.app.data.content.ElectromagneticsContent
 import com.circuitqueest.app.data.content.FiltersContent
 import com.circuitqueest.app.data.content.KirchhoffsContent
 import com.circuitqueest.app.data.content.MosfetsContent
 import com.circuitqueest.app.data.content.OhmsLawContent
 import com.circuitqueest.app.data.content.OpAmpsContent
 import com.circuitqueest.app.data.content.PowerElectronicsContent
+import com.circuitqueest.app.data.content.SemiconductorPhysicsContent
 import com.circuitqueest.app.data.content.SeriesParallelContent
 import com.circuitqueest.app.data.content.SignalsSystemsContent
 import com.circuitqueest.app.data.content.TheveninNortonContent
@@ -58,7 +62,11 @@ class HomeViewModel(
             PowerElectronicsContent.topic,
             ControlSystemsContent.topic,
             TransmissionLinesContent.topic,
-            CommunicationSystemsContent.topic
+            CommunicationSystemsContent.topic,
+            ElectromagneticsContent.topic,
+            SemiconductorPhysicsContent.topic,
+            DigitalSystemsContent.topic,
+            ElectricMachinesContent.topic
         ).sortedBy { it.order }
     }
 
