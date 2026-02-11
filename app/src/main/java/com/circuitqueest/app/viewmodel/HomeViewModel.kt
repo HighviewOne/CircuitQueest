@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.circuitqueest.app.data.content.AcCircuitsContent
+import com.circuitqueest.app.data.content.AntennaDesignContent
+import com.circuitqueest.app.data.content.BatteryStorageContent
 import com.circuitqueest.app.data.content.CapacitorsInductorsContent
 import com.circuitqueest.app.data.content.CommunicationSystemsContent
 import com.circuitqueest.app.data.content.ControlSystemsContent
@@ -24,11 +26,13 @@ import com.circuitqueest.app.data.content.PowerSystemsContent
 import com.circuitqueest.app.data.content.SemiconductorPhysicsContent
 import com.circuitqueest.app.data.content.SensorsMeasurementContent
 import com.circuitqueest.app.data.content.SeriesParallelContent
+import com.circuitqueest.app.data.content.SignalIntegrityContent
 import com.circuitqueest.app.data.content.SignalsSystemsContent
 import com.circuitqueest.app.data.content.TheveninNortonContent
 import com.circuitqueest.app.data.content.TransformersContent
 import com.circuitqueest.app.data.content.TransistorsContent
 import com.circuitqueest.app.data.content.TransmissionLinesContent
+import com.circuitqueest.app.data.content.VlsiDesignContent
 import com.circuitqueest.app.data.content.Topic
 import com.circuitqueest.app.data.db.entity.TopicProgress
 import com.circuitqueest.app.data.repository.ProgressRepository
@@ -74,7 +78,11 @@ class HomeViewModel(
             PcbDesignContent.topic,
             EmbeddedSystemsContent.topic,
             PowerSystemsContent.topic,
-            SensorsMeasurementContent.topic
+            SensorsMeasurementContent.topic,
+            AntennaDesignContent.topic,
+            VlsiDesignContent.topic,
+            SignalIntegrityContent.topic,
+            BatteryStorageContent.topic
         ).sortedBy { it.order }
     }
 
