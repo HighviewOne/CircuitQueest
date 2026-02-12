@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.circuitqueest.app.data.content.AcCircuitsContent
 import com.circuitqueest.app.data.content.AnalogCircuitsContent
 import com.circuitqueest.app.data.content.AntennaDesignContent
+import com.circuitqueest.app.data.content.AudioElectronicsContent
 import com.circuitqueest.app.data.content.BatteryStorageContent
 import com.circuitqueest.app.data.content.CapacitorsInductorsContent
 import com.circuitqueest.app.data.content.CommunicationSystemsContent
@@ -13,9 +14,12 @@ import com.circuitqueest.app.data.content.ControlSystemsContent
 import com.circuitqueest.app.data.content.DigitalLogicContent
 import com.circuitqueest.app.data.content.DigitalSystemsContent
 import com.circuitqueest.app.data.content.DiodesContent
+import com.circuitqueest.app.data.content.DspContent
 import com.circuitqueest.app.data.content.ElectricMachinesContent
+import com.circuitqueest.app.data.content.ElectricVehiclesContent
 import com.circuitqueest.app.data.content.ElectromagneticsContent
 import com.circuitqueest.app.data.content.EmbeddedSystemsContent
+import com.circuitqueest.app.data.content.FiberOpticsContent
 import com.circuitqueest.app.data.content.FiltersContent
 import com.circuitqueest.app.data.content.IotWirelessContent
 import com.circuitqueest.app.data.content.KirchhoffsContent
@@ -90,7 +94,11 @@ class HomeViewModel(
             RfCircuitsContent.topic,
             AnalogCircuitsContent.topic,
             RenewableEnergyContent.topic,
-            IotWirelessContent.topic
+            IotWirelessContent.topic,
+            DspContent.topic,
+            FiberOpticsContent.topic,
+            ElectricVehiclesContent.topic,
+            AudioElectronicsContent.topic
         ).sortedBy { it.order }
     }
 
