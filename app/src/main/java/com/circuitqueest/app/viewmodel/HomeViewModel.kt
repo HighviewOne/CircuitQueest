@@ -8,6 +8,7 @@ import com.circuitqueest.app.data.content.AnalogCircuitsContent
 import com.circuitqueest.app.data.content.AntennaDesignContent
 import com.circuitqueest.app.data.content.AudioElectronicsContent
 import com.circuitqueest.app.data.content.BatteryStorageContent
+import com.circuitqueest.app.data.content.BiomedicalElectronicsContent
 import com.circuitqueest.app.data.content.CapacitorsInductorsContent
 import com.circuitqueest.app.data.content.CommunicationSystemsContent
 import com.circuitqueest.app.data.content.ControlSystemsContent
@@ -23,12 +24,15 @@ import com.circuitqueest.app.data.content.FiberOpticsContent
 import com.circuitqueest.app.data.content.FiltersContent
 import com.circuitqueest.app.data.content.IotWirelessContent
 import com.circuitqueest.app.data.content.KirchhoffsContent
+import com.circuitqueest.app.data.content.MemsContent
+import com.circuitqueest.app.data.content.MlHardwareContent
 import com.circuitqueest.app.data.content.MosfetsContent
 import com.circuitqueest.app.data.content.OhmsLawContent
 import com.circuitqueest.app.data.content.OpAmpsContent
 import com.circuitqueest.app.data.content.PcbDesignContent
 import com.circuitqueest.app.data.content.PowerElectronicsContent
 import com.circuitqueest.app.data.content.PowerSystemsContent
+import com.circuitqueest.app.data.content.RadarSystemsContent
 import com.circuitqueest.app.data.content.RenewableEnergyContent
 import com.circuitqueest.app.data.content.RfCircuitsContent
 import com.circuitqueest.app.data.content.SemiconductorPhysicsContent
@@ -98,7 +102,11 @@ class HomeViewModel(
             DspContent.topic,
             FiberOpticsContent.topic,
             ElectricVehiclesContent.topic,
-            AudioElectronicsContent.topic
+            AudioElectronicsContent.topic,
+            MemsContent.topic,
+            RadarSystemsContent.topic,
+            BiomedicalElectronicsContent.topic,
+            MlHardwareContent.topic
         ).sortedBy { it.order }
     }
 
