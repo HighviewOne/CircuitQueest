@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.circuitqueest.app.data.content.AcCircuitsContent
+import com.circuitqueest.app.data.content.AnalogCircuitsContent
 import com.circuitqueest.app.data.content.AntennaDesignContent
 import com.circuitqueest.app.data.content.BatteryStorageContent
 import com.circuitqueest.app.data.content.CapacitorsInductorsContent
@@ -16,6 +17,7 @@ import com.circuitqueest.app.data.content.ElectricMachinesContent
 import com.circuitqueest.app.data.content.ElectromagneticsContent
 import com.circuitqueest.app.data.content.EmbeddedSystemsContent
 import com.circuitqueest.app.data.content.FiltersContent
+import com.circuitqueest.app.data.content.IotWirelessContent
 import com.circuitqueest.app.data.content.KirchhoffsContent
 import com.circuitqueest.app.data.content.MosfetsContent
 import com.circuitqueest.app.data.content.OhmsLawContent
@@ -23,6 +25,8 @@ import com.circuitqueest.app.data.content.OpAmpsContent
 import com.circuitqueest.app.data.content.PcbDesignContent
 import com.circuitqueest.app.data.content.PowerElectronicsContent
 import com.circuitqueest.app.data.content.PowerSystemsContent
+import com.circuitqueest.app.data.content.RenewableEnergyContent
+import com.circuitqueest.app.data.content.RfCircuitsContent
 import com.circuitqueest.app.data.content.SemiconductorPhysicsContent
 import com.circuitqueest.app.data.content.SensorsMeasurementContent
 import com.circuitqueest.app.data.content.SeriesParallelContent
@@ -82,7 +86,11 @@ class HomeViewModel(
             AntennaDesignContent.topic,
             VlsiDesignContent.topic,
             SignalIntegrityContent.topic,
-            BatteryStorageContent.topic
+            BatteryStorageContent.topic,
+            RfCircuitsContent.topic,
+            AnalogCircuitsContent.topic,
+            RenewableEnergyContent.topic,
+            IotWirelessContent.topic
         ).sortedBy { it.order }
     }
 
