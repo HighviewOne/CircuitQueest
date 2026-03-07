@@ -36,9 +36,7 @@ import androidx.compose.ui.unit.dp
 import com.circuitqueest.app.ui.components.CategoryHeader
 import com.circuitqueest.app.ui.components.TopicCard
 import com.circuitqueest.app.ui.components.XpProgressBar
-import com.circuitqueest.app.viewmodel.CategoryState
 import com.circuitqueest.app.viewmodel.HomeViewModel
-import com.circuitqueest.app.viewmodel.TopicState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

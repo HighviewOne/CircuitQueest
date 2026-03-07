@@ -6,7 +6,7 @@ An Android app for learning Electrical Engineering fundamentals through an inter
 
 ## 🎮 Key Features
 
-- **41 Comprehensive Topics** - From fundamentals (Ohm's Law) to advanced (VLSI Design, ML Hardware)
+- **42 Comprehensive Topics** - From fundamentals (Ohm's Law) to advanced (VLSI Design, ML Hardware)
 - **Quest-Based Progression** - Complete topics sequentially to unlock advanced material
 - **XP & Achievement System** - Earn points for lessons (+50 XP) and quizzes (score-based + bonuses)
 - **Dual Question Types** - Multiple choice and numeric input with tolerance for rounding errors
@@ -28,7 +28,7 @@ Thévenin-Norton Equivalent, Diodes, Transistors, Digital Logic, MOSFETs, Filter
 ### Systems & Signals (Topics 16-24)
 Signals & Systems, Power Electronics, Control Systems, Transmission Lines, Communication Systems, Electromagnetics, Semiconductor Physics
 
-### Advanced Topics (Topics 25-41)
+### Advanced Topics (Topics 25-42)
 Digital Systems, Electric Machines, PCB Design, Embedded Systems, Power Systems, Sensors & Measurement, Antenna Design, VLSI Design, Signal Integrity, Battery & Storage, RF Circuits, Analog Circuits, Renewable Energy, IoT & Wireless, DSP, Fiber Optics, Electric Vehicles, Audio Electronics, MEMS, Radar Systems, Biomedical Electronics, ML Hardware
 
 ## 🛠 Technology Stack
@@ -38,7 +38,7 @@ Digital Systems, Electric Machines, PCB Design, Embedded Systems, Power Systems,
 | **Language** | Kotlin | 2.0.21 |
 | **UI Framework** | Jetpack Compose | 2024.12.01 |
 | **Architecture** | MVVM + Clean Architecture | - |
-| **DI Framework** | Hilt | 2.48 |
+| **DI Framework** | Hilt | 2.51.1 |
 | **Database** | Room | 2.6.1 |
 | **Navigation** | Navigation Compose | 2.8.5 |
 | **Build System** | Gradle Kotlin DSL | 8.7.3 |
@@ -55,7 +55,7 @@ Digital Systems, Electric Machines, PCB Design, Embedded Systems, Power Systems,
 ### Setup (5 minutes)
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/CircuitQueest.git
+git clone https://github.com/HighviewOne/CircuitQueest.git
 cd CircuitQueest
 
 # Build APK
@@ -68,7 +68,7 @@ cd CircuitQueest
 ./gradlew connectedAndroidTest
 
 # Check code quality
-./gradlew detekt ktlint
+./gradlew detekt
 ```
 
 ### Build & Run
@@ -162,21 +162,13 @@ Local Storage (SQLite)
 
 ## 📚 Documentation
 
-- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Deep dive into system design
-- **[TESTING.md](docs/TESTING.md)** - Testing strategy and guide
-- **[DEVELOPMENT.md](docs/DEVELOPMENT.md)** - Developer setup & workflow
-- **[DEPLOYMENT.md](docs/DEPLOYMENT.md)** - Release & deployment guide
-- **[API.md](docs/API.md)** - Public API documentation
-- **[CONTRIBUTING.md](docs/CONTRIBUTING.md)** - Contributing guidelines
-- **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** - FAQs & debugging
+- **[Website](https://highviewone.github.io/CircuitQueest/)** - Landing page & overview
+- **[Documentation](https://highviewone.github.io/CircuitQueest/documentation.html)** - Architecture, build instructions, full topic list
+- **[Privacy Policy](https://highviewone.github.io/CircuitQueest/privacy.html)** - Data handling
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see [CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines on:
-- Code style and conventions
-- Testing requirements
-- Pull request process
-- Git commit format
+Contributions welcome! Please open an issue or pull request on [GitHub](https://github.com/HighviewOne/CircuitQueest).
 
 ## 📦 Build Output
 
@@ -208,8 +200,6 @@ Obfuscated: Yes (ProGuard R8)
 
 # Code Quality
 ./gradlew detekt                 # Static analysis
-./gradlew ktlint                 # Code formatting
-./gradlew ktlintFormat           # Auto-format code
 
 # Clean
 ./gradlew clean                  # Remove build output
@@ -247,10 +237,7 @@ Phase 5 | ✅ Complete | 300+ | 50%+
 
 ## 📞 Support
 
-For issues, questions, or feature requests, please:
-1. Check [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for common issues
-2. Open an issue on GitHub with clear description
-3. Include device info, Android version, and error logs
+For issues, questions, or feature requests, open an issue on [GitHub](https://github.com/HighviewOne/CircuitQueest/issues). Include device info, Android version, and error logs.
 
 ## 🚀 What's Next?
 

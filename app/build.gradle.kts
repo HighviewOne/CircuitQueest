@@ -83,6 +83,7 @@ dependencies {
 
 detekt {
     config.setFrom("$rootDir/detekt.yml")
+    source.setFrom("src/main/java")
     reports {
         html.required = true
     }

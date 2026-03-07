@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import com.circuitqueest.app.data.db.entity.TopicProgress
 import kotlinx.coroutines.flow.Flow
 
