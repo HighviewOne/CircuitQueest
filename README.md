@@ -14,7 +14,7 @@ An Android app for learning Electrical Engineering fundamentals through an inter
 - **Dark Circuit-Board Theme** - Electric blue, gold, and charcoal color palette for immersion
 - **Real-Time Progress Tracking** - Best scores, XP accumulation, and topic completion status
 - **Production-Grade Testing** - 300+ comprehensive tests with 50%+ code coverage
-- **Automated CI/CD** - GitHub Actions for build, testing, and quality checks
+- **CI/CD** - GitHub Actions workflows for build verification and static analysis
 - **Clean Architecture** - MVVM + Hilt DI for maintainability and testability
 
 ## 📊 Topics Covered
@@ -155,7 +155,7 @@ Local Storage (SQLite)
 |--------|-------|--------|
 | Test Count | 300+ | ✅ Excellent |
 | Code Coverage | 50%+ | ✅ Target Met |
-| CI/CD Pipelines | 2 (build + quality) | ✅ Active |
+| CI/CD Pipelines | 2 (build + detekt) | ✅ Active |
 | ProGuard Obfuscation | Enabled | ✅ Secure |
 | APK Size Reduction | 20-40% | ✅ Optimized |
 | Min SDK | 26 (Android 8.0) | ✅ Compatible |
