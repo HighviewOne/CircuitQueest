@@ -1,11 +1,5 @@
 package com.circuitqueest.app.data.content
 
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
-
-@Singleton
 object TopicsService {
     val allTopics = listOf(
         OhmsLawContent.topic,

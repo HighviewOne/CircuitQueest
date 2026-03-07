@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.detekt)
-    alias(libs.plugins.ktlint)
     alias(libs.plugins.hilt)
 }
 
@@ -23,7 +22,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
-            shrinkResources = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -80,11 +79,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     debugImplementation(libs.androidx.ui.tooling)
-}
-
-ktlint {
-    android = true
-    ignoreFailures = false
 }
 
 detekt {

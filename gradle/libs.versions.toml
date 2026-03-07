@@ -18,8 +18,8 @@ androidxTestRules = "1.5.0"
 composeUiTest = "1.6.0"
 detekt = "1.23.1"
 ktlint = "1.1.1"
-hilt = "2.48"
-hiltComposeNavigation = "1.0.0"
+hilt = "2.51.1"
+hiltComposeNavigation = "1.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
