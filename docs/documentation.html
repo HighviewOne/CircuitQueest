@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation — CircuitQuEEst</title>
+  <meta name="description" content="CircuitQuEEst documentation: architecture, topic list, build instructions.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .docs-layout {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    @media (max-width: 768px) {
+      .docs-layout { grid-template-columns: 1fr; }
+      .docs-sidebar { display: none; }
+    }
+
+    /* Sidebar */
+    .docs-sidebar {
+      position: sticky;
+      top: 80px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+
+    .sidebar-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.75rem;
+    }
+
+    .sidebar-nav { list-style: none; }
+    .sidebar-nav li { margin-bottom: 0.1rem; }
+    .sidebar-nav a {
+      display: block;
+      padding: 0.35rem 0.5rem;
+      border-radius: 6px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: background 0.15s, color 0.15s;
+    }
+    .sidebar-nav a:hover { background: var(--surface-lite); color: var(--text); }
+    .sidebar-nav .sub { padding-left: 1rem; font-size: 0.8rem; }
+
+    /* Content */
+    .docs-content h1 { font-size: 2rem; margin-bottom: 0.4rem; }
+    .docs-content h2 {
+      font-size: 1.35rem;
+      color: var(--blue-light);
+      margin-top: 2.5rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .docs-content h3 {
+      font-size: 1rem;
+      color: var(--gold);
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .docs-content p { color: var(--text-muted); margin-bottom: 0.75rem; line-height: 1.7; }
+    .docs-content ul { margin: 0.5rem 0 0.75rem 1.25rem; color: var(--text-muted); }
+    .docs-content ul li { margin-bottom: 0.3rem; }
+    .docs-content strong { color: var(--text); }
+
+    /* Architecture diagram */
+    .arch-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 0.8rem;
+      line-height: 1.8;
+      color: var(--text-muted);
+      overflow-x: auto;
+    }
+    .arch-layer { color: var(--blue-light); font-weight: 700; }
+    .arch-arrow { color: var(--gold); }
+
+    /* Category topics table */
+    .cat-section { margin-top: 1.5rem; }
+    .cat-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .cat-header .icon { font-size: 1.2rem; }
+    .cat-header h3 { margin: 0; color: var(--text); }
+    .cat-header .count { color: var(--text-muted); font-size: 0.85rem; }
+
+    .topic-table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">
+    <span class="bolt">⚡</span> CircuitQuEEst
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="documentation.html" class="active">Docs</a></li>
+    <li><a href="privacy.html">Privacy</a></li>
+    <li><a href="https://github.com/HighviewOne/CircuitQueest" target="_blank" rel="noopener">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<div class="docs-layout">
+
+  <!-- Sidebar -->
+  <aside class="docs-sidebar">
+    <div class="sidebar-title">Documentation</div>
+    <ul class="sidebar-nav">
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a class="sub" href="#layers">Layer overview</a></li>
+      <li><a class="sub" href="#navigation">Navigation</a></li>
+      <li><a class="sub" href="#content">Content model</a></li>
+      <li><a class="sub" href="#progress">Progress system</a></li>
+      <li><a href="#build">Build Instructions</a></li>
+      <li><a class="sub" href="#requirements">Requirements</a></li>
+      <li><a class="sub" href="#steps">Build steps</a></li>
+      <li><a href="#topics">All 42 Topics</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main content -->
+  <main class="docs-content">
+    <h1>Documentation</h1>
+    <p>Technical reference for CircuitQuEEst — architecture, content model, build instructions, and the full topic list.</p>
+
+    <!-- Overview -->
+    <h2 id="overview">Overview</h2>
+    <p>
+      CircuitQuEEst is a single-activity Android application built entirely with Kotlin and Jetpack Compose. It teaches Electrical Engineering fundamentals through 42 sequential topics, each consisting of a scrollable lesson and a 7-question quiz.
+    </p>
+    <ul>
+      <li><strong>Language:</strong> 100% Kotlin</li>
+      <li><strong>UI:</strong> Jetpack Compose + Material 3</li>
+      <li><strong>Architecture:</strong> MVVM (ViewModel + Repository pattern)</li>
+      <li><strong>Storage:</strong> Room database (offline-first, SQLite)</li>
+      <li><strong>Navigation:</strong> Jetpack Navigation Compose</li>
+      <li><strong>Build system:</strong> Gradle Kotlin DSL + version catalog</li>
+      <li><strong>Min SDK:</strong> 26 (Android 8.0 Oreo) &nbsp;/&nbsp; <strong>Target SDK:</strong> 35</li>
+    </ul>
+
+    <!-- Architecture -->
+    <h2 id="architecture">Architecture</h2>
+
+    <h3 id="layers">Layer overview</h3>
+    <div class="arch-box">
+<span class="arch-layer">┌─ UI Layer (Jetpack Compose) ──────────────────────────────┐</span>
+│  HomeScreen · LessonScreen · QuizScreen · ResultScreen      │
+│  Components: TopicCard · CategoryHeader · XpProgressBar     │
+<span class="arch-layer">├─ ViewModel Layer ─────────────────────────────────────────┤</span>
+│  HomeViewModel · LessonViewModel · QuizViewModel            │
+│  StateFlow&lt;T&gt; → collectAsState() → recompose UI             │
+<span class="arch-layer">├─ Repository Layer ────────────────────────────────────────┤</span>
+│  ProgressRepository (single source of truth)                │
+│  Room DAOs: TopicProgressDao · QuizResultDao                │
+<span class="arch-layer">├─ Data Layer ──────────────────────────────────────────────┤</span>
+│  Room DB (CircuitQueestDatabase)                            │
+│  Entities: TopicProgress · QuizResult                       │
+<span class="arch-layer">└─ Content Layer (compile-time) ────────────────────────────┘</span>
+   Kotlin singleton objects — one file per topic              │
+   TopicCategories — maps topicId → category (UI-only)       │
+    </div>
+
+    <h3 id="navigation">Navigation</h3>
+    <p>
+      A single <code>NavGraph.kt</code> defines all routes using Jetpack Navigation Compose. The repository is injected at the NavGraph level and passed into ViewModel factories.
+    </p>
+    <table>
+      <thead><tr><th>Route</th><th>Screen</th></tr></thead>
+      <tbody>
+        <tr><td><code>home</code></td><td>HomeScreen — category list + search</td></tr>
+        <tr><td><code>lesson/{topicId}</code></td><td>LessonScreen — scrollable lesson sections</td></tr>
+        <tr><td><code>quiz/{topicId}</code></td><td>QuizScreen — 7-question quiz</td></tr>
+        <tr><td><code>result/{topicId}/{score}/{total}</code></td><td>ResultScreen — score + XP summary</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="content">Content model</h3>
+    <p>
+      All 42 topics are defined as Kotlin singleton objects in <code>data/content/</code>. Each file exposes a single <code>Topic</code> object:
+    </p>
+    <pre><code>data class Topic(
+    val id: String,        // e.g. "ohms_law"
+    val title: String,
+    val subtitle: String,
+    val icon: String,      // emoji
+    val order: Int,        // global sort order (1–42)
+    val lesson: Lesson,
+    val quiz: Quiz
+)
+
+data class Lesson(val title: String, val sections: List&lt;LessonSection&gt;)
+data class LessonSection(val heading: String, val content: String,
+                         val formula: String? = null, val keyPoint: String? = null)
+
+data class Quiz(val title: String, val questions: List&lt;Question&gt;)
+sealed class Question {
+    data class MultipleChoice(val options: List&lt;String&gt;, val correctIndex: Int, ...) : Question()
+    data class NumericInput(val correctAnswer: Double, val tolerance: Double, ...) : Question()
+}</code></pre>
+
+    <p>
+      <strong>Categories</strong> are a pure UI concern defined in <code>TopicCategories.kt</code>. No <code>Topic</code> data class field was needed — the mapping is a separate object that the ViewModel joins at runtime.
+    </p>
+
+    <h3 id="progress">Progress system</h3>
+    <p>XP is awarded as follows:</p>
+    <ul>
+      <li><strong>+50 XP</strong> — completing a lesson (first time)</li>
+      <li><strong>+score × 10 XP</strong> — for each quiz attempt</li>
+      <li><strong>+100 XP bonus</strong> — for the first quiz completion on a topic</li>
+    </ul>
+    <p>
+      Sequential unlock: completing a topic's quiz sets <code>TopicProgress.quizCompleted = true</code>, which unlocks the next topic in global <code>order</code> sequence. This logic lives in <code>HomeViewModel</code> and is unaffected by category groupings.
+    </p>
+
+    <!-- Build -->
+    <h2 id="build">Build Instructions</h2>
+
+    <h3 id="requirements">Requirements</h3>
+    <ul>
+      <li>JDK 17 (Adoptium Temurin recommended)</li>
+      <li>Android SDK — platform 35, build-tools 35.0.0</li>
+      <li>Gradle Wrapper 8.11.1 (included in repo)</li>
+      <li>Android Gradle Plugin 8.7.3</li>
+      <li>Kotlin 2.0.21</li>
+    </ul>
+
+    <h3 id="steps">Build steps</h3>
+    <pre><code># Clone the repository
+git clone https://github.com/HighviewOne/CircuitQueest.git
+cd CircuitQueest
+
+# Build debug APK
+./gradlew assembleDebug
+
+# Output location
+# app/build/outputs/apk/debug/app-debug.apk (~10 MB)</code></pre>
+
+    <p>If your environment variables aren't set:</p>
+    <pre><code>JAVA_HOME=/path/to/jdk-17 \
+ANDROID_HOME=/path/to/android-sdk \
+./gradlew assembleDebug</code></pre>
+
+    <p>Install directly to a connected device:</p>
+    <pre><code>./gradlew installDebug</code></pre>
+
+    <!-- Topics -->
+    <h2 id="topics">All 42 Topics</h2>
+    <p>Topics are organized into 9 categories on the HomeScreen. Global unlock order follows the numeric sequence below.</p>
+
+    <!-- Circuit Fundamentals -->
+    <div class="cat-section">
+      <div class="cat-header">
+        <span class="icon">⚡</span>
+        <h3>Circuit Fundamentals</h3>
+        <span class="count">(6 topics)</span>
+      </div>
+      <div class="topic-table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td><strong>Ohm's Law</strong></td><td>V=IR, power calculations, basic circuit analysis</td></tr>
+            <tr><td>2</td><td><strong>Series &amp; Parallel Circuits</strong></td><td>Resistance combinations, voltage/current division</td></tr>
+            <tr><td>3</td><td><strong>Kirchhoff's Laws</strong></td><td>KCL, KVL, node and loop analysis</td></tr>
+            <tr><td>4</td><td><strong>Capacitors &amp; Inductors</strong></td><td>C=Q/V, V=LdI/dt, RC/RL time constants</td></tr>
+            <tr><td>5</td><td><strong>AC Circuits</strong></td><td>RMS values, reactance, impedance, RLC resonance</td></tr>
+            <tr><td>7</td><td><strong>Thevenin &amp; Norton</strong></td><td>Equivalent circuits, source transformation, max power</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Semiconductor Devices -->
+    <div class="cat-section">
+      <div class="cat-header">
+        <span class="icon">🔌</span>
+        <h3>Semiconductor Devices</h3>
+        <span class="count">(4 topics)</span>
+      </div>
+      <div class="topic-table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
+          <tbody>
+            <tr><td>8</td><td><strong>Diodes &amp; Rectifiers</strong></td><td>PN junctions, Zener, half/full-wave, LEDs</td></tr>
+            <tr><td>9</td><td><strong>Transistors (BJTs)</strong></td><td>NPN/PNP, beta, operating regions, switching</td></tr>
+            <tr><td>11</td><td><strong>MOSFETs</strong></td><td>NMOS/PMOS, threshold voltage, triode/saturation, CMOS</td></tr>
+            <tr><td>20</td><td><strong>Semiconductor Physics</strong></td><td>Band theory, doping, drift/diffusion, carrier transport</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Analog Design -->
+    <div class="cat-section">
+      <div class="cat-header">
+        <span class="icon">〰️</span>
+        <h3>Analog Design</h3>
+        <span class="count">(4 topics)</span>
+      </div>
+      <div class="topic-table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
+          <tbody>
+            <tr><td>6</td><td><strong>Op-Amps</strong></td><td>Inverting/non-inverting gain, voltage follower, summing amp</td></tr>
+            <tr><td>12</td><td><strong>Filters</strong></td><td>Low/high/band-pass, cutoff frequency, roll-off, active filters</td></tr>
+            <tr><td>32</td><td><strong>Analog Circuit Design</strong></td><td>Current mirrors, diff pairs, feedback, bandgap, cascode</td></tr>
+            <tr><td>38</td><td><strong>Audio Electronics</strong></td><td>Amplifier classes, DACs, speakers, headphone amp design</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Digital Systems -->
+    <div class="cat-section">
+      <div class="cat-header">
+        <span class="icon">💻</span>
+        <h3>Digital Systems</h3>
+        <span class="count">(4 topics)</span>
+      </div>
+      <div class="topic-table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
+          <tbody>
+            <tr><td>10</td><td><strong>Digital Logic Gates</strong></td><td>AND/OR/NOT/NAND/NOR/XOR, Boolean algebra, Karnaugh maps</td></tr>
+            <tr><td>21</td><td><strong>Digital Systems</strong></td><td>Flip-flops, counters, finite state machines, memory</td></tr>
+            <tr><td>28</td><td><strong>VLSI Design</strong></td><td>CMOS fabrication, RTL-to-GDSII, DRC/LVS, timing, power</td></tr>
+            <tr><td>42</td><td><strong>Machine Learning Hardware</strong></td><td>GPUs, TPUs, quantization, inference engines, edge AI</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Signals & Control -->
+    <div class="cat-section">
+      <div class="cat-header">
+        <span class="icon">📊</span>
+        <h3>Signals &amp; Control</h3>
+        <span class="count">(3 topics)</span>
+      </div>
+      <div class="topic-table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
+          <tbody>
+            <tr><td>14</td><td><strong>Signals &amp; Systems</strong></td><td>Fourier/Laplace transforms, transfer functions, Bode plots</td></tr>
+            <tr><td>16</td><td><strong>Control Systems</strong></td><td>Feedback loops, PID controllers, stability, gain/phase margins</td></tr>
+            <tr><td>35</td><td><strong>Digital Signal Processing</strong></td><td>Sampling theorem, FFT, FIR/IIR filters, quantization noise</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Power & Energy -->
+    <div class="cat-section">
+      <div class="cat-header">
+        <span class="icon">🔋</span>
+        <h3>Power &amp; Energy</h3>
+        <span class="count">(6 topics)</span>
+      </div>
+      <div class="topic-table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
+          <tbody>
+            <tr><td>13</td><td><strong>Transformers</strong></td><td>Turns ratio, impedance matching, efficiency, losses</td></tr>
+            <tr><td>15</td><td><strong>Power Electronics</strong></td><td>Linear regulators, LDOs, buck/boost converters, PWM</td></tr>
+            <tr><td>25</td><td><strong>Power Systems</strong></td><td>Three-phase power, transmission, power factor, protection</td></tr>
+            <tr><td>33</td><td><strong>Renewable Energy</strong></td><td>Solar cells, MPPT, wind turbines, grid-tie inverters</td></tr>
+            <tr><td>37</td><td><strong>Electric Vehicles</strong></td><td>Powertrains, inverters, regenerative braking, charging</td></tr>
+            <tr><td>30</td><td><strong>Battery &amp; Energy Storage</strong></td><td>Li-ion chemistry, C-rate, CC-CV charging, BMS, supercaps</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RF & Communications -->
+    <div class="cat-section">
+      <div class="cat-header">
+        <span class="icon">📡</span>
+        <h3>RF &amp; Communications</h3>
+        <span class="count">(7 topics)</span>
+      </div>
+      <div class="topic-table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
+          <tbody>
+            <tr><td>19</td><td><strong>Electromagnetics</strong></td><td>E/B fields, Faraday's law, Maxwell's equations, EM waves</td></tr>
+            <tr><td>17</td><td><strong>Transmission Lines</strong></td><td>Characteristic impedance, reflections, VSWR, Smith chart</td></tr>
+            <tr><td>18</td><td><strong>Communication Systems</strong></td><td>AM/FM modulation, SNR, Nyquist theorem, QAM</td></tr>
+            <tr><td>27</td><td><strong>Antenna Design</strong></td><td>Radiation patterns, gain, dipole/patch/dish, link budgets</td></tr>
+            <tr><td>31</td><td><strong>RF Circuit Design</strong></td><td>S-parameters, LNA design, oscillators, mixers, matching</td></tr>
+            <tr><td>36</td><td><strong>Fiber Optics &amp; Photonics</strong></td><td>Optical fiber, lasers, photodetectors, WDM systems</td></tr>
+            <tr><td>40</td><td><strong>Radar Systems</strong></td><td>Pulse radar, Doppler effect, phased arrays, automotive radar</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Hardware & Embedded -->
+    <div class="cat-section">
+      <div class="cat-header">
+        <span class="icon">🔧</span>
+        <h3>Hardware &amp; Embedded</h3>
+        <span class="count">(5 topics)</span>
+      </div>
+      <div class="topic-table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
+          <tbody>
+            <tr><td>23</td><td><strong>PCB Design</strong></td><td>Layer stackup, trace routing, decoupling, ground planes, Gerbers</td></tr>
+            <tr><td>24</td><td><strong>Embedded Systems</strong></td><td>MCU peripherals, GPIO, ADC/DAC, UART/SPI/I2C protocols</td></tr>
+            <tr><td>26</td><td><strong>Sensors &amp; Measurement</strong></td><td>Temperature sensors, Wheatstone bridge, instrumentation amps</td></tr>
+            <tr><td>29</td><td><strong>Signal Integrity &amp; EMC</strong></td><td>Crosstalk, ground bounce, EMI shielding, differential signaling</td></tr>
+            <tr><td>34</td><td><strong>IoT &amp; Wireless</strong></td><td>Wi-Fi/BLE/LoRa/Zigbee, mesh networking, low-power design</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Specialized Applications -->
+    <div class="cat-section">
+      <div class="cat-header">
+        <span class="icon">🏥</span>
+        <h3>Specialized Applications</h3>
+        <span class="count">(3 topics)</span>
+      </div>
+      <div class="topic-table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
+          <tbody>
+            <tr><td>22</td><td><strong>Electric Machines</strong></td><td>DC/AC/stepper motors, torque-speed curves, drives</td></tr>
+            <tr><td>39</td><td><strong>MEMS</strong></td><td>Accelerometers, gyroscopes, pressure sensors, microfabrication</td></tr>
+            <tr><td>41</td><td><strong>Biomedical Electronics</strong></td><td>ECG/EEG signal acquisition, pacemakers, patient safety</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<footer>
+  <p>
+    <strong style="color:var(--text);">⚡ CircuitQuEEst</strong> &nbsp;·&nbsp;
+    <a href="index.html">Home</a> &nbsp;·&nbsp;
+    <a href="documentation.html">Docs</a> &nbsp;·&nbsp;
+    <a href="privacy.html">Privacy</a> &nbsp;·&nbsp;
+    <a href="https://github.com/HighviewOne/CircuitQueest" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

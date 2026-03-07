@@ -46,6 +46,8 @@ import com.circuitqueest.app.data.content.TransistorsContent
 import com.circuitqueest.app.data.content.TransmissionLinesContent
 import com.circuitqueest.app.data.content.VlsiDesignContent
 import com.circuitqueest.app.data.content.Topic
+import com.circuitqueest.app.data.content.TopicCategories
+import com.circuitqueest.app.data.content.TopicCategory
 import com.circuitqueest.app.data.db.entity.TopicProgress
 import com.circuitqueest.app.data.repository.ProgressRepository
 import kotlinx.coroutines.flow.SharingStarted
@@ -57,6 +59,11 @@ data class TopicState(
     val topic: Topic,
     val progress: TopicProgress?,
     val isLocked: Boolean
+)
+
+data class CategoryState(
+    val category: TopicCategory,
+    val topics: List<TopicState>
 )
 
 class HomeViewModel(
@@ -132,6 +139,27 @@ class HomeViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = allTopics.mapIndexed { index, topic ->
                 TopicState(topic = topic, progress = null, isLocked = index > 0)
+            }
+        )
+
+    val categorizedTopics: StateFlow<List<CategoryState>> = topicStates
+        .map { states ->
+            val stateMap = states.associateBy { it.topic.id }
+            TopicCategories.categories.map { category ->
+                CategoryState(
+                    category = category,
+                    topics = category.topicIds.mapNotNull { stateMap[it] }
+                )
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = TopicCategories.categories.map { category ->
+                CategoryState(
+                    category = category,
+                    topics = emptyList()
+                )
             }
         )
 
