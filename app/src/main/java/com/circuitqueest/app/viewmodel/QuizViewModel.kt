@@ -1,15 +1,18 @@
 package com.circuitqueest.app.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.circuitqueest.app.data.content.Question
+import com.circuitqueest.app.data.content.TopicsService
 import com.circuitqueest.app.data.repository.ProgressRepository
 import com.circuitqueest.app.util.QuizScoring
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class QuizState(
     val topicId: String = "",
@@ -24,11 +27,13 @@ data class QuizFeedback(
     val explanation: String
 )
 
-class QuizViewModel(
-    private val topicId: String,
-    private val repository: ProgressRepository
+@HiltViewModel
+class QuizViewModel @Inject constructor(
+    private val repository: ProgressRepository,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
+    private val topicId: String = checkNotNull(savedStateHandle["topicId"])
     private val questions: List<Question>
     private val _quizState = MutableStateFlow(QuizState())
     val quizState: StateFlow<QuizState> = _quizState.asStateFlow()
@@ -43,7 +48,7 @@ class QuizViewModel(
     val quizComplete: StateFlow<Boolean> = _quizComplete.asStateFlow()
 
     init {
-        val topic = HomeViewModel.allTopics.find { it.id == topicId }
+        val topic = TopicsService.allTopics.find { it.id == topicId }
         questions = topic?.quiz?.questions ?: emptyList()
 
         _quizState.value = QuizState(
@@ -111,15 +116,5 @@ class QuizViewModel(
         _quizState.value = _quizState.value.copy(currentIndex = nextIndex)
         _currentQuestion.value = questions[nextIndex]
         _feedback.value = null
-    }
-
-    class Factory(
-        private val topicId: String,
-        private val repository: ProgressRepository
-    ) : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return QuizViewModel(topicId, repository) as T
-        }
     }
 }

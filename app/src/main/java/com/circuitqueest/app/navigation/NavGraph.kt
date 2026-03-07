@@ -1,15 +1,12 @@
 package com.circuitqueest.app.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.circuitqueest.app.CircuitQueestApp
-import com.circuitqueest.app.data.repository.ProgressRepository
 import com.circuitqueest.app.ui.screens.HomeScreen
 import com.circuitqueest.app.ui.screens.LessonScreen
 import com.circuitqueest.app.ui.screens.QuizScreen
@@ -32,19 +29,11 @@ object Routes {
 @Composable
 fun CircuitQueestNavGraph() {
     val navController = rememberNavController()
-    val context = LocalContext.current
-    val app = context.applicationContext as CircuitQueestApp
-    val repository = ProgressRepository(
-        progressDao = app.database.progressDao(),
-        quizResultDao = app.database.quizResultDao()
-    )
 
     NavHost(navController = navController, startDestination = Routes.HOME) {
 
         composable(Routes.HOME) {
-            val homeViewModel: HomeViewModel = viewModel(
-                factory = HomeViewModel.Factory(repository)
-            )
+            val homeViewModel: HomeViewModel = hiltViewModel()
             HomeScreen(
                 viewModel = homeViewModel,
                 onTopicClick = { topicId ->
@@ -57,10 +46,7 @@ fun CircuitQueestNavGraph() {
             route = Routes.LESSON,
             arguments = listOf(navArgument("topicId") { type = NavType.StringType })
         ) { backStackEntry ->
-            val topicId = backStackEntry.arguments?.getString("topicId") ?: return@composable
-            val lessonViewModel: LessonViewModel = viewModel(
-                factory = LessonViewModel.Factory(topicId, repository)
-            )
+            val lessonViewModel: LessonViewModel = hiltViewModel()
             LessonScreen(
                 viewModel = lessonViewModel,
                 onBack = { navController.popBackStack() },
@@ -74,10 +60,7 @@ fun CircuitQueestNavGraph() {
             route = Routes.QUIZ,
             arguments = listOf(navArgument("topicId") { type = NavType.StringType })
         ) { backStackEntry ->
-            val topicId = backStackEntry.arguments?.getString("topicId") ?: return@composable
-            val quizViewModel: QuizViewModel = viewModel(
-                factory = QuizViewModel.Factory(topicId, repository)
-            )
+            val quizViewModel: QuizViewModel = hiltViewModel()
             QuizScreen(
                 viewModel = quizViewModel,
                 onBack = { navController.popBackStack() },

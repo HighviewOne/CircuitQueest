@@ -1,0 +1,54 @@
+package com.circuitqueest.app.data.content
+
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+
+@Singleton
+object TopicsService {
+    val allTopics = listOf(
+        OhmsLawContent.topic,
+        SeriesParallelContent.topic,
+        KirchhoffsContent.topic,
+        CapacitorsInductorsContent.topic,
+        AcCircuitsContent.topic,
+        OpAmpsContent.topic,
+        TheveninNortonContent.topic,
+        DiodesContent.topic,
+        TransistorsContent.topic,
+        DigitalLogicContent.topic,
+        MosfetsContent.topic,
+        FiltersContent.topic,
+        TransformersContent.topic,
+        SignalsSystemsContent.topic,
+        PowerElectronicsContent.topic,
+        ControlSystemsContent.topic,
+        TransmissionLinesContent.topic,
+        CommunicationSystemsContent.topic,
+        ElectromagneticsContent.topic,
+        SemiconductorPhysicsContent.topic,
+        DigitalSystemsContent.topic,
+        ElectricMachinesContent.topic,
+        PcbDesignContent.topic,
+        EmbeddedSystemsContent.topic,
+        PowerSystemsContent.topic,
+        SensorsMeasurementContent.topic,
+        AntennaDesignContent.topic,
+        VlsiDesignContent.topic,
+        SignalIntegrityContent.topic,
+        BatteryStorageContent.topic,
+        RfCircuitsContent.topic,
+        AnalogCircuitsContent.topic,
+        RenewableEnergyContent.topic,
+        IotWirelessContent.topic,
+        DspContent.topic,
+        FiberOpticsContent.topic,
+        ElectricVehiclesContent.topic,
+        AudioElectronicsContent.topic,
+        MemsContent.topic,
+        RadarSystemsContent.topic,
+        BiomedicalElectronicsContent.topic,
+        MlHardwareContent.topic
+    ).sortedBy { it.order }
+}
