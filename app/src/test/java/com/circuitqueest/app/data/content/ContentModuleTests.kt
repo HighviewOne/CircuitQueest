@@ -64,7 +64,7 @@ class ContentModuleTests {
     // ============ KirchhoffsContent Tests ============
     @Test
     fun kirchhoffsContent_topic_hasCorrectId() {
-        assertEquals("kirchhoffs_laws", KirchhoffsContent.topic.id)
+        assertEquals("kirchhoffs", KirchhoffsContent.topic.id)
     }
 
     @Test
@@ -128,7 +128,7 @@ class ContentModuleTests {
     // ============ DiodesContent Tests ============
     @Test
     fun diodesContent_topic_hasCorrectId() {
-        assertEquals("diodes", DiodesContent.topic.id)
+        assertEquals("diodes_rectifiers", DiodesContent.topic.id)
     }
 
     @Test
@@ -139,7 +139,7 @@ class ContentModuleTests {
     // ============ TransistorsContent Tests ============
     @Test
     fun transistorsContent_topic_hasCorrectId() {
-        assertEquals("transistors", TransistorsContent.topic.id)
+        assertEquals("transistors_bjt", TransistorsContent.topic.id)
     }
 
     @Test

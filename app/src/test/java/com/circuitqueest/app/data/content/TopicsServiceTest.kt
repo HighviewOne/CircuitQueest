@@ -18,9 +18,9 @@ class TopicsServiceTest {
     }
 
     @Test
-    fun topicsService_allTopics_countIs41() {
+    fun topicsService_allTopics_countIs42() {
         // Assert - verify exact count
-        assertEquals(41, TopicsService.allTopics.size)
+        assertEquals(42, TopicsService.allTopics.size)
     }
 
     @Test

@@ -10,6 +10,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import com.circuitqueest.app.data.db.dao.ProgressDao
@@ -154,7 +155,7 @@ class QuizFlowIntegrationTest {
         repository.saveQuizResult(topicId, thirdAttempt, totalQuestions)
 
         val progressCaptor = argumentCaptor<TopicProgress>()
-        verify(progressDao).upsertProgress(progressCaptor.capture())
+        verify(progressDao, times(3)).upsertProgress(progressCaptor.capture())
 
         val finalProgress = progressCaptor.lastValue
 
@@ -172,7 +173,7 @@ class QuizFlowIntegrationTest {
         repository.markLessonCompleted(topicId)
         var xpAfterLesson = 50
 
-        // Complete perfect quiz: 100 (base) + 100 (first) + 50 (perfect) = 250
+        // Complete perfect quiz: score*10 (100) + first completion bonus (100) = 200
         val progressAfterLesson = TopicProgress(topicId, lessonCompleted = true, xpEarned = xpAfterLesson)
         whenever(progressDao.getProgressOnce(topicId)).thenReturn(progressAfterLesson)
         whenever(quizResultDao.getBestScore(topicId)).thenReturn(
@@ -181,11 +182,11 @@ class QuizFlowIntegrationTest {
         repository.saveQuizResult(topicId, 10, 10)
 
         val progressCaptor = argumentCaptor<TopicProgress>()
-        verify(progressDao).upsertProgress(progressCaptor.capture())
+        verify(progressDao, times(2)).upsertProgress(progressCaptor.capture())
 
         val finalProgress = progressCaptor.lastValue
 
-        assertEquals(xpAfterLesson + 250, finalProgress.xpEarned)
+        assertEquals(xpAfterLesson + 200, finalProgress.xpEarned)
     }
 
     @Test

@@ -69,6 +69,7 @@ dependencies {
 
     // Testing dependencies
     testImplementation(libs.junit4)
+    testImplementation(kotlin("test-junit"))
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.test.runner)

@@ -262,7 +262,7 @@ class ViewModelErrorHandlingTest {
     }
 
     @Test
-    fun viewModel_maintains StateConsistency() {
+    fun viewModel_maintainsStateConsistency() {
         // Arrange
         val state = mutableMapOf<String, Any>(
             "currentQuestion" to 1,

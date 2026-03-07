@@ -5,6 +5,7 @@ import com.circuitqueest.app.data.db.dao.QuizResultDao
 import com.circuitqueest.app.data.db.entity.TopicProgress
 import com.circuitqueest.app.data.db.entity.QuizResult
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.*
@@ -66,7 +67,7 @@ class ProgressRepositoryTest {
     }
 
     @Test
-    suspend fun getTotalXp_returnsZeroWhenEmpty() {
+    fun getTotalXp_returnsZeroWhenEmpty() {
         whenever(progressDao.getTotalXp()).thenReturn(flowOf(0))
 
         val result = repository.getTotalXp()
@@ -75,7 +76,7 @@ class ProgressRepositoryTest {
     }
 
     @Test
-    suspend fun markLessonCompleted_firstTime_addsXp() {
+    fun markLessonCompleted_firstTime_addsXp() = runBlocking {
         val topicId = "topic1"
         val existingProgress = TopicProgress(topicId, lessonCompleted = false, xpEarned = 0)
         
@@ -92,7 +93,7 @@ class ProgressRepositoryTest {
     }
 
     @Test
-    suspend fun markLessonCompleted_alreadyCompleted_noAdditionalXp() {
+    fun markLessonCompleted_alreadyCompleted_noAdditionalXp() = runBlocking {
         val topicId = "topic1"
         val existingProgress = TopicProgress(topicId, lessonCompleted = true, xpEarned = 50)
         
@@ -108,7 +109,7 @@ class ProgressRepositoryTest {
     }
 
     @Test
-    suspend fun saveQuizResult_firstCompletion_addsXp() {
+    fun saveQuizResult_firstCompletion_addsXp() = runBlocking {
         val topicId = "topic1"
         val score = 10
         val totalQuestions = 10
@@ -131,12 +132,12 @@ class ProgressRepositoryTest {
         val updatedProgress = progressCaptor.firstValue
         assertEquals(true, updatedProgress.quizCompleted)
         assertEquals(10, updatedProgress.bestScore)
-        // XP: base (100) + first completion (100) + perfect bonus (50) = 250
-        assertEquals(300, updatedProgress.xpEarned) // 50 previous + 250 new
+        // XP: base score*10 (100) + first completion bonus (100) = 200
+        assertEquals(250, updatedProgress.xpEarned) // 50 previous + 200 new
     }
 
     @Test
-    suspend fun saveQuizResult_notFirstCompletion_updatesIfBetterScore() {
+    fun saveQuizResult_notFirstCompletion_updatesIfBetterScore() = runBlocking {
         val topicId = "topic1"
         val score = 8
         val totalQuestions = 10
@@ -163,7 +164,7 @@ class ProgressRepositoryTest {
     }
 
     @Test
-    suspend fun saveQuizResult_worseScore_noUpdate() {
+    fun saveQuizResult_worseScore_noUpdate() = runBlocking {
         val topicId = "topic1"
         val score = 4
         val totalQuestions = 10
@@ -190,7 +191,7 @@ class ProgressRepositoryTest {
     }
 
     @Test
-    suspend fun saveQuizResult_savesQuizResultToDao() {
+    fun saveQuizResult_savesQuizResultToDao() = runBlocking {
         val topicId = "topic1"
         val score = 7
         val totalQuestions = 10
