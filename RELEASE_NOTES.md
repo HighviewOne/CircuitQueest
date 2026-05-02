@@ -1,3 +1,61 @@
+# CircuitQuEEst v2.2 — Claude Design Visual Overhaul
+
+**Release Date:** May 2, 2026
+**Status:** ✅ Production Ready
+**APK size:** ~12 MB (includes bundled Space Grotesk + JetBrains Mono)
+
+## What's New in v2.2
+
+Full visual redesign of the app and GitHub Pages site using the **Claude Design** cockpit aesthetic — dark palette, electric blue/gold accents, PCB motifs, and IEEE-style schematic icons.
+
+### UI Redesign
+
+**Theme & tokens**
+- New 23-token color palette (`CqBg`, `CqSurface`, `CqBlue`, `CqGold`, `CqCyan`, `CqGreen`, `CqRed`, `CqText` hierarchy, border tokens, trace/track colors)
+- Bundled **Space Grotesk** (4 weights) + **JetBrains Mono** (3 weights) — fully offline, no network fonts
+- Typography scale mapped to Material 3 slots; `labelSmall` = mono eyebrow style (11sp, 0.18em tracking)
+- Spacing (`s4`–`s64`) and Radius (`sm/md/lg/xl`) token objects
+
+**Atom components**
+- `SchematicIcons` — 15 IEEE-style `ImageVector`s (Resistor, Transistor, OpAmp, NAND, Signal, Battery, Antenna, Chip, Heartbeat, Capacitor, Inductor, Diode, Ground, Voltmeter, Ammeter); `forCategory()` and `accentForCategory()` helpers
+- `XpBar` — shimmer gradient fill (Blue→Cyan→Gold), 2s loop, level + XP text overlay
+- `TopicGlyphBadge` — 40dp accent-tinted badge for icons or emoji fallback
+- `StatusChip` — Done (green), In Progress (gold + pulsing dot), Locked (dashed border)
+- `FormulaTile` — gold L-bracket corners via `drawBehind`, JetBrains Mono 26sp
+- `goldBrackets()` / `dashedBorder()` shared modifier extensions
+
+**Home screen**
+- JetBrains Mono wordmark + LVL pill header
+- Shimmer `XpBar` below header
+- `BasicTextField` search with styled `CqSurface` container
+- Collapsible category cards: schematic icon badge, "X of Y quests · Z XP" subtitle, 60×3dp accent progress bar, animated chevron
+- Topic cards: `01`/`02` order number, emoji glyph badge, `StatusChip`, gold border for active quest, 3-cycle shake animation on locked tap
+- `AnimatedVisibility` expand/collapse (200ms) per category
+
+**Lesson screen**
+- Hero card: `CqBlueDeep→CqBlue` gradient, PCB trace canvas overlay (8% opacity), QUEST·NN eyebrow, 32sp title, stat pills (read time / questions / +50 XP)
+- Numbered section cards (`01`, `02`, …) with SpaceGrotesk 15sp body at 1.6 line-height
+- `FormulaTile` for formulas, gold left-bar `KeyInsightCallout` for key points
+- Sticky bottom CTA: gold "Start N-question quiz →" when complete, blue "Complete Lesson" otherwise
+
+**Quiz screen**
+- Progress nodes row: done = gold fill + ✓, current = pulsing glow ring, upcoming = hollow grey
+- `QuestionCard`: Q-badge + 20sp question text
+- Option cards: A/B/C/D letter chips; default/selected(blue)/correct(green)/wrong(red)/dimmed states; `scale 1→1.02→1` pulse on submit
+- Numeric input: 72dp field, 32sp JetBrains Mono, gold unit label
+- Feedback panel slides up from bottom (`slideInVertically`, 250ms): "Circuit closed!" or "Open circuit" with explanation
+
+**Result screen**
+- Animated score ring: gradient fill arc (Blue→Cyan→Gold) from 0→score% over 800ms with cubic-bezier easing, 12 tick marks, percentage + "X/Y correct" center overlay
+- Three stat cards: XP Earned / Score / Status with accent colors
+- Up Next card: gold corner brackets, topic preview, "Continue →" navigates directly to next lesson
+- Footer: gold/blue CTA + Retry button
+
+**GitHub Pages landing page**
+- Full redesign: Space Grotesk + JetBrains Mono, PCB dot-grid background, phone mockup hero with animated XP bar fill, feature grid, 9-track curriculum section, gold-bracket CTA
+
+---
+
 # CircuitQuEEst v1.0.0 - Production Release
 
 **Release Date:** March 7, 2026  
