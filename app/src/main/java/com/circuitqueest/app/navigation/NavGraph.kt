@@ -97,6 +97,11 @@ fun CircuitQueestNavGraph() {
                     navController.navigate(Routes.HOME) {
                         popUpTo(Routes.HOME) { inclusive = true }
                     }
+                },
+                onNextLesson = { id ->
+                    navController.navigate(Routes.lesson(id)) {
+                        popUpTo(Routes.HOME)
+                    }
                 }
             )
         }
