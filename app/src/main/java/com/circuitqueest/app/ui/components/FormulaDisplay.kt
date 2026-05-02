@@ -13,7 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.circuitqueest.app.ui.theme.ElectricBlue
+import com.circuitqueest.app.ui.theme.CqBlue
 
 @Composable
 fun FormulaDisplay(
@@ -25,7 +25,7 @@ fun FormulaDisplay(
         fontFamily = FontFamily.Monospace,
         fontWeight = FontWeight.Bold,
         fontSize = 18.sp,
-        color = ElectricBlue,
+        color = CqBlue,
         textAlign = TextAlign.Center,
         modifier = modifier
             .fillMaxWidth()

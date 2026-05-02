@@ -2,20 +2,33 @@ package com.circuitqueest.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val ElectricBlue = Color(0xFF1A73E8)
-val ElectricBlueLight = Color(0xFF5DA3FF)
-val ElectricBlueDark = Color(0xFF0D47A1)
+// Backgrounds
+val CqBg = Color(0xFF0A0E1A)
+val CqBg2 = Color(0xFF0F1422)
+val CqSurface = Color(0xFF161B2E)
+val CqSurface2 = Color(0xFF1D2340)
+val CqSurface3 = Color(0xFF262D50)
+val CqBorder = Color(0xFF2A3258)
+val CqBorderStrong = Color(0xFF3B4577)
 
-val GoldAmber = Color(0xFFF9A825)
-val GoldAmberLight = Color(0xFFFFD54F)
-val GoldAmberDark = Color(0xFFF57F17)
+// Brand
+val CqBlue = Color(0xFF2480FF)
+val CqBlueLight = Color(0xFF5DA3FF)
+val CqBlueDeep = Color(0xFF0A3A8C)
+val CqCyan = Color(0xFF4FD6E8)
+val CqCyanDeep = Color(0xFF0E6B78)
+val CqGold = Color(0xFFF4B840)
+val CqGoldLight = Color(0xFFFFD980)
 
-val DarkCharcoal = Color(0xFF1E1E2E)
-val Slate = Color(0xFF2D2D44)
-val SlateLighter = Color(0xFF3D3D5C)
+// Semantic
+val CqGreen = Color(0xFF34E090)
+val CqRed = Color(0xFFFF5566)
 
-val CircuitGreen = Color(0xFF00E676)
-val ShortCircuitRed = Color(0xFFFF5252)
+// Text
+val CqText = Color(0xFFE6ECFF)
+val CqTextDim = Color(0xFF98A2C8)
+val CqTextFaint = Color(0xFF5D678F)
 
-val TextWhite = Color(0xFFE0E0E0)
-val TextGray = Color(0xFF9E9E9E)
+// Lines / glow
+val CqTrace = Color(0xFF355397)
+val CqTrack = Color(0xFF1F2647)

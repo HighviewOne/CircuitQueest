@@ -21,9 +21,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.circuitqueest.app.ui.components.QuizScoreDisplay
-import com.circuitqueest.app.ui.theme.CircuitGreen
-import com.circuitqueest.app.ui.theme.GoldAmber
-import com.circuitqueest.app.ui.theme.ShortCircuitRed
+import com.circuitqueest.app.ui.theme.CqGreen
+import com.circuitqueest.app.ui.theme.CqGold
+import com.circuitqueest.app.ui.theme.CqRed
 
 @Composable
 fun ResultScreen(
@@ -54,7 +54,7 @@ fun ResultScreen(
         Text(
             text = if (passed) "Quest Complete!" else "Keep Training!",
             style = MaterialTheme.typography.headlineLarge,
-            color = if (passed) GoldAmber else ShortCircuitRed,
+            color = if (passed) CqGold else CqRed,
             textAlign = TextAlign.Center
         )
 
@@ -89,7 +89,7 @@ fun ResultScreen(
                 Text(
                     text = "$percentage%",
                     style = MaterialTheme.typography.headlineLarge,
-                    color = if (passed) CircuitGreen else ShortCircuitRed
+                    color = if (passed) CqGreen else CqRed
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -97,7 +97,7 @@ fun ResultScreen(
                 Text(
                     text = "+$xpEarned XP earned",
                     style = MaterialTheme.typography.titleMedium,
-                    color = GoldAmber
+                    color = CqGold
                 )
             }
         }

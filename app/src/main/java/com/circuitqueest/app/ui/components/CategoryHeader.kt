@@ -20,8 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.circuitqueest.app.ui.theme.SlateLighter
-import com.circuitqueest.app.ui.theme.TextGray
+import com.circuitqueest.app.ui.theme.CqSurface3
+import com.circuitqueest.app.ui.theme.CqTextDim
 
 @Composable
 fun CategoryHeader(
@@ -44,7 +44,7 @@ fun CategoryHeader(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = SlateLighter)
+        colors = CardDefaults.cardColors(containerColor = CqSurface3)
     ) {
         Row(
             modifier = Modifier
@@ -69,7 +69,7 @@ fun CategoryHeader(
             Text(
                 text = "$completedCount/$totalCount",
                 style = MaterialTheme.typography.bodySmall,
-                color = TextGray
+                color = CqTextDim
             )
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -77,7 +77,7 @@ fun CategoryHeader(
             Text(
                 text = "\u25BC",
                 fontSize = 12.sp,
-                color = TextGray,
+                color = CqTextDim,
                 modifier = Modifier.rotate(chevronRotation)
             )
         }

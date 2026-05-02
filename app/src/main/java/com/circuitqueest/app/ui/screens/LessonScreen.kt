@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.circuitqueest.app.data.content.LessonSection
 import com.circuitqueest.app.ui.components.FormulaDisplay
-import com.circuitqueest.app.ui.theme.GoldAmber
+import com.circuitqueest.app.ui.theme.CqGold
 import com.circuitqueest.app.viewmodel.LessonViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -141,13 +141,13 @@ private fun LessonSectionCard(section: LessonSection) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = GoldAmber.copy(alpha = 0.15f)
+                        containerColor = CqGold.copy(alpha = 0.15f)
                     )
                 ) {
                     Text(
                         text = "\uD83D\uDD11 $keyPoint",
                         style = MaterialTheme.typography.labelLarge,
-                        color = GoldAmber,
+                        color = CqGold,
                         modifier = Modifier.padding(12.dp)
                     )
                 }

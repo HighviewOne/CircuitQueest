@@ -17,7 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.circuitqueest.app.ui.theme.GoldAmber
+import com.circuitqueest.app.ui.theme.CqGold
 
 @Composable
 fun XpProgressBar(
@@ -45,7 +45,7 @@ fun XpProgressBar(
             Text(
                 text = "$currentXp XP",
                 style = MaterialTheme.typography.labelMedium,
-                color = GoldAmber
+                color = CqGold
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
@@ -55,7 +55,7 @@ fun XpProgressBar(
                 .fillMaxWidth()
                 .height(8.dp)
                 .clip(RoundedCornerShape(4.dp)),
-            color = GoldAmber,
+            color = CqGold,
             trackColor = MaterialTheme.colorScheme.surfaceVariant
         )
     }

@@ -27,8 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.circuitqueest.app.ui.theme.CircuitGreen
-import com.circuitqueest.app.ui.theme.ShortCircuitRed
+import com.circuitqueest.app.ui.theme.CqGreen
+import com.circuitqueest.app.ui.theme.CqRed
 
 @Composable
 fun MultipleChoiceQuestion(
@@ -185,15 +185,15 @@ fun AnswerFeedback(
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (isCorrect) CircuitGreen.copy(alpha = 0.15f)
-            else ShortCircuitRed.copy(alpha = 0.15f)
+            containerColor = if (isCorrect) CqGreen.copy(alpha = 0.15f)
+            else CqRed.copy(alpha = 0.15f)
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = if (isCorrect) "\u2705 Correct!" else "\u274C Incorrect",
                 style = MaterialTheme.typography.titleMedium,
-                color = if (isCorrect) CircuitGreen else ShortCircuitRed
+                color = if (isCorrect) CqGreen else CqRed
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(

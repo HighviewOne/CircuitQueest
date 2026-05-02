@@ -5,24 +5,26 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 
 private val CircuitQueestColorScheme = darkColorScheme(
-    primary = ElectricBlue,
-    onPrimary = TextWhite,
-    primaryContainer = ElectricBlueDark,
-    onPrimaryContainer = TextWhite,
-    secondary = GoldAmber,
-    onSecondary = DarkCharcoal,
-    secondaryContainer = GoldAmberDark,
-    onSecondaryContainer = TextWhite,
-    tertiary = CircuitGreen,
-    onTertiary = DarkCharcoal,
-    background = DarkCharcoal,
-    onBackground = TextWhite,
-    surface = Slate,
-    onSurface = TextWhite,
-    surfaceVariant = SlateLighter,
-    onSurfaceVariant = TextGray,
-    error = ShortCircuitRed,
-    onError = TextWhite
+    primary = CqBlue,
+    onPrimary = CqText,
+    primaryContainer = CqBlueDeep,
+    onPrimaryContainer = CqText,
+    secondary = CqGold,
+    onSecondary = CqBg,
+    secondaryContainer = CqSurface2,
+    onSecondaryContainer = CqGold,
+    tertiary = CqCyan,
+    onTertiary = CqBg,
+    background = CqBg,
+    onBackground = CqText,
+    surface = CqSurface,
+    onSurface = CqText,
+    surfaceVariant = CqSurface2,
+    onSurfaceVariant = CqTextDim,
+    outline = CqBorder,
+    outlineVariant = CqBorderStrong,
+    error = CqRed,
+    onError = CqText
 )
 
 @Composable

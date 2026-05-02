@@ -20,8 +20,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.circuitqueest.app.ui.theme.GoldAmber
-import com.circuitqueest.app.ui.theme.SlateLighter
+import com.circuitqueest.app.ui.theme.CqGold
+import com.circuitqueest.app.ui.theme.CqSurface3
 
 @Composable
 fun TopicCard(
@@ -41,7 +41,7 @@ fun TopicCard(
             .fillMaxWidth()
             .alpha(if (isLocked) 0.5f else 1f),
         colors = CardDefaults.cardColors(
-            containerColor = if (isLocked) SlateLighter else MaterialTheme.colorScheme.surface
+            containerColor = if (isLocked) CqSurface3 else MaterialTheme.colorScheme.surface
         )
     ) {
         Row(
@@ -91,7 +91,7 @@ fun TopicCard(
                             Text(
                                 text = "\uD83C\uDFC6 Quiz: $quizScore/$totalQuestions",
                                 style = MaterialTheme.typography.labelMedium,
-                                color = GoldAmber
+                                color = CqGold
                             )
                         }
                     }
