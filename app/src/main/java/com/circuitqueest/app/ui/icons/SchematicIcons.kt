@@ -2,6 +2,10 @@ package com.circuitqueest.app.ui.icons
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import com.circuitqueest.app.ui.theme.CqBlue
+import com.circuitqueest.app.ui.theme.CqBlueLight
+import com.circuitqueest.app.ui.theme.CqCyan
+import com.circuitqueest.app.ui.theme.CqGold
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -149,6 +153,18 @@ object SchematicIcons {
             strokePath("M21 12 a9 9 0 1 0 -18 0 a9 9 0 1 0 18 0")
             strokePath("M7.5 16 L12 8 L16.5 16 M9.5 13 H14.5")
         }
+    }
+
+    fun accentForCategory(name: String): Color = when (name) {
+        "Circuit Fundamentals" -> CqBlue
+        "Semiconductor Devices" -> CqCyan
+        "Analog Design" -> CqGold
+        "Digital Systems" -> CqBlueLight
+        "Signals & Control" -> CqCyan
+        "Power & Energy" -> CqGold
+        "RF & Communications" -> CqBlueLight
+        "Hardware & Embedded" -> CqCyan
+        else -> CqGold
     }
 
     fun forCategory(name: String): ImageVector = when (name) {
