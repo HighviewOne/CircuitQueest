@@ -1,23 +1,29 @@
 package com.circuitqueest.app.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -25,11 +31,35 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.circuitqueest.app.data.content.LessonSection
-import com.circuitqueest.app.ui.components.FormulaDisplay
+import com.circuitqueest.app.data.content.Topic
+import com.circuitqueest.app.ui.components.FormulaTile
+import com.circuitqueest.app.ui.theme.CqBg
+import com.circuitqueest.app.ui.theme.CqBg2
+import com.circuitqueest.app.ui.theme.CqBlue
+import com.circuitqueest.app.ui.theme.CqBlueDeep
+import com.circuitqueest.app.ui.theme.CqBlueLight
+import com.circuitqueest.app.ui.theme.CqBorder
 import com.circuitqueest.app.ui.theme.CqGold
+import com.circuitqueest.app.ui.theme.CqSurface
+import com.circuitqueest.app.ui.theme.CqText
+import com.circuitqueest.app.ui.theme.CqTextDim
+import com.circuitqueest.app.ui.theme.JetBrainsMono
+import com.circuitqueest.app.ui.theme.MonoLabel
+import com.circuitqueest.app.ui.theme.Radius
+import com.circuitqueest.app.ui.theme.SpaceGrotesk
+import com.circuitqueest.app.ui.theme.Spacing
 import com.circuitqueest.app.viewmodel.LessonViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,7 +71,6 @@ fun LessonScreen(
 ) {
     val topic by viewModel.topic.collectAsState()
     val lessonCompleted by viewModel.lessonCompleted.collectAsState()
-
     val currentTopic = topic ?: return
 
     Scaffold(
@@ -49,109 +78,281 @@ fun LessonScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = currentTopic.lesson.title,
-                        style = MaterialTheme.typography.titleMedium
+                        text = currentTopic.title,
+                        fontFamily = SpaceGrotesk,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp,
+                        color = CqText,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = CqText
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                    containerColor = CqBg,
+                    titleContentColor = CqText
                 )
             )
         },
-        containerColor = MaterialTheme.colorScheme.background
+        bottomBar = {
+            StickyCtaBar(
+                lessonCompleted = lessonCompleted,
+                questionCount = currentTopic.quiz.questions.size,
+                onComplete = { viewModel.markLessonComplete() },
+                onStartQuiz = { onStartQuiz(currentTopic.id) }
+            )
+        },
+        containerColor = CqBg
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = Spacing.s20),
+            verticalArrangement = Arrangement.spacedBy(Spacing.s16)
         ) {
-            item {
-                Spacer(modifier = Modifier.height(4.dp))
-            }
+            item { Spacer(modifier = Modifier.height(Spacing.s4)) }
 
-            items(currentTopic.lesson.sections) { section ->
-                LessonSectionCard(section = section)
-            }
+            // Hero card
+            item { HeroCard(topic = currentTopic) }
 
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-
-                if (!lessonCompleted) {
-                    Button(
-                        onClick = { viewModel.markLessonComplete() },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Complete Lesson (+50 XP)")
-                    }
-                } else {
-                    Button(
-                        onClick = { onStartQuiz(currentTopic.id) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Start Boss Battle (Quiz)")
-                    }
+            // Section cards
+            currentTopic.lesson.sections.forEachIndexed { index, section ->
+                item(key = "section_$index") {
+                    SectionCard(index = index + 1, section = section)
                 }
+            }
 
-                Spacer(modifier = Modifier.height(24.dp))
+            item { Spacer(modifier = Modifier.height(Spacing.s8)) }
+        }
+    }
+}
+
+// ── Hero card ─────────────────────────────────────────────────────────────────
+
+@Composable
+private fun HeroCard(topic: Topic) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(Radius.xl))
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(CqBlueDeep, CqBlue),
+                    start = Offset(0f, 0f),
+                    end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
+                )
+            )
+    ) {
+        // PCB trace overlay
+        androidx.compose.foundation.Canvas(modifier = Modifier.matchParentSize()) {
+            val c = Color.White.copy(alpha = 0.08f)
+            val sw = 1.5.dp.toPx()
+            val r = 3.dp.toPx()
+            val style = Stroke(sw)
+            drawLine(c, Offset(0f, size.height * 0.28f), Offset(size.width * 0.45f, size.height * 0.28f), sw)
+            drawLine(c, Offset(size.width * 0.45f, size.height * 0.28f), Offset(size.width * 0.45f, size.height * 0.6f), sw)
+            drawLine(c, Offset(size.width * 0.45f, size.height * 0.6f), Offset(size.width, size.height * 0.6f), sw)
+            drawCircle(c, r, Offset(size.width * 0.45f, size.height * 0.28f))
+            drawCircle(c, r, Offset(size.width * 0.45f, size.height * 0.6f))
+            drawLine(c, Offset(0f, size.height * 0.75f), Offset(size.width * 0.25f, size.height * 0.75f), sw)
+            drawLine(c, Offset(size.width * 0.25f, size.height * 0.75f), Offset(size.width * 0.25f, size.height), sw)
+            drawCircle(c, r, Offset(size.width * 0.25f, size.height * 0.75f))
+        }
+
+        Column(modifier = Modifier.padding(Spacing.s24)) {
+            // Eyebrow
+            Text(
+                text = "QUEST · ${String.format("%02d", topic.order)}",
+                style = MonoLabel,
+                color = CqBlueLight
+            )
+            Spacer(modifier = Modifier.height(Spacing.s12))
+            // Title
+            Text(
+                text = topic.title,
+                fontFamily = SpaceGrotesk,
+                fontWeight = FontWeight.Bold,
+                fontSize = 32.sp,
+                lineHeight = 38.sp,
+                color = CqText
+            )
+            Spacer(modifier = Modifier.height(Spacing.s8))
+            // Subtitle
+            Text(
+                text = topic.subtitle,
+                fontFamily = SpaceGrotesk,
+                fontSize = 16.sp,
+                lineHeight = 24.sp,
+                color = Color.White.copy(alpha = 0.75f)
+            )
+            Spacer(modifier = Modifier.height(Spacing.s16))
+            // Stats row
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s8)) {
+                StatPill("~${topic.lesson.sections.size + 1} min")
+                StatPill("${topic.quiz.questions.size} questions")
+                StatPill("+50 XP")
             }
         }
     }
 }
 
 @Composable
-private fun LessonSectionCard(section: LessonSection) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+private fun StatPill(text: String) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(100.dp))
+            .background(Color.White.copy(alpha = 0.12f))
+            .padding(horizontal = 10.dp, vertical = 5.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = section.heading,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = section.content,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+        Text(
+            text = text,
+            fontFamily = JetBrainsMono,
+            fontWeight = FontWeight.Medium,
+            fontSize = 11.sp,
+            color = Color.White.copy(alpha = 0.85f)
+        )
+    }
+}
 
-            section.formula?.let { formula ->
-                Spacer(modifier = Modifier.height(12.dp))
-                FormulaDisplay(formula = formula)
-            }
+// ── Section card ──────────────────────────────────────────────────────────────
 
-            section.keyPoint?.let { keyPoint ->
-                Spacer(modifier = Modifier.height(12.dp))
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = CqGold.copy(alpha = 0.15f)
-                    )
+@Composable
+private fun SectionCard(index: Int, section: LessonSection) {
+    val shape = RoundedCornerShape(Radius.lg)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(CqSurface)
+            .border(1.dp, CqBorder, shape)
+            .padding(Spacing.s20)
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.s12)) {
+            // Section header: number pill + heading
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.s12)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(100.dp))
+                        .background(CqBg2)
+                        .border(1.dp, CqBorder, RoundedCornerShape(100.dp))
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
                 ) {
                     Text(
-                        text = "\uD83D\uDD11 $keyPoint",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = CqGold,
-                        modifier = Modifier.padding(12.dp)
+                        text = String.format("%02d", index),
+                        style = MonoLabel,
+                        color = CqTextDim
                     )
                 }
+                Text(
+                    text = section.heading,
+                    fontFamily = SpaceGrotesk,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp,
+                    color = CqText,
+                    modifier = Modifier.weight(1f)
+                )
             }
+
+            // Body text
+            Text(
+                text = section.content,
+                fontFamily = SpaceGrotesk,
+                fontWeight = FontWeight.Normal,
+                fontSize = 15.sp,
+                lineHeight = 24.sp,
+                color = CqText.copy(alpha = 0.9f)
+            )
+
+            // Formula tile
+            section.formula?.let { FormulaTile(formula = it) }
+
+            // Key insight callout
+            section.keyPoint?.let { KeyInsightCallout(keyPoint = it) }
+        }
+    }
+}
+
+@Composable
+private fun KeyInsightCallout(keyPoint: String) {
+    val shape = RoundedCornerShape(Radius.md)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(CqGold.copy(alpha = 0.06f))
+            .border(1.dp, CqGold.copy(alpha = 0.35f), shape)
+    ) {
+        Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .fillMaxHeight()
+                    .background(CqGold)
+            )
+            Column(
+                modifier = Modifier.padding(horizontal = Spacing.s16, vertical = Spacing.s12)
+            ) {
+                Text(text = "KEY INSIGHT", style = MonoLabel, color = CqGold)
+                Spacer(modifier = Modifier.height(Spacing.s4))
+                Text(
+                    text = keyPoint,
+                    fontFamily = SpaceGrotesk,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    color = CqText
+                )
+            }
+        }
+    }
+}
+
+// ── Sticky CTA ────────────────────────────────────────────────────────────────
+
+@Composable
+private fun StickyCtaBar(
+    lessonCompleted: Boolean,
+    questionCount: Int,
+    onComplete: () -> Unit,
+    onStartQuiz: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(CqBg)
+            .padding(horizontal = Spacing.s20, vertical = Spacing.s12)
+    ) {
+        Button(
+            onClick = if (lessonCompleted) onStartQuiz else onComplete,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp),
+            shape = RoundedCornerShape(Radius.md),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (lessonCompleted) CqGold else CqBlue,
+                contentColor = if (lessonCompleted) CqBg else CqText
+            )
+        ) {
+            Text(
+                text = if (lessonCompleted)
+                    "Start the $questionCount-question quiz  →"
+                else
+                    "Complete Lesson  +50 XP",
+                fontFamily = SpaceGrotesk,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 15.sp
+            )
         }
     }
 }
