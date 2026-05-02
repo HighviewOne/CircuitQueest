@@ -2,11 +2,11 @@ package com.circuitqueest.app.ui.components
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -28,13 +28,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.circuitqueest.app.ui.theme.CqBorder
 import com.circuitqueest.app.ui.theme.CqBlue
 import com.circuitqueest.app.ui.theme.CqBlueLight
 import com.circuitqueest.app.ui.theme.CqCyan
 import com.circuitqueest.app.ui.theme.CqGold
-import com.circuitqueest.app.ui.theme.CqSurface
 import com.circuitqueest.app.ui.theme.CqTextDim
+import com.circuitqueest.app.ui.theme.LocalCqPalette
 import com.circuitqueest.app.ui.theme.MonoLabel
 import com.circuitqueest.app.ui.theme.Radius
 import com.circuitqueest.app.ui.theme.Spacing
@@ -55,6 +54,7 @@ fun XpBar(
     totalXp: Int,
     modifier: Modifier = Modifier
 ) {
+    val pal = LocalCqPalette.current
     val info = computeLevel(totalXp)
     val shape = RoundedCornerShape(Radius.lg)
 
@@ -79,10 +79,9 @@ fun XpBar(
             .fillMaxWidth()
             .height(56.dp)
             .clip(shape)
-            .background(CqSurface)
-            .border(1.dp, CqBorder, shape)
+            .background(pal.surface)
+            .border(1.dp, pal.border, shape)
     ) {
-        // Gradient fill
         Box(
             modifier = Modifier
                 .fillMaxHeight()
@@ -93,7 +92,6 @@ fun XpBar(
                     )
                 )
         ) {
-            // Shimmer sweep
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -111,7 +109,6 @@ fun XpBar(
             )
         }
 
-        // Text overlay
         Row(
             modifier = Modifier
                 .fillMaxSize()

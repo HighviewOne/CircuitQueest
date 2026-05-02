@@ -32,3 +32,12 @@ val CqTextFaint = Color(0xFF5D678F)
 // Lines / glow
 val CqTrace = Color(0xFF355397)
 val CqTrack = Color(0xFF1F2647)
+
+// Blueprint mode palette
+val BpBg       = Color(0xFF060F1E)
+val BpBg2      = Color(0xFF081426)
+val BpSurface  = Color(0xFF0C2850)
+val BpSurface2 = Color(0xFF0D3A78)
+val BpBorder      = Color(0x47FFFFFF)
+val BpBorderStrong = Color(0x66FFFFFF)
+val BpTrack    = Color(0xFF0A1C38)

@@ -1,5 +1,8 @@
+@file:OptIn(ExperimentalSharedTransitionApi::class)
+
 package com.circuitqueest.app.ui.components
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -29,15 +32,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.circuitqueest.app.ui.theme.CqBg
-import com.circuitqueest.app.ui.theme.CqBg2
-import com.circuitqueest.app.ui.theme.CqBorder
+import com.circuitqueest.app.navigation.LocalNavAnimatedVisibilityScope
+import com.circuitqueest.app.navigation.LocalNavSharedTransitionScope
 import com.circuitqueest.app.ui.theme.CqGold
-import com.circuitqueest.app.ui.theme.CqSurface
 import com.circuitqueest.app.ui.theme.CqText
 import com.circuitqueest.app.ui.theme.CqTextDim
 import com.circuitqueest.app.ui.theme.CqTextFaint
 import com.circuitqueest.app.ui.theme.JetBrainsMono
+import com.circuitqueest.app.ui.theme.LocalCqPalette
 import com.circuitqueest.app.ui.theme.MonoLabel
 import com.circuitqueest.app.ui.theme.Radius
 import com.circuitqueest.app.ui.theme.SpaceGrotesk
@@ -46,6 +48,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun TopicCard(
+    topicId: String,
     topicNumber: Int,
     title: String,
     subtitle: String,
@@ -60,6 +63,9 @@ fun TopicCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val pal = LocalCqPalette.current
+    val sharedScope = LocalNavSharedTransitionScope.current
+    val animScope = LocalNavAnimatedVisibilityScope.current
     val shakeOffset = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
     val shape = RoundedCornerShape(Radius.md)
@@ -76,15 +82,27 @@ fun TopicCard(
         else -> null
     }
 
-    val cardBg = if (isLocked) CqBg2 else CqSurface
+    val cardBg = if (isLocked) pal.bg2 else pal.surface
     val borderModifier: Modifier = when {
         isCurrent -> Modifier.border(1.5.dp, CqGold, shape)
-        isLocked -> Modifier.dashedBorder(1.dp, CqBorder, Radius.md)
-        else -> Modifier.border(1.dp, CqBorder, shape)
+        isLocked -> Modifier.dashedBorder(1.dp, pal.border, Radius.md)
+        else -> Modifier.border(1.dp, pal.border, shape)
     }
+
+    val sharedModifier: Modifier = if (sharedScope != null && animScope != null && !isLocked) {
+        with(sharedScope) {
+            Modifier.sharedBounds(
+                sharedContentState = rememberSharedContentState(key = "topic_card_$topicId"),
+                animatedVisibilityScope = animScope,
+                enter = androidx.compose.animation.fadeIn(tween(200)),
+                exit = androidx.compose.animation.fadeOut(tween(150))
+            )
+        }
+    } else Modifier
 
     Box(
         modifier = modifier
+            .then(sharedModifier)
             .offset(x = shakeOffset.value.dp)
             .fillMaxWidth()
             .clip(shape)
@@ -104,7 +122,7 @@ fun TopicCard(
                     onClick()
                 }
             }
-            .padding(Spacing.s14)
+            .padding(s14)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -166,5 +184,4 @@ fun TopicCard(
     }
 }
 
-private val Spacing.s14 get() = 14.dp
-private val Radius.md get() = 12.dp
+private val s14 = 14.dp

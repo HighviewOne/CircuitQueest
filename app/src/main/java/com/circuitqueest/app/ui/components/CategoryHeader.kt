@@ -28,10 +28,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.circuitqueest.app.ui.theme.CqBorder
-import com.circuitqueest.app.ui.theme.CqSurface
 import com.circuitqueest.app.ui.theme.CqText
 import com.circuitqueest.app.ui.theme.CqTextDim
+import com.circuitqueest.app.ui.theme.LocalCqPalette
 import com.circuitqueest.app.ui.theme.MonoLabel
 import com.circuitqueest.app.ui.theme.Radius
 import com.circuitqueest.app.ui.theme.SpaceGrotesk
@@ -49,6 +48,7 @@ fun CategoryHeader(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val pal = LocalCqPalette.current
     val shape = RoundedCornerShape(Radius.lg)
     val chevronRotation by animateFloatAsState(
         targetValue = if (isExpanded) 180f else 0f,
@@ -61,8 +61,8 @@ fun CategoryHeader(
         modifier = modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(CqSurface)
-            .border(1.dp, CqBorder, shape)
+            .background(pal.surface)
+            .border(1.dp, pal.border, shape)
             .clickable(onClick = onClick)
             .padding(Spacing.s16)
     ) {
@@ -98,13 +98,12 @@ fun CategoryHeader(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                // Mini progress bar
                 Box(
                     modifier = Modifier
                         .width(60.dp)
                         .height(3.dp)
                         .clip(RoundedCornerShape(2.dp))
-                        .background(CqBorder)
+                        .background(pal.border)
                 ) {
                     Box(
                         modifier = Modifier

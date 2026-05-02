@@ -17,9 +17,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.circuitqueest.app.ui.theme.CqBg
 import com.circuitqueest.app.ui.theme.CqBlue
 import com.circuitqueest.app.ui.theme.JetBrainsMono
+import com.circuitqueest.app.ui.theme.LocalCqPalette
 import com.circuitqueest.app.ui.theme.MonoLabel
 
 @Composable
@@ -30,12 +30,13 @@ fun TopicGlyphBadge(
     size: Dp = 40.dp,
     modifier: Modifier = Modifier
 ) {
+    val pal = LocalCqPalette.current
     val shape = RoundedCornerShape(10.dp)
     Box(
         modifier = modifier
             .size(size)
             .clip(shape)
-            .background(CqBg)
+            .background(pal.bg)
             .border(1.dp, accentColor.copy(alpha = 0.4f), shape),
         contentAlignment = Alignment.Center
     ) {

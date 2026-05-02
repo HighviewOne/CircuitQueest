@@ -6,6 +6,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,13 +47,12 @@ import com.circuitqueest.app.ui.components.CategoryHeader
 import com.circuitqueest.app.ui.components.TopicCard
 import com.circuitqueest.app.ui.components.XpBar
 import com.circuitqueest.app.ui.icons.SchematicIcons
-import com.circuitqueest.app.ui.theme.CqBg
-import com.circuitqueest.app.ui.theme.CqBorder
-import com.circuitqueest.app.ui.theme.CqSurface
+import com.circuitqueest.app.ui.theme.CqBlue
 import com.circuitqueest.app.ui.theme.CqText
 import com.circuitqueest.app.ui.theme.CqTextDim
 import com.circuitqueest.app.ui.theme.CqTextFaint
 import com.circuitqueest.app.ui.theme.JetBrainsMono
+import com.circuitqueest.app.ui.theme.LocalCqPalette
 import com.circuitqueest.app.ui.theme.MonoLabel
 import com.circuitqueest.app.ui.theme.SpaceGrotesk
 import com.circuitqueest.app.ui.theme.Spacing
@@ -61,19 +61,20 @@ import com.circuitqueest.app.viewmodel.HomeViewModel
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
-    onTopicClick: (String) -> Unit
+    onTopicClick: (String) -> Unit,
+    onToggleBlueprint: () -> Unit = {},
+    blueprintMode: Boolean = false
 ) {
+    val pal = LocalCqPalette.current
     val categorizedTopics by viewModel.categorizedTopics.collectAsState()
     val totalXp by viewModel.totalXp.collectAsState()
     var searchQuery by rememberSaveable { mutableStateOf("") }
     val expandedCategories = remember { mutableStateMapOf<String, Boolean>() }
 
-    // First category starts expanded
     if (expandedCategories.isEmpty() && categorizedTopics.isNotEmpty()) {
         expandedCategories[categorizedTopics.first().category.name] = true
     }
 
-    // Identify the current (first unlocked, incomplete) topic
     val currentTopicId = remember(categorizedTopics) {
         categorizedTopics.flatMap { it.topics }
             .firstOrNull { !it.isLocked && it.progress?.quizCompleted != true }
@@ -82,7 +83,7 @@ fun HomeScreen(
 
     val isSearching = searchQuery.isNotBlank()
 
-    Scaffold(containerColor = CqBg) { paddingValues ->
+    Scaffold(containerColor = pal.bg) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -106,20 +107,43 @@ fun HomeScreen(
                         letterSpacing = 0.9.sp,
                         color = CqText
                     )
-                    // Level badge
-                    val level = totalXp / 500 + 1
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(100.dp))
-                            .background(CqSurface)
-                            .border(1.dp, CqBorder, RoundedCornerShape(100.dp))
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = "LVL $level",
-                            style = MonoLabel,
-                            color = CqTextDim
-                        )
+                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s8)) {
+                        // Blueprint mode toggle
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(100.dp))
+                                .background(
+                                    if (blueprintMode) CqBlue.copy(alpha = 0.18f) else pal.surface
+                                )
+                                .border(
+                                    1.dp,
+                                    if (blueprintMode) CqBlue else pal.border,
+                                    RoundedCornerShape(100.dp)
+                                )
+                                .clickable { onToggleBlueprint() }
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = if (blueprintMode) "⊟ BP" else "⊞ BP",
+                                style = MonoLabel,
+                                color = if (blueprintMode) CqBlue else CqTextDim
+                            )
+                        }
+                        // Level badge
+                        val level = totalXp / 500 + 1
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(100.dp))
+                                .background(pal.surface)
+                                .border(1.dp, pal.border, RoundedCornerShape(100.dp))
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "LVL $level",
+                                style = MonoLabel,
+                                color = CqTextDim
+                            )
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.height(Spacing.s12))
@@ -138,8 +162,8 @@ fun HomeScreen(
                         .fillMaxWidth()
                         .height(44.dp)
                         .clip(searchShape)
-                        .background(CqSurface)
-                        .border(1.dp, CqBorder, searchShape)
+                        .background(pal.surface)
+                        .border(1.dp, pal.border, searchShape)
                         .padding(horizontal = 12.dp),
                     contentAlignment = Alignment.CenterStart
                 ) {
@@ -226,6 +250,7 @@ fun HomeScreen(
                             }?.category?.name ?: ""
                         )
                         TopicCard(
+                            topicId = state.topic.id,
                             topicNumber = state.topic.order,
                             title = state.topic.title,
                             subtitle = state.topic.subtitle,
@@ -280,6 +305,7 @@ fun HomeScreen(
                             ) {
                                 categoryState.topics.forEach { state ->
                                     TopicCard(
+                                        topicId = state.topic.id,
                                         topicNumber = state.topic.order,
                                         title = state.topic.title,
                                         subtitle = state.topic.subtitle,

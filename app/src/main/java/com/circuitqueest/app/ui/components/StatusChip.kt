@@ -24,10 +24,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.circuitqueest.app.ui.theme.CqBorder
 import com.circuitqueest.app.ui.theme.CqGold
 import com.circuitqueest.app.ui.theme.CqGreen
 import com.circuitqueest.app.ui.theme.CqTextFaint
+import com.circuitqueest.app.ui.theme.LocalCqPalette
 import com.circuitqueest.app.ui.theme.MonoLabel
 
 enum class ChipStatus { DONE, IN_PROGRESS, LOCKED }
@@ -38,6 +38,7 @@ fun StatusChip(
     label: String? = null,
     modifier: Modifier = Modifier
 ) {
+    val pal = LocalCqPalette.current
     val cornerRadius = 6.dp
     val shape = RoundedCornerShape(cornerRadius)
 
@@ -92,7 +93,7 @@ fun StatusChip(
             val text = label ?: "⌗ Complete previous quest"
             Box(
                 modifier = modifier
-                    .dashedBorder(1.dp, CqBorder, cornerRadius)
+                    .dashedBorder(1.dp, pal.border, cornerRadius)
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             ) {
                 Text(text = text, style = MonoLabel.copy(fontSize = 10.sp), color = CqTextFaint)
@@ -100,4 +101,3 @@ fun StatusChip(
         }
     }
 }
-

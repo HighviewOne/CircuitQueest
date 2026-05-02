@@ -52,12 +52,11 @@ import com.circuitqueest.app.data.content.Question
 import com.circuitqueest.app.ui.components.AnswerFeedback
 import com.circuitqueest.app.ui.components.MultipleChoiceQuestion
 import com.circuitqueest.app.ui.components.NumericInputQuestion
-import com.circuitqueest.app.ui.theme.CqBg
-import com.circuitqueest.app.ui.theme.CqBorder
 import com.circuitqueest.app.ui.theme.CqGold
 import com.circuitqueest.app.ui.theme.CqText
 import com.circuitqueest.app.ui.theme.CqTextDim
 import com.circuitqueest.app.ui.theme.JetBrainsMono
+import com.circuitqueest.app.ui.theme.LocalCqPalette
 import com.circuitqueest.app.ui.theme.MonoLabel
 import com.circuitqueest.app.ui.theme.Spacing
 import com.circuitqueest.app.viewmodel.QuizViewModel
@@ -69,6 +68,7 @@ fun QuizScreen(
     onBack: () -> Unit,
     onQuizComplete: (String, Int, Int) -> Unit
 ) {
+    val pal = LocalCqPalette.current
     val quizState by viewModel.quizState.collectAsState()
     val currentQuestion by viewModel.currentQuestion.collectAsState()
     val feedback by viewModel.feedback.collectAsState()
@@ -96,19 +96,18 @@ fun QuizScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = CqBg,
+                    containerColor = pal.bg,
                     titleContentColor = CqTextDim
                 )
             )
         },
-        containerColor = CqBg
+        containerColor = pal.bg
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Scrollable content
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -118,13 +117,12 @@ fun QuizScreen(
             ) {
                 Spacer(modifier = Modifier.height(Spacing.s4))
 
-                // Progress nodes
                 QuizProgressNodes(
                     currentIndex = quizState.currentIndex,
-                    totalQuestions = quizState.totalQuestions
+                    totalQuestions = quizState.totalQuestions,
+                    borderColor = pal.border
                 )
 
-                // Question + answers
                 currentQuestion?.let { question ->
                     when (question) {
                         is Question.MultipleChoice -> MultipleChoiceQuestion(
@@ -145,11 +143,9 @@ fun QuizScreen(
                     }
                 }
 
-                // Extra room so content isn't hidden behind the feedback panel
                 Spacer(modifier = Modifier.height(if (feedback != null) 260.dp else 24.dp))
             }
 
-            // Feedback panel — slides up from bottom
             AnimatedVisibility(
                 visible = feedback != null,
                 modifier = Modifier
@@ -179,7 +175,11 @@ fun QuizScreen(
 // ── Progress nodes ────────────────────────────────────────────────────────────
 
 @Composable
-private fun QuizProgressNodes(currentIndex: Int, totalQuestions: Int) {
+private fun QuizProgressNodes(
+    currentIndex: Int,
+    totalQuestions: Int,
+    borderColor: androidx.compose.ui.graphics.Color
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -187,13 +187,13 @@ private fun QuizProgressNodes(currentIndex: Int, totalQuestions: Int) {
         repeat(totalQuestions) { index ->
             val isDone = index < currentIndex
             val isCurrent = index == currentIndex
-            QuizNode(isDone = isDone, isCurrent = isCurrent)
+            QuizNode(isDone = isDone, isCurrent = isCurrent, borderColor = borderColor)
             if (index < totalQuestions - 1) {
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .height(1.dp)
-                        .background(if (isDone) CqGold else CqBorder)
+                        .background(if (isDone) CqGold else borderColor)
                 )
             }
         }
@@ -201,7 +201,12 @@ private fun QuizProgressNodes(currentIndex: Int, totalQuestions: Int) {
 }
 
 @Composable
-private fun QuizNode(isDone: Boolean, isCurrent: Boolean) {
+private fun QuizNode(
+    isDone: Boolean,
+    isCurrent: Boolean,
+    borderColor: androidx.compose.ui.graphics.Color
+) {
+    val pal = LocalCqPalette.current
     val pulseAlpha by rememberInfiniteTransition(label = "node_pulse").animateFloat(
         initialValue = 0.25f,
         targetValue = 0.55f,
@@ -213,7 +218,6 @@ private fun QuizNode(isDone: Boolean, isCurrent: Boolean) {
         modifier = Modifier.size(28.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Glow ring for current node
         if (isCurrent) {
             Box(
                 modifier = Modifier
@@ -222,7 +226,6 @@ private fun QuizNode(isDone: Boolean, isCurrent: Boolean) {
                     .background(CqGold.copy(alpha = pulseAlpha))
             )
         }
-        // Main circle
         Box(
             modifier = Modifier
                 .size(20.dp)
@@ -230,7 +233,7 @@ private fun QuizNode(isDone: Boolean, isCurrent: Boolean) {
                 .background(if (isDone) CqGold else Color.Transparent)
                 .border(
                     width = if (isDone) 0.dp else 1.5.dp,
-                    color = if (isDone || isCurrent) CqGold else CqBorder,
+                    color = if (isDone || isCurrent) CqGold else borderColor,
                     shape = CircleShape
                 ),
             contentAlignment = Alignment.Center
@@ -241,7 +244,7 @@ private fun QuizNode(isDone: Boolean, isCurrent: Boolean) {
                     fontFamily = JetBrainsMono,
                     fontWeight = FontWeight.Bold,
                     fontSize = 9.sp,
-                    color = CqBg
+                    color = pal.bg
                 )
             }
         }

@@ -42,17 +42,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.circuitqueest.app.ui.theme.CqBg
-import com.circuitqueest.app.ui.theme.CqBg2
 import com.circuitqueest.app.ui.theme.CqBlue
-import com.circuitqueest.app.ui.theme.CqBorder
 import com.circuitqueest.app.ui.theme.CqGold
 import com.circuitqueest.app.ui.theme.CqGreen
 import com.circuitqueest.app.ui.theme.CqRed
-import com.circuitqueest.app.ui.theme.CqSurface
 import com.circuitqueest.app.ui.theme.CqText
 import com.circuitqueest.app.ui.theme.CqTextDim
 import com.circuitqueest.app.ui.theme.JetBrainsMono
+import com.circuitqueest.app.ui.theme.LocalCqPalette
 import com.circuitqueest.app.ui.theme.MonoLabel
 import com.circuitqueest.app.ui.theme.Radius
 import com.circuitqueest.app.ui.theme.SpaceGrotesk
@@ -71,6 +68,7 @@ fun MultipleChoiceQuestion(
     onAnswer: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val pal = LocalCqPalette.current
     var selectedIndex by remember { mutableIntStateOf(-1) }
 
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Spacing.s12)) {
@@ -81,9 +79,7 @@ fun MultipleChoiceQuestion(
                 OptionCard(
                     letter = ('A' + index).toString(),
                     text = option,
-                    state = optionState(
-                        index, selectedIndex, correctIndex, isSubmitted
-                    ),
+                    state = optionState(index, selectedIndex, correctIndex, isSubmitted),
                     isSubmitted = isSubmitted,
                     onClick = { if (!isSubmitted) selectedIndex = index }
                 )
@@ -99,7 +95,7 @@ fun MultipleChoiceQuestion(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = CqBlue,
                     contentColor = CqText,
-                    disabledContainerColor = CqBorder,
+                    disabledContainerColor = pal.border,
                     disabledContentColor = CqTextDim
                 )
             ) {
@@ -137,6 +133,7 @@ private fun OptionCard(
     isSubmitted: Boolean,
     onClick: () -> Unit
 ) {
+    val pal = LocalCqPalette.current
     val scope = rememberCoroutineScope()
     val scale = remember { Animatable(1f) }
 
@@ -163,10 +160,10 @@ private fun OptionCard(
             CqRed.copy(alpha = 0.15f), CqRed, CqRed
         )
         OptionState.CORRECT_UNSELECTED -> OptionColors(
-            CqSurface, CqBorder.copy(alpha = 0.4f),
-            CqBg2, CqBorder.copy(alpha = 0.4f), CqTextDim.copy(alpha = 0.4f)
+            pal.surface, pal.border.copy(alpha = 0.4f),
+            pal.bg2, pal.border.copy(alpha = 0.4f), CqTextDim.copy(alpha = 0.4f)
         )
-        OptionState.DEFAULT -> OptionColors(CqSurface, CqBorder, CqBg2, CqBorder, CqTextDim)
+        OptionState.DEFAULT -> OptionColors(pal.surface, pal.border, pal.bg2, pal.border, CqTextDim)
     }
 
     val shape = RoundedCornerShape(Radius.md)
@@ -182,7 +179,6 @@ private fun OptionCard(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.s12)
     ) {
-        // Letter chip
         Box(
             modifier = Modifier
                 .size(32.dp)
@@ -230,22 +226,22 @@ fun NumericInputQuestion(
     onAnswer: (Double?) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val pal = LocalCqPalette.current
     var inputText by remember { mutableStateOf("") }
 
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Spacing.s12)) {
         QuestionCard(questionNumber = questionNumber, questionText = questionText)
 
-        // Big numeric input
         val fieldShape = RoundedCornerShape(Radius.md)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(72.dp)
                 .clip(fieldShape)
-                .background(CqSurface)
+                .background(pal.surface)
                 .border(
                     1.dp,
-                    if (isSubmitted) CqBorder.copy(alpha = 0.4f) else CqBorder,
+                    if (isSubmitted) pal.border.copy(alpha = 0.4f) else pal.border,
                     fieldShape
                 )
                 .padding(horizontal = Spacing.s16),
@@ -304,7 +300,7 @@ fun NumericInputQuestion(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = CqBlue,
                     contentColor = CqText,
-                    disabledContainerColor = CqBorder,
+                    disabledContainerColor = pal.border,
                     disabledContentColor = CqTextDim
                 )
             ) {
@@ -319,21 +315,22 @@ fun NumericInputQuestion(
 
 @Composable
 fun QuestionCard(questionNumber: Int, questionText: String, modifier: Modifier = Modifier) {
+    val pal = LocalCqPalette.current
     val shape = RoundedCornerShape(Radius.xl)
     Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(CqSurface)
-            .border(1.dp, CqBorder, shape)
+            .background(pal.surface)
+            .border(1.dp, pal.border, shape)
             .padding(Spacing.s24)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(Spacing.s12)) {
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(Radius.sm))
-                    .background(CqBg)
-                    .border(1.dp, CqBorder, RoundedCornerShape(Radius.sm))
+                    .background(pal.bg)
+                    .border(1.dp, pal.border, RoundedCornerShape(Radius.sm))
                     .padding(horizontal = 8.dp, vertical = 3.dp)
             ) {
                 Text(text = "Q$questionNumber", style = MonoLabel, color = CqTextDim)
@@ -350,7 +347,7 @@ fun QuestionCard(questionNumber: Int, questionText: String, modifier: Modifier =
     }
 }
 
-// ── AnswerFeedback kept for backward compat (unused in new design) ────────────
+// ── Answer feedback ───────────────────────────────────────────────────────────
 
 @Composable
 fun AnswerFeedback(
@@ -359,6 +356,7 @@ fun AnswerFeedback(
     onNext: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val pal = LocalCqPalette.current
     val color = if (isCorrect) CqGreen else CqRed
     val shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
     Box(
@@ -385,7 +383,7 @@ fun AnswerFeedback(
                 modifier = Modifier.fillMaxWidth().height(48.dp),
                 shape = RoundedCornerShape(Radius.md),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = color, contentColor = CqBg
+                    containerColor = color, contentColor = pal.bg
                 )
             ) {
                 Text("Next  →", fontFamily = SpaceGrotesk,

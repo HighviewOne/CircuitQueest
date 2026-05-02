@@ -45,20 +45,16 @@ import com.circuitqueest.app.data.content.TopicsService
 import com.circuitqueest.app.ui.components.TopicGlyphBadge
 import com.circuitqueest.app.ui.components.goldBrackets
 import com.circuitqueest.app.ui.icons.SchematicIcons
-import com.circuitqueest.app.ui.theme.CqBg
 import com.circuitqueest.app.ui.theme.CqBlue
 import com.circuitqueest.app.ui.theme.CqBlueLight
-import com.circuitqueest.app.ui.theme.CqBorder
 import com.circuitqueest.app.ui.theme.CqCyan
 import com.circuitqueest.app.ui.theme.CqGold
 import com.circuitqueest.app.ui.theme.CqGreen
 import com.circuitqueest.app.ui.theme.CqRed
-import com.circuitqueest.app.ui.theme.CqSurface
-import com.circuitqueest.app.ui.theme.CqSurface2
 import com.circuitqueest.app.ui.theme.CqText
 import com.circuitqueest.app.ui.theme.CqTextDim
-import com.circuitqueest.app.ui.theme.CqTrack
 import com.circuitqueest.app.ui.theme.JetBrainsMono
+import com.circuitqueest.app.ui.theme.LocalCqPalette
 import com.circuitqueest.app.ui.theme.MonoLabel
 import com.circuitqueest.app.ui.theme.Radius
 import com.circuitqueest.app.ui.theme.SpaceGrotesk
@@ -76,6 +72,7 @@ fun ResultScreen(
     onHome: () -> Unit,
     onNextLesson: ((String) -> Unit)? = null
 ) {
+    val pal = LocalCqPalette.current
     val percentage = if (totalQuestions > 0) (score * 100) / totalQuestions else 0
     val passed = percentage >= 60
     val xpEarned = score * 10 + if (passed) 100 else 0
@@ -100,7 +97,7 @@ fun ResultScreen(
         )
     }
 
-    Scaffold(containerColor = CqBg) { paddingValues ->
+    Scaffold(containerColor = pal.bg) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -111,7 +108,6 @@ fun ResultScreen(
         ) {
             Spacer(modifier = Modifier.height(Spacing.s24))
 
-            // ── Header ────────────────────────────────────────────────────────
             Text(
                 text = if (passed) "QUEST COMPLETE" else "KEEP TRAINING",
                 style = MonoLabel,
@@ -130,14 +126,15 @@ fun ResultScreen(
 
             Spacer(modifier = Modifier.height(Spacing.s32))
 
-            // ── Score ring ────────────────────────────────────────────────────
             Box(
                 modifier = Modifier.size(200.dp),
                 contentAlignment = Alignment.Center
             ) {
                 ScoreRing(
                     progress = animProgress.value,
-                    passed = passed
+                    passed = passed,
+                    trackColor = pal.track,
+                    borderColor = pal.border
                 )
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
@@ -157,7 +154,6 @@ fun ResultScreen(
 
             Spacer(modifier = Modifier.height(Spacing.s24))
 
-            // ── Stat cards ────────────────────────────────────────────────────
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.s12)
@@ -166,41 +162,46 @@ fun ResultScreen(
                     value = "+$xpEarned",
                     label = "XP Earned",
                     valueColor = CqGold,
+                    bgColor = pal.surface,
+                    borderColor = pal.border,
                     modifier = Modifier.weight(1f)
                 )
                 StatCard(
                     value = "$score/$totalQuestions",
                     label = "Score",
                     valueColor = CqBlueLight,
+                    bgColor = pal.surface,
+                    borderColor = pal.border,
                     modifier = Modifier.weight(1f)
                 )
                 StatCard(
                     value = if (passed) "Pass" else "Fail",
                     label = "Status",
                     valueColor = if (passed) CqGreen else CqRed,
+                    bgColor = pal.surface,
+                    borderColor = pal.border,
                     modifier = Modifier.weight(1f)
                 )
             }
 
-            // ── Up next card ──────────────────────────────────────────────────
             nextTopic?.let { next ->
                 Spacer(modifier = Modifier.height(Spacing.s16))
                 UpNextCard(
                     next = next,
+                    bgColor = pal.surface2,
                     onContinue = { onNextLesson?.invoke(next.id) ?: onHome() }
                 )
             }
 
             Spacer(modifier = Modifier.height(Spacing.s24))
 
-            // ── Footer actions ────────────────────────────────────────────────
             Button(
                 onClick = onHome,
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(Radius.md),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (passed) CqGold else CqBlue,
-                    contentColor = if (passed) CqBg else CqText
+                    contentColor = if (passed) pal.bg else CqText
                 )
             ) {
                 Text(
@@ -216,7 +217,7 @@ fun ResultScreen(
                 modifier = Modifier.fillMaxWidth().height(48.dp),
                 shape = RoundedCornerShape(Radius.md),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = CqTextDim),
-                border = androidx.compose.foundation.BorderStroke(1.dp, CqBorder)
+                border = androidx.compose.foundation.BorderStroke(1.dp, pal.border)
             ) {
                 Text(
                     text = "Retry Quiz",
@@ -234,7 +235,7 @@ fun ResultScreen(
 // ── Score ring ────────────────────────────────────────────────────────────────
 
 @Composable
-private fun ScoreRing(progress: Float, passed: Boolean) {
+private fun ScoreRing(progress: Float, passed: Boolean, trackColor: Color, borderColor: Color) {
     val fillColors = if (passed)
         listOf(CqBlue, CqBlueLight, CqCyan, CqGold)
     else
@@ -248,9 +249,8 @@ private fun ScoreRing(progress: Float, passed: Boolean) {
         val center = Offset(size.width / 2f, size.height / 2f)
         val radius = (size.minDimension / 2f) - inset
 
-        // Track
         drawArc(
-            color = CqTrack,
+            color = trackColor,
             startAngle = -90f,
             sweepAngle = 360f,
             useCenter = false,
@@ -259,13 +259,12 @@ private fun ScoreRing(progress: Float, passed: Boolean) {
             style = Stroke(strokeW)
         )
 
-        // Tick marks at 12 hour positions
         repeat(12) { i ->
             val angle = (i * 30.0 - 90.0) * PI / 180.0
             val outerR = radius + inset * 0.6f
             val innerR = radius - inset * 0.6f
             drawLine(
-                color = CqBorder,
+                color = borderColor,
                 start = Offset(
                     center.x + (innerR * cos(angle)).toFloat(),
                     center.y + (innerR * sin(angle)).toFloat()
@@ -278,7 +277,6 @@ private fun ScoreRing(progress: Float, passed: Boolean) {
             )
         }
 
-        // Gradient fill arc
         if (progress > 0.01f) {
             drawArc(
                 brush = Brush.sweepGradient(colors = fillColors, center = center),
@@ -300,6 +298,8 @@ private fun StatCard(
     value: String,
     label: String,
     valueColor: Color,
+    bgColor: Color,
+    borderColor: Color,
     modifier: Modifier = Modifier
 ) {
     val shape = RoundedCornerShape(Radius.lg)
@@ -307,8 +307,8 @@ private fun StatCard(
         modifier = modifier
             .height(80.dp)
             .clip(shape)
-            .background(CqSurface)
-            .border(1.dp, CqBorder, shape),
+            .background(bgColor)
+            .border(1.dp, borderColor, shape),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -334,13 +334,13 @@ private fun StatCard(
 // ── Up next card ──────────────────────────────────────────────────────────────
 
 @Composable
-private fun UpNextCard(next: Topic, onContinue: () -> Unit) {
+private fun UpNextCard(next: Topic, bgColor: Color, onContinue: () -> Unit) {
     val shape = RoundedCornerShape(Radius.lg)
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(CqSurface2)
+            .background(bgColor)
             .goldBrackets()
             .padding(Spacing.s20)
     ) {
@@ -376,7 +376,7 @@ private fun UpNextCard(next: Topic, onContinue: () -> Unit) {
                 modifier = Modifier.fillMaxWidth().height(44.dp),
                 shape = RoundedCornerShape(Radius.md),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = CqGold, contentColor = CqBg
+                    containerColor = CqGold, contentColor = bgColor
                 )
             ) {
                 Text(

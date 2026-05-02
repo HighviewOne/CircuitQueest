@@ -14,9 +14,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import com.circuitqueest.app.ui.theme.CqGold
-import com.circuitqueest.app.ui.theme.CqSurface2
 import com.circuitqueest.app.ui.theme.CqText
 import com.circuitqueest.app.ui.theme.JetBrainsMono
+import com.circuitqueest.app.ui.theme.LocalCqPalette
 import com.circuitqueest.app.ui.theme.Radius
 import com.circuitqueest.app.ui.theme.Spacing
 
@@ -25,11 +25,12 @@ fun FormulaTile(
     formula: String,
     modifier: Modifier = Modifier
 ) {
+    val pal = LocalCqPalette.current
     Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(Radius.lg))
-            .background(CqSurface2)
+            .background(pal.surface2)
             .goldBrackets()
             .padding(Spacing.s24),
         contentAlignment = Alignment.Center
@@ -45,4 +46,3 @@ fun FormulaTile(
         )
     }
 }
-
