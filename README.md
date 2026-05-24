@@ -1,254 +1,155 @@
-# CircuitQuEEst ⚡ - Master Electrical Engineering Through Gamified Learning
+<div align="center">
 
-**Status: ✅ Production Ready** | **Tests: 300+** | **Coverage: 50%+** | **v1.0.0**
+# ⚡ CircuitQueest
 
-An Android app for learning Electrical Engineering fundamentals through an interactive quest/adventure metaphor. Complete lessons to unlock lore, then battle through quizzes to earn XP and advance to the next topic. Built with modern Android architecture, comprehensive testing, and production-ready code quality.
+**Master Electrical Engineering through gamified quests**
 
-## 🎮 Key Features
+[![Build](https://github.com/HighviewOne/CircuitQueest/actions/workflows/build.yml/badge.svg)](https://github.com/HighviewOne/CircuitQueest/actions/workflows/build.yml)
+[![Version](https://img.shields.io/badge/version-2.3-2480FF?labelColor=0A0E1A)](https://github.com/HighviewOne/CircuitQueest/releases)
+[![Android](https://img.shields.io/badge/Android-8.0%2B-34E090?logo=android&logoColor=white&labelColor=0A0E1A)](https://developer.android.com)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-7F52FF?logo=kotlin&logoColor=white&labelColor=0A0E1A)](https://kotlinlang.org)
+[![Compose](https://img.shields.io/badge/Jetpack_Compose-2024.12-4285F4?logo=android&logoColor=white&labelColor=0A0E1A)](https://developer.android.com/jetpack/compose)
+[![License](https://img.shields.io/badge/license-MIT-F4B840?labelColor=0A0E1A)](LICENSE)
 
-- **42 Comprehensive Topics** - From fundamentals (Ohm's Law) to advanced (VLSI Design, ML Hardware)
-- **Quest-Based Progression** - Complete topics sequentially to unlock advanced material
-- **XP & Achievement System** - Earn points for lessons (+50 XP) and quizzes (score-based + bonuses)
-- **Dual Question Types** - Multiple choice and numeric input with tolerance for rounding errors
-- **Offline-First Architecture** - All content and progress stored locally using Room database
-- **Dark Circuit-Board Theme** - Electric blue, gold, and charcoal color palette for immersion
-- **Real-Time Progress Tracking** - Best scores, XP accumulation, and topic completion status
-- **Production-Grade Testing** - 300+ comprehensive tests with 50%+ code coverage
-- **CI/CD** - GitHub Actions workflows for build verification and static analysis
-- **Clean Architecture** - MVVM + Hilt DI for maintainability and testability
+[**Website**](https://highviewone.github.io/CircuitQueest/) · [**Documentation**](https://highviewone.github.io/CircuitQueest/documentation.html) · [**Privacy**](https://highviewone.github.io/CircuitQueest/privacy.html)
 
-## 📊 Topics Covered
-
-### Fundamentals (Topics 1-6)
-Ohm's Law, Series & Parallel Circuits, Kirchhoff's Laws, Capacitors & Inductors, AC Circuits, Operational Amplifiers
-
-### Analog & Digital (Topics 7-15)
-Thévenin-Norton Equivalent, Diodes, Transistors, Digital Logic, MOSFETs, Filters, Transformers
-
-### Systems & Signals (Topics 16-24)
-Signals & Systems, Power Electronics, Control Systems, Transmission Lines, Communication Systems, Electromagnetics, Semiconductor Physics
-
-### Advanced Topics (Topics 25-42)
-Digital Systems, Electric Machines, PCB Design, Embedded Systems, Power Systems, Sensors & Measurement, Antenna Design, VLSI Design, Signal Integrity, Battery & Storage, RF Circuits, Analog Circuits, Renewable Energy, IoT & Wireless, DSP, Fiber Optics, Electric Vehicles, Audio Electronics, MEMS, Radar Systems, Biomedical Electronics, ML Hardware
-
-## 🛠 Technology Stack
-
-| Component | Technology | Version |
-|-----------|-----------|---------|
-| **Language** | Kotlin | 2.0.21 |
-| **UI Framework** | Jetpack Compose | 2024.12.01 |
-| **Architecture** | MVVM + Clean Architecture | - |
-| **DI Framework** | Hilt | 2.51.1 |
-| **Database** | Room | 2.6.1 |
-| **Navigation** | Navigation Compose | 2.8.5 |
-| **Build System** | Gradle Kotlin DSL | 8.7.3 |
-| **Testing Framework** | JUnit4, Mockito, Compose UI Test | Latest |
-
-## 🚀 Quick Start
-
-### Prerequisites
-- JDK 17 or higher
-- Android SDK (Platform 35, Build-tools 35.0.0)
-- Min SDK: 26 (Android 8.0+)
-- Android Studio Arctic Fox or higher
-
-### Setup (5 minutes)
-```bash
-# Clone repository
-git clone https://github.com/HighviewOne/CircuitQueest.git
-cd CircuitQueest
-
-# Build APK
-./gradlew assembleDebug
-
-# Run unit tests
-./gradlew test
-
-# Run all tests (unit + instrumented)
-./gradlew connectedAndroidTest
-
-# Check code quality
-./gradlew detekt
-```
-
-### Build & Run
-```bash
-# Debug build
-./gradlew assembleDebug
-
-# Release build (production)
-./gradlew assembleRelease
-
-# Output APK
-# Debug: app/build/outputs/apk/debug/app-debug.apk
-# Release: app/build/outputs/apk/release/app-release.apk
-```
-
-## 📐 Architecture Overview
-
-### MVVM + Clean Architecture
-```
-Presentation Layer (UI/Compose)
-    ↓
-ViewModel Layer (State Management)
-    ↓
-Repository Layer (Business Logic)
-    ↓
-Data Layer (Room Database)
-    ↓
-Local Storage (SQLite)
-```
-
-### Key Components
-- **Screens** - HomeScreen, LessonScreen, QuizScreen, ResultScreen
-- **ViewModels** - @HiltViewModel with SavedStateHandle
-- **Repository** - Single source of truth for data
-- **DAOs** - Type-safe database access
-- **Services** - TopicsService for centralized topic management
-- **Components** - Reusable Compose UI components
-
-### Dependency Injection (Hilt)
-- All ViewModels use @HiltViewModel
-- Singleton ProgressRepository provided via RepositoryModule
-- Navigation-aware SavedStateHandle for route arguments
-
-## 📊 Testing Strategy
-
-### Test Pyramid (300+ Tests)
-```
-         UI Tests (40)
-        ╱───────────╲
-       ╱ Component  ╲
-      ╱   Tests (20) ╲
-     ├────────────────┤
-     │  Integration    │
-     │    Tests (26)   │
-     ├────────────────┤
-     │   Unit Tests    │
-     │    (197 tests)  │
-     └────────────────┘
-```
-
-### Coverage Breakdown
-- **Unit Tests (197)** - Scoring, Repository, ViewModels, Content modules, Edge cases
-- **Instrumented Tests (103)** - Database operations, UI screens, Complex workflows
-- **Total: 300+ tests** | **Coverage: 50%+**
-
-### Running Tests
-```bash
-# Unit tests only
-./gradlew test
-
-# Instrumented tests (requires emulator/device)
-./gradlew connectedAndroidTest
-
-# Specific test class
-./gradlew test --tests "com.circuitqueest.app.util.QuizScoringTest"
-
-# With coverage report
-./gradlew test --coverage
-```
-
-## 📈 Production Metrics
-
-| Metric | Value | Status |
-|--------|-------|--------|
-| Test Count | 300+ | ✅ Excellent |
-| Code Coverage | 50%+ | ✅ Target Met |
-| CI/CD Pipelines | 2 (build + detekt) | ✅ Active |
-| ProGuard Obfuscation | Enabled | ✅ Secure |
-| APK Size Reduction | 20-40% | ✅ Optimized |
-| Min SDK | 26 (Android 8.0) | ✅ Compatible |
-
-## 📚 Documentation
-
-- **[Website](https://highviewone.github.io/CircuitQueest/)** - Landing page & overview
-- **[Documentation](https://highviewone.github.io/CircuitQueest/documentation.html)** - Architecture, build instructions, full topic list
-- **[Privacy Policy](https://highviewone.github.io/CircuitQueest/privacy.html)** - Data handling
-
-## 🤝 Contributing
-
-Contributions welcome! Please open an issue or pull request on [GitHub](https://github.com/HighviewOne/CircuitQueest).
-
-## 📦 Build Output
-
-### Debug APK
-```
-app/build/outputs/apk/debug/app-debug.apk
-Size: ~15-20 MB (unoptimized)
-```
-
-### Release APK
-```
-app/build/outputs/apk/release/app-release.apk
-Size: ~9-12 MB (ProGuard + minification enabled)
-Obfuscated: Yes (ProGuard R8)
-```
-
-## 🔧 Commands Reference
-
-```bash
-# Build variants
-./gradlew assembleDebug          # Debug APK
-./gradlew assembleRelease        # Release APK
-./gradlew installDebug           # Install to device
-
-# Testing
-./gradlew test                   # Unit tests
-./gradlew connectedAndroidTest   # Instrumented tests
-./gradlew test connectedAndroidTest # All tests
-
-# Code Quality
-./gradlew detekt                 # Static analysis
-
-# Clean
-./gradlew clean                  # Remove build output
-./gradlew cleanBuildCache        # Clear Gradle cache
-```
-
-## 📱 Requirements
-
-- **Min SDK:** 26 (Android 8.0)
-- **Target SDK:** 35 (Android 15)
-- **JDK:** 17
-- **Gradle:** 8.7+
-- **Kotlin:** 2.0+
-
-## 📄 License
-
-This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
-
-## 👥 Contributors
-
-- **Project Lead** - CircuitQueest Team
-- **Testing Framework** - Built with modern Android testing best practices
-- **CI/CD Setup** - GitHub Actions automation
-
-## 🎯 Project Status
-
-**Phase** | **Status** | **Tests** | **Coverage**
----------|-----------|----------|-------------
-Phase 1 | ✅ Complete | 62 | 20%
-Phase 2 | ✅ Complete | 87 | 25%
-Phase 3 | ✅ Complete | 127 | 40%
-Phase 4 | ✅ Complete | 167 | 50%
-Phase 5 | ✅ Complete | 300+ | 50%+
-**Total** | **✅ PRODUCTION READY** | **300+** | **50%+**
-
-## 📞 Support
-
-For issues, questions, or feature requests, open an issue on [GitHub](https://github.com/HighviewOne/CircuitQueest/issues). Include device info, Android version, and error logs.
-
-## 🚀 What's Next?
-
-- [ ] Deploy to Google Play Store
-- [ ] Gather user feedback
-- [ ] Performance monitoring setup
-- [ ] Analytics integration
-- [ ] Advanced animations & micro-interactions
-- [ ] Leaderboards & achievements
-- [ ] Social sharing features
+</div>
 
 ---
 
-**Built with ❤️ for Electrical Engineering enthusiasts | Stay curious, keep learning! ⚡**
+CircuitQueest is an offline-first Android app that teaches electrical engineering through a quest-based progression system. Work through 42 topics — from Ohm's Law to ML Hardware — each with a structured lesson and a 7-question quiz. Earn XP, unlock new topics, and track your progress entirely on-device.
+
+> **Theme:** Cockpit dark aesthetic — Space Grotesk + JetBrains Mono, electric blue/gold palette, PCB trace motifs, IEEE schematic icons, and a toggleable blueprint mode.
+
+## Screenshots
+
+| Home | Lesson | Quiz | Result |
+|------|--------|------|--------|
+| Collapsible categories · search · XP bar | PCB hero · parallax scroll · sticky CTA | Progress nodes · option feedback | Animated score ring · up-next card |
+
+## Features
+
+- **42 EE topics** spanning fundamentals through advanced — Ohm's Law, Kirchhoff, MOSFETs, VLSI, RF, ML Hardware, and more
+- **Quest progression** — complete a topic's quiz to unlock the next; no internet required
+- **XP system** — +50 XP per lesson, score-based quiz XP, +100 first-completion bonus
+- **Dual question types** — multiple choice and numeric input with tolerance-aware grading
+- **Blueprint mode** — toggleable alternate palette (deep navy + white-28% borders)
+- **Shared-element transitions** — topic cards morph into the lesson hero
+- **Offline-first** — all content and progress in a local Room database; no account needed
+- **Cockpit UI** — bundled Space Grotesk + JetBrains Mono, shimmer XP bar, pulsing progress nodes
+
+## Topic Curriculum
+
+<details>
+<summary>All 42 topics across 9 categories</summary>
+
+| # | Topic | Category |
+|---|-------|----------|
+| 1 | Ohm's Law | Fundamentals |
+| 2 | Series & Parallel Circuits | Fundamentals |
+| 3 | Kirchhoff's Laws | Fundamentals |
+| 4 | Capacitors & Inductors | Fundamentals |
+| 5 | AC Circuits | Fundamentals |
+| 6 | Operational Amplifiers | Fundamentals |
+| 7 | Thévenin & Norton | Analog |
+| 8 | Diodes & Rectifiers | Analog |
+| 9 | Transistors (BJTs) | Analog |
+| 10 | Digital Logic Gates | Digital |
+| 11 | MOSFETs | Analog |
+| 12 | Filters | Analog |
+| 13 | Transformers | Power |
+| 14 | Signals & Systems | Systems |
+| 15 | Power Electronics | Power |
+| 16 | Control Systems | Systems |
+| 17 | Transmission Lines | RF |
+| 18 | Communication Systems | RF |
+| 19 | Electromagnetics | Physics |
+| 20 | Semiconductor Physics | Physics |
+| 21 | Digital Systems | Digital |
+| 22 | Electric Machines | Power |
+| 23 | PCB Design | Hardware |
+| 24 | Embedded Systems | Hardware |
+| 25 | Power Systems | Power |
+| 26 | Sensors & Measurement | Hardware |
+| 27 | Antenna Design | RF |
+| 28 | VLSI Design | Advanced |
+| 29 | Signal Integrity & EMC | Advanced |
+| 30 | Battery & Energy Storage | Advanced |
+| 31 | RF Circuit Design | RF |
+| 32 | Analog Circuit Design | Analog |
+| 33 | Renewable Energy | Power |
+| 34 | IoT & Wireless | Hardware |
+| 35 | Digital Signal Processing | Systems |
+| 36 | Fiber Optics & Photonics | Advanced |
+| 37 | Electric Vehicles | Power |
+| 38 | Audio Electronics | Analog |
+| 39 | MEMS | Advanced |
+| 40 | Radar Systems | RF |
+| 41 | Biomedical Electronics | Advanced |
+| 42 | Machine Learning Hardware | Advanced |
+
+</details>
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Language | Kotlin 2.0.21 |
+| UI | Jetpack Compose (BOM 2024.12.01) |
+| Architecture | MVVM · Hilt DI · Room |
+| Navigation | Navigation Compose with shared-element transitions |
+| Storage | Room 2.6.1 (offline-first, no backend) |
+| Fonts | Space Grotesk + JetBrains Mono (bundled, fully offline) |
+| Min SDK | 26 (Android 8.0) · Target SDK 35 |
+| Build | Gradle 8.11.1 · AGP 8.7.3 · KSP |
+
+## Quick Start
+
+**Prerequisites:** JDK 17, Android SDK (platform 35)
+
+```bash
+git clone https://github.com/HighviewOne/CircuitQueest.git
+cd CircuitQueest
+./gradlew assembleDebug
+# APK → app/build/outputs/apk/debug/app-debug.apk  (~12 MB)
+```
+
+**Other tasks:**
+
+```bash
+./gradlew detekt          # Static analysis
+./gradlew test            # Unit tests
+./gradlew clean           # Clear build output
+```
+
+## Architecture
+
+```
+HomeScreen / LessonScreen / QuizScreen / ResultScreen
+        ↓ (Hilt ViewModels)
+HomeViewModel · LessonViewModel · QuizViewModel
+        ↓ (StateFlow)
+ProgressRepository
+        ↓ (Room DAOs)
+TopicProgress · QuizResult  (SQLite, local only)
+```
+
+Content is stored as Kotlin singleton objects in `data/content/` — no JSON, no API. Navigation uses `SharedTransitionLayout` for hero morphing between the topic list and the lesson screen.
+
+## Adding a Topic
+
+1. Create `app/src/main/java/com/circuitqueest/app/data/content/YourTopicContent.kt` — a singleton `object` with a `Topic`, 6+ `LessonSection`s, and a 7-question `Quiz`.
+2. Add it to `TopicsService.allTopics`.
+3. Done — sequential unlock and XP handling are automatic.
+
+See any existing `*Content.kt` file for the exact shape.
+
+## Contributing
+
+Bug reports and content corrections are welcome. Please use the [issue templates](.github/ISSUE_TEMPLATE/) — there are forms for bugs, feature requests, and documentation improvements.
+
+For code changes, open a PR against `master`. The build CI must pass.
+
+## License
+
+[MIT](LICENSE) © 2026 CircuitQueest

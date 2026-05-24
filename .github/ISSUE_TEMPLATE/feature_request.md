@@ -1,45 +1,49 @@
 name: Feature Request
-description: Suggest a new feature for CircuitQuEEst
+description: Suggest a new feature or topic for CircuitQueest
 title: "[FEATURE] "
 labels: ["enhancement"]
 body:
-  - type: markdown
+  - type: dropdown
+    id: type
     attributes:
-      value: |
-        Thanks for suggesting a feature! Help us understand what you'd like to see.
+      label: Request type
+      options:
+        - New EE topic
+        - UI / UX improvement
+        - Learning feature (e.g. review mode, hints)
+        - Accessibility
+        - Other
+    validations:
+      required: true
 
   - type: textarea
     id: description
     attributes:
-      label: Feature Description
-      description: Clear description of the feature you'd like
+      label: Feature description
+      description: What would you like to see? Be as specific as possible.
       placeholder: |
-        Add ability to create custom quizzes on topics I'm struggling with
+        A spaced-repetition review mode that resurfaces questions I got wrong, weighted by how long ago I answered them.
     validations:
       required: true
 
   - type: textarea
     id: motivation
     attributes:
-      label: Motivation
-      description: Why would this feature be useful?
+      label: Why is this useful?
       placeholder: |
-        As a learner struggling with certain topics, I'd like to focus my practice on specific areas
+        I finish topics but forget the formulas a week later. A review queue would help retention without re-doing full quizzes.
     validations:
       required: true
 
   - type: textarea
     id: alternative
     attributes:
-      label: Alternatives Considered
-      description: Any alternative approaches?
+      label: Alternatives you've considered
       placeholder: |
-        Could also allow toggling which topics appear in the quiz selection
+        Could also be a "weak spots" tab on the home screen listing topics where my quiz score was < 70%.
 
   - type: textarea
     id: additional
     attributes:
-      label: Additional Context
-      description: Screenshots, mockups, or other details
-      placeholder: |
-        This would help me prepare for exams more efficiently
+      label: Additional context
+      description: Screenshots, mockups, or references to similar apps
