@@ -1,3 +1,37 @@
+# CircuitQuEEst v2.3 — Polish Animations & Blueprint Mode
+
+**Release Date:** June 12, 2026
+**Status:** ✅ Production Ready
+**APK size:** ~12 MB (includes bundled Space Grotesk + JetBrains Mono)
+
+## What's New in v2.3
+
+Motion polish on top of the v2.2 cockpit redesign, plus a brand-new alternate color scheme.
+
+### Blueprint Mode 🔷
+
+A toggleable PCB-blueprint theme — deep navy surfaces with white schematic-style borders, like working on an actual blueprint.
+
+- New `⊞ BP` toggle chip in the Home screen header
+- Structural colors (backgrounds, surfaces, borders) switch via a `CqPalette` CompositionLocal — accent colors (blue, gold, green, red) stay constant in both themes
+- Survives rotation via `rememberSaveable`
+- All four screens and every component respond instantly to the toggle
+
+### Polish Animations ✨
+
+- **Shared-element transitions** — tapping a topic card morphs it into the lesson hero card and back, using Compose's `SharedTransitionLayout` API
+- **Lesson hero parallax** — the hero content scrolls at 0.4× speed for subtle depth as you read
+- **Sticky CTA fade-in** — the bottom call-to-action bar fades in only after you scroll past the hero
+
+### Repo & Docs
+
+- Polished README — badges, accurate v2.3 feature list, collapsible 42-topic table
+- New PR template with project-specific checklist
+- Issue chooser now links to the documentation site; blank issues disabled
+- Repo About sidebar: description, homepage, and 10 topic tags
+
+---
+
 # CircuitQuEEst v2.2 — Claude Design Visual Overhaul
 
 **Release Date:** May 2, 2026
