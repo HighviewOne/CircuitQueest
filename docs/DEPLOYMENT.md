@@ -4,8 +4,8 @@
 
 Before releasing to production:
 
-- [ ] All tests passing: `./gradlew test connectedAndroidTest`
-- [ ] Code quality checks passing: `./gradlew detekt ktlint`
+- [ ] All tests passing: `./gradlew test` (plus `connectedAndroidTest` on an emulator or spare device — it uninstalls the app afterwards)
+- [ ] Code quality checks passing: `./gradlew detekt`
 - [ ] Version updated in build.gradle.kts
 - [ ] CHANGELOG updated with new features
 - [ ] Release notes prepared
@@ -183,8 +183,8 @@ If issues detected post-release:
 ## CI/CD Integration
 
 ### GitHub Actions Workflows
-- **build.yml** - Runs on every push/PR
-- **code-quality.yml** - Code quality checks
+- **build.yml** - Push/PR to `master`: unit tests, debug APK, compiles instrumented tests
+- **quality.yml** - Push/PR to `master`: detekt
 
 ### Manual Release Steps
 ```bash

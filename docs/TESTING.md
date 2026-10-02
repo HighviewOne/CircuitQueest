@@ -95,7 +95,7 @@ class ProgressDaoInstrumentedTest {
 ### All Tests
 ```bash
 ./gradlew test                      # Unit tests only
-./gradlew connectedAndroidTest      # Instrumented tests (requires device/emulator)
+./gradlew connectedAndroidTest      # Instrumented tests (requires device/emulator; uninstalls the app afterwards — use an emulator, not a phone with real progress)
 ./gradlew test connectedAndroidTest # Both (recommended for CI/CD)
 ```
 

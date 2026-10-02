@@ -403,8 +403,8 @@ val LESSON = "lesson/{topicId}"
 // Quiz screen - requires topicId
 val QUIZ = "quiz/{topicId}"
 
-// Result screen - requires topicId and score
-val RESULT = "result/{topicId}/{score}"
+// Result screen - topicId, score, question count, and XP awarded
+val RESULT = "result/{topicId}/{score}/{total}/{xp}"
 ```
 
 #### Navigation Example
@@ -551,23 +551,27 @@ object RepositoryModule {
 ### Room Database
 ```kotlin
 @Database(
-    entities = [Progress::class, QuizResult::class],
+    entities = [TopicProgress::class, QuizResult::class],
     version = 1,
-    exportSchema = false
+    exportSchema = true // JSON written to app/schemas/
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun progressDao(): ProgressDao
     abstract fun quizResultDao(): QuizResultDao
+
+    companion object {
+        const val DATABASE_NAME = "circuitqueest_db"
+    }
 }
 ```
 
 ### Creating Instance
+Hilt provides the single instance (`data/di/RepositoryModule.kt`); inject `ProgressRepository`
+rather than building the database yourself:
 ```kotlin
-val database = Room.databaseBuilder(
-    context,
-    AppDatabase::class.java,
-    "circuitqueest-db"
-).build()
+@Provides @Singleton
+fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
+    Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.DATABASE_NAME).build()
 ```
 
 ---

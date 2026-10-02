@@ -254,26 +254,10 @@ adb devices
 #### Detekt warnings
 **Solution:**
 ```bash
-# Run detekt to see all issues
+# Run detekt to see all issues (report: app/build/reports/detekt/)
 ./gradlew detekt
 
-# Auto-fix formatting issues
-./gradlew ktlintFormat
-
-# Address remaining issues in code
-```
-
-#### ktlint formatting errors
-**Solution:**
-```bash
-# Show formatting issues
-./gradlew ktlint
-
-# Auto-fix
-./gradlew ktlintFormat
-
-# Specific file
-./gradlew ktlint --arguments '{0}'
+# Fix the reported issues in code; detekt has no auto-format task here
 ```
 
 ---

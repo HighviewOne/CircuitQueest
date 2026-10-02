@@ -51,10 +51,9 @@ All changes must include tests:
 ### 3. Code Quality
 ```bash
 # Run formatters
-./gradlew ktlintFormat
 
 # Run quality checks
-./gradlew detekt ktlint
+./gradlew detekt
 
 # Fix any issues
 ```
@@ -77,7 +76,6 @@ git push origin feature/my-feature
 - Follow [Kotlin Style Guide](https://kotlinlang.org/docs/coding-conventions.html)
 - Use 4-space indentation
 - Max line length: 120 characters
-- Use `ktlintFormat` for auto-formatting
 
 ### Naming
 ```kotlin
@@ -161,7 +159,7 @@ Brief description of changes
 - [ ] Added unit tests
 - [ ] Added instrumented tests
 - [ ] Ran full test suite: ./gradlew test connectedAndroidTest
-- [ ] Checked code quality: ./gradlew detekt ktlint
+- [ ] Checked code quality: ./gradlew detekt
 
 ## Related Issues
 Fixes #123
