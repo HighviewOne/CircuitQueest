@@ -1,6 +1,7 @@
 package com.circuitqueest.app.data.di
 
 import android.content.Context
+import androidx.room.Room
 import com.circuitqueest.app.data.db.AppDatabase
 import com.circuitqueest.app.data.repository.ProgressRepository
 import dagger.Module
@@ -16,13 +17,15 @@ object RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideProgressRepository(
-        @ApplicationContext context: Context
-    ): ProgressRepository {
-        val database = AppDatabase.getDatabase(context)
-        return ProgressRepository(
+    fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
+        Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.DATABASE_NAME)
+            .build()
+
+    @Singleton
+    @Provides
+    fun provideProgressRepository(database: AppDatabase): ProgressRepository =
+        ProgressRepository(
             progressDao = database.progressDao(),
             quizResultDao = database.quizResultDao()
         )
-    }
 }

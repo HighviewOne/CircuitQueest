@@ -37,6 +37,10 @@ jobs:
       - name: Build debug APK
         run: ./gradlew assembleDebug
 
+      # No emulator in CI, but compiling keeps the instrumented suite from rotting.
+      - name: Compile instrumented tests
+        run: ./gradlew assembleDebugAndroidTest
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
