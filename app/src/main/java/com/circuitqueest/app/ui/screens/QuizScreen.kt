@@ -41,6 +41,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,7 +67,7 @@ import com.circuitqueest.app.viewmodel.QuizViewModel
 fun QuizScreen(
     viewModel: QuizViewModel,
     onBack: () -> Unit,
-    onQuizComplete: (String, Int, Int) -> Unit
+    onQuizComplete: (topicId: String, score: Int, total: Int, xpEarned: Int) -> Unit
 ) {
     val pal = LocalCqPalette.current
     val quizState by viewModel.quizState.collectAsState()
@@ -76,7 +77,12 @@ fun QuizScreen(
 
     LaunchedEffect(quizComplete) {
         if (quizComplete) {
-            onQuizComplete(quizState.topicId, quizState.score, quizState.totalQuestions)
+            onQuizComplete(
+                quizState.topicId,
+                quizState.score,
+                quizState.totalQuestions,
+                quizState.xpEarned
+            )
         }
     }
 
@@ -124,22 +130,26 @@ fun QuizScreen(
                 )
 
                 currentQuestion?.let { question ->
-                    when (question) {
-                        is Question.MultipleChoice -> MultipleChoiceQuestion(
-                            questionText = question.questionText,
-                            options = question.options,
-                            questionNumber = quizState.currentIndex + 1,
-                            correctIndex = question.correctIndex,
-                            isSubmitted = feedback != null,
-                            onAnswer = { viewModel.answerMultipleChoice(it) }
-                        )
-                        is Question.NumericInput -> NumericInputQuestion(
-                            questionText = question.questionText,
-                            unit = question.unit,
-                            questionNumber = quizState.currentIndex + 1,
-                            isSubmitted = feedback != null,
-                            onAnswer = { viewModel.answerNumeric(it) }
-                        )
+                    // Keyed so the selected option / typed value doesn't carry over
+                    // into the next question when both use the same composable.
+                    key(question.id) {
+                        when (question) {
+                            is Question.MultipleChoice -> MultipleChoiceQuestion(
+                                questionText = question.questionText,
+                                options = question.options,
+                                questionNumber = quizState.currentIndex + 1,
+                                correctIndex = question.correctIndex,
+                                isSubmitted = feedback != null,
+                                onAnswer = { viewModel.answerMultipleChoice(it) }
+                            )
+                            is Question.NumericInput -> NumericInputQuestion(
+                                questionText = question.questionText,
+                                unit = question.unit,
+                                questionNumber = quizState.currentIndex + 1,
+                                isSubmitted = feedback != null,
+                                onAnswer = { viewModel.answerNumeric(it) }
+                            )
+                        }
                     }
                 }
 

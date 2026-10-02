@@ -68,6 +68,7 @@ fun ResultScreen(
     topicId: String,
     score: Int,
     totalQuestions: Int,
+    xpEarned: Int,
     onRetry: (String) -> Unit,
     onHome: () -> Unit,
     onNextLesson: ((String) -> Unit)? = null
@@ -75,7 +76,6 @@ fun ResultScreen(
     val pal = LocalCqPalette.current
     val percentage = if (totalQuestions > 0) (score * 100) / totalQuestions else 0
     val passed = percentage >= 60
-    val xpEarned = score * 10 + if (passed) 100 else 0
 
     val topic = remember(topicId) { TopicsService.allTopics.find { it.id == topicId } }
     val topicTitle = topic?.title ?: "Quest"

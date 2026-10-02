@@ -30,11 +30,12 @@ object Routes {
     const val HOME = "home"
     const val LESSON = "lesson/{topicId}"
     const val QUIZ = "quiz/{topicId}"
-    const val RESULT = "result/{topicId}/{score}/{total}"
+    const val RESULT = "result/{topicId}/{score}/{total}/{xp}"
 
     fun lesson(topicId: String) = "lesson/$topicId"
     fun quiz(topicId: String) = "quiz/$topicId"
-    fun result(topicId: String, score: Int, total: Int) = "result/$topicId/$score/$total"
+    fun result(topicId: String, score: Int, total: Int, xp: Int) =
+        "result/$topicId/$score/$total/$xp"
 }
 
 @Composable
@@ -95,8 +96,8 @@ fun CircuitQueestNavGraph(
                     QuizScreen(
                         viewModel = quizViewModel,
                         onBack = { navController.popBackStack() },
-                        onQuizComplete = { id, score, total ->
-                            navController.navigate(Routes.result(id, score, total)) {
+                        onQuizComplete = { id, score, total, xp ->
+                            navController.navigate(Routes.result(id, score, total, xp)) {
                                 popUpTo(Routes.HOME)
                             }
                         }
@@ -109,12 +110,14 @@ fun CircuitQueestNavGraph(
                 arguments = listOf(
                     navArgument("topicId") { type = NavType.StringType },
                     navArgument("score") { type = NavType.IntType },
-                    navArgument("total") { type = NavType.IntType }
+                    navArgument("total") { type = NavType.IntType },
+                    navArgument("xp") { type = NavType.IntType }
                 )
             ) { backStackEntry ->
                 val topicId = backStackEntry.arguments?.getString("topicId") ?: return@composable
                 val score = backStackEntry.arguments?.getInt("score") ?: 0
                 val total = backStackEntry.arguments?.getInt("total") ?: 0
+                val xp = backStackEntry.arguments?.getInt("xp") ?: 0
 
                 CompositionLocalProvider(
                     LocalNavSharedTransitionScope provides this@SharedTransitionLayout,
@@ -124,6 +127,7 @@ fun CircuitQueestNavGraph(
                         topicId = topicId,
                         score = score,
                         totalQuestions = total,
+                        xpEarned = xp,
                         onRetry = { id ->
                             navController.navigate(Routes.quiz(id)) {
                                 popUpTo(Routes.HOME)

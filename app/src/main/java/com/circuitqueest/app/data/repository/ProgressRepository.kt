@@ -28,6 +28,11 @@ class ProgressRepository(
     }
 
     suspend fun saveQuizResult(topicId: String, score: Int, totalQuestions: Int) {
+        recordQuizResult(topicId, score, totalQuestions)
+    }
+
+    /** Saves the attempt and returns the XP actually awarded for it. */
+    suspend fun recordQuizResult(topicId: String, score: Int, totalQuestions: Int): Int {
         quizResultDao.insertResult(
             QuizResult(
                 topicId = topicId,
@@ -48,6 +53,7 @@ class ProgressRepository(
                 lastAccessedTimestamp = System.currentTimeMillis()
             )
         )
+        return xpForQuiz
     }
 
     private suspend fun getCurrentProgress(topicId: String): TopicProgress {

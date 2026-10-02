@@ -19,7 +19,8 @@ data class QuizState(
     val quizTitle: String = "",
     val currentIndex: Int = 0,
     val score: Int = 0,
-    val totalQuestions: Int = 0
+    val totalQuestions: Int = 0,
+    val xpEarned: Int = 0
 )
 
 data class QuizFeedback(
@@ -46,6 +47,8 @@ class QuizViewModel @Inject constructor(
 
     private val _quizComplete = MutableStateFlow(false)
     val quizComplete: StateFlow<Boolean> = _quizComplete.asStateFlow()
+
+    private var isSaving = false
 
     init {
         val topic = TopicsService.allTopics.find { it.id == topicId }
@@ -99,15 +102,20 @@ class QuizViewModel @Inject constructor(
     }
 
     fun nextQuestion() {
+        // Only advance from an answered question, and save the attempt once even if
+        // "Next" is tapped repeatedly while the write is in flight.
+        if (_feedback.value == null || isSaving) return
         val nextIndex = _quizState.value.currentIndex + 1
 
         if (nextIndex >= questions.size) {
+            isSaving = true
             viewModelScope.launch {
-                repository.saveQuizResult(
+                val xp = repository.recordQuizResult(
                     topicId = topicId,
                     score = _quizState.value.score,
                     totalQuestions = _quizState.value.totalQuestions
                 )
+                _quizState.value = _quizState.value.copy(xpEarned = xp)
                 _quizComplete.value = true
             }
             return

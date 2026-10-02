@@ -273,7 +273,7 @@ fun NumericInputQuestion(
                         ),
                         keyboardActions = KeyboardActions(onDone = {
                             if (inputText.isNotBlank() && !isSubmitted)
-                                onAnswer(inputText.toDoubleOrNull())
+                                onAnswer(parseNumericAnswer(inputText))
                         }),
                         singleLine = true,
                         cursorBrush = SolidColor(CqText),
@@ -293,7 +293,7 @@ fun NumericInputQuestion(
 
         if (!isSubmitted) {
             Button(
-                onClick = { if (inputText.isNotBlank()) onAnswer(inputText.toDoubleOrNull()) },
+                onClick = { if (inputText.isNotBlank()) onAnswer(parseNumericAnswer(inputText)) },
                 enabled = inputText.isNotBlank(),
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(Radius.md),
@@ -310,6 +310,11 @@ fun NumericInputQuestion(
         }
     }
 }
+
+// Decimal keyboards in many locales offer "," rather than ".", which
+// toDoubleOrNull() rejects and would silently mark the answer wrong.
+internal fun parseNumericAnswer(text: String): Double? =
+    text.trim().replace(',', '.').toDoubleOrNull()
 
 // ── Shared: question card ─────────────────────────────────────────────────────
 

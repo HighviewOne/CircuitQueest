@@ -93,9 +93,16 @@ fun LessonScreen(
         }
     }
 
-    // CTA fades in after the user scrolls past the hero card
+    // CTA fades in after the user scrolls past the hero card, or immediately when the
+    // whole lesson fits on screen (tablets, short lessons) and there is nothing to scroll.
+    val ctaVisible by remember {
+        derivedStateOf {
+            val laidOut = listState.layoutInfo.totalItemsCount > 0
+            listState.firstVisibleItemIndex >= 2 || (laidOut && !listState.canScrollForward)
+        }
+    }
     val ctaAlpha by animateFloatAsState(
-        targetValue = if (listState.firstVisibleItemIndex >= 2) 1f else 0f,
+        targetValue = if (ctaVisible) 1f else 0f,
         animationSpec = tween(400),
         label = "cta_alpha"
     )
@@ -136,7 +143,8 @@ fun LessonScreen(
                 bgColor = pal.bg,
                 onComplete = { viewModel.markLessonComplete() },
                 onStartQuiz = { onStartQuiz(currentTopic.id) },
-                alpha = ctaAlpha
+                alpha = ctaAlpha,
+                enabled = ctaVisible
             )
         },
         containerColor = pal.bg
@@ -380,6 +388,7 @@ private fun StickyCtaBar(
     questionCount: Int,
     bgColor: androidx.compose.ui.graphics.Color,
     alpha: Float,
+    enabled: Boolean,
     onComplete: () -> Unit,
     onStartQuiz: () -> Unit
 ) {
@@ -392,13 +401,17 @@ private fun StickyCtaBar(
     ) {
         Button(
             onClick = if (lessonCompleted) onStartQuiz else onComplete,
+            // Don't accept taps while the bar is faded out.
+            enabled = enabled,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),
             shape = RoundedCornerShape(Radius.md),
             colors = ButtonDefaults.buttonColors(
                 containerColor = if (lessonCompleted) CqGold else CqBlue,
-                contentColor = if (lessonCompleted) bgColor else CqText
+                contentColor = if (lessonCompleted) bgColor else CqText,
+                disabledContainerColor = if (lessonCompleted) CqGold else CqBlue,
+                disabledContentColor = if (lessonCompleted) bgColor else CqText
             )
         ) {
             Text(
