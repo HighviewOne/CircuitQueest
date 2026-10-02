@@ -6,7 +6,7 @@ object MemsContent {
         title = "MEMS",
         subtitle = "Accelerometers, gyroscopes, and microfabrication",
         icon = "\uD83D\uDD2C",
-        order = 38,
+        order = 40,
         lesson = Lesson(
             title = "MEMS: Tiny Machines, Big Impact",
             sections = listOf(

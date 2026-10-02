@@ -6,7 +6,7 @@ object AudioElectronicsContent {
         title = "Audio Electronics",
         subtitle = "Amplifier classes, DACs, and speaker design",
         icon = "\uD83C\uDFA7",
-        order = 37,
+        order = 13,
         lesson = Lesson(
             title = "Audio Electronics: The Sound of Circuits",
             sections = listOf(

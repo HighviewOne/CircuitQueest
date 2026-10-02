@@ -6,7 +6,7 @@ object MlHardwareContent {
         title = "Machine Learning Hardware",
         subtitle = "GPUs, TPUs, and neural network accelerators",
         icon = "\uD83E\uDDE0",
-        order = 41,
+        order = 17,
         lesson = Lesson(
             title = "Machine Learning Hardware: Silicon for Intelligence",
             sections = listOf(

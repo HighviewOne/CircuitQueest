@@ -6,7 +6,7 @@ object RfCircuitsContent {
         title = "RF Circuit Design",
         subtitle = "Oscillators, amplifiers, and S-parameters",
         icon = "\uD83D\uDCFB",
-        order = 30,
+        order = 31,
         lesson = Lesson(
             title = "RF Circuit Design: The High-Frequency Frontier",
             sections = listOf(

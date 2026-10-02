@@ -6,7 +6,7 @@ object MosfetsContent {
         title = "MOSFETs",
         subtitle = "Field-effect transistors and CMOS logic",
         icon = "\uD83D\uDD0C",
-        order = 10,
+        order = 8,
         lesson = Lesson(
             title = "MOSFETs: Voltage-Controlled Switches",
             sections = listOf(

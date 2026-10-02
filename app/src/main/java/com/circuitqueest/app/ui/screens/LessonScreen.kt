@@ -35,7 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -45,7 +45,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -56,6 +55,7 @@ import com.circuitqueest.app.data.content.Topic
 import com.circuitqueest.app.navigation.LocalNavAnimatedVisibilityScope
 import com.circuitqueest.app.navigation.LocalNavSharedTransitionScope
 import com.circuitqueest.app.ui.components.FormulaTile
+import com.circuitqueest.app.ui.components.QuestNotFound
 import com.circuitqueest.app.ui.theme.CqBlue
 import com.circuitqueest.app.ui.theme.CqBlueDeep
 import com.circuitqueest.app.ui.theme.CqBlueLight
@@ -68,7 +68,9 @@ import com.circuitqueest.app.ui.theme.MonoLabel
 import com.circuitqueest.app.ui.theme.Radius
 import com.circuitqueest.app.ui.theme.SpaceGrotesk
 import com.circuitqueest.app.ui.theme.Spacing
+import com.circuitqueest.app.util.QuizScoring
 import com.circuitqueest.app.viewmodel.LessonViewModel
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,9 +80,12 @@ fun LessonScreen(
     onStartQuiz: (String) -> Unit
 ) {
     val pal = LocalCqPalette.current
-    val topic by viewModel.topic.collectAsState()
-    val lessonCompleted by viewModel.lessonCompleted.collectAsState()
-    val currentTopic = topic ?: return
+    val topic by viewModel.topic.collectAsStateWithLifecycle()
+    val lessonCompleted by viewModel.lessonCompleted.collectAsStateWithLifecycle()
+    val currentTopic = topic ?: run {
+        QuestNotFound(onBack = onBack)
+        return
+    }
 
     val listState = rememberLazyListState()
 
@@ -234,7 +239,7 @@ private fun HeroCard(topic: Topic, parallaxOffset: Float = 0f) {
                 .graphicsLayer { translationY = -parallaxOffset * 0.4f }
         ) {
             Text(
-                text = "QUEST · ${String.format("%02d", topic.order)}",
+                text = "QUEST · ${String.format(Locale.ROOT, "%02d", topic.order)}",
                 style = MonoLabel,
                 color = CqBlueLight
             )
@@ -259,7 +264,7 @@ private fun HeroCard(topic: Topic, parallaxOffset: Float = 0f) {
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s8)) {
                 StatPill("~${topic.lesson.sections.size + 1} min")
                 StatPill("${topic.quiz.questions.size} questions")
-                StatPill("+50 XP")
+                StatPill("+${QuizScoring.LESSON_XP} XP")
             }
         }
     }
@@ -313,7 +318,7 @@ private fun SectionCard(
                         .padding(horizontal = 8.dp, vertical = 3.dp)
                 ) {
                     Text(
-                        text = String.format("%02d", index),
+                        text = String.format(Locale.ROOT, "%02d", index),
                         style = MonoLabel,
                         color = CqTextDim
                     )
@@ -418,7 +423,7 @@ private fun StickyCtaBar(
                 text = if (lessonCompleted)
                     "Start the $questionCount-question quiz  →"
                 else
-                    "Complete Lesson  +50 XP",
+                    "Complete Lesson  +${QuizScoring.LESSON_XP} XP",
                 fontFamily = SpaceGrotesk,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 15.sp

@@ -29,13 +29,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +45,8 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.circuitqueest.app.data.content.Topic
+import com.circuitqueest.app.data.content.TopicCategories
 import com.circuitqueest.app.ui.components.CategoryHeader
 import com.circuitqueest.app.ui.components.TopicCard
 import com.circuitqueest.app.ui.components.XpBar
@@ -66,13 +70,14 @@ fun HomeScreen(
     blueprintMode: Boolean = false
 ) {
     val pal = LocalCqPalette.current
-    val categorizedTopics by viewModel.categorizedTopics.collectAsState()
-    val totalXp by viewModel.totalXp.collectAsState()
+    val categorizedTopics by viewModel.categorizedTopics.collectAsStateWithLifecycle()
+    val totalXp by viewModel.totalXp.collectAsStateWithLifecycle()
     var searchQuery by rememberSaveable { mutableStateOf("") }
-    val expandedCategories = remember { mutableStateMapOf<String, Boolean>() }
-
-    if (expandedCategories.isEmpty() && categorizedTopics.isNotEmpty()) {
-        expandedCategories[categorizedTopics.first().category.name] = true
+    // Names of expanded categories; saveable so rotation doesn't collapse them.
+    val expandedCategories = rememberSaveable(
+        saver = listSaver(save = { it.toList() }, restore = { it.toMutableStateList() })
+    ) {
+        mutableStateListOf(TopicCategories.categories.first().name)
     }
 
     val currentTopicId = remember(categorizedTopics) {
@@ -219,12 +224,9 @@ fun HomeScreen(
 
             // ── Content ─────────────────────────────────────────────────
             if (isSearching) {
-                val query = searchQuery.trim().lowercase()
+                val query = searchQuery.trim()
                 val filtered = categorizedTopics.flatMap { it.topics }
-                    .filter {
-                        it.topic.title.lowercase().contains(query) ||
-                            it.topic.subtitle.lowercase().contains(query)
-                    }
+                    .filter { it.topic.matchesSearch(query) }
 
                 if (filtered.isEmpty()) {
                     item {
@@ -269,7 +271,7 @@ fun HomeScreen(
             } else {
                 categorizedTopics.forEach { categoryState ->
                     val categoryName = categoryState.category.name
-                    val isExpanded = expandedCategories[categoryName] ?: false
+                    val isExpanded = categoryName in expandedCategories
                     val completedCount = categoryState.topics.count {
                         it.progress?.quizCompleted == true
                     }
@@ -288,7 +290,11 @@ fun HomeScreen(
                             accentColor = accent,
                             isExpanded = isExpanded,
                             onClick = {
-                                expandedCategories[categoryName] = !isExpanded
+                                if (isExpanded) {
+                                    expandedCategories.remove(categoryName)
+                                } else {
+                                    expandedCategories.add(categoryName)
+                                }
                             }
                         )
                     }
@@ -329,4 +335,12 @@ fun HomeScreen(
             item { Spacer(modifier = Modifier.height(Spacing.s32)) }
         }
     }
+}
+
+/** Matches the title, subtitle, and lesson section headings/formulas, ignoring case. */
+internal fun Topic.matchesSearch(query: String): Boolean {
+    if (query.isBlank()) return true
+    val haystack = sequenceOf(title, subtitle) +
+        lesson.sections.asSequence().flatMap { sequenceOf(it.heading, it.formula.orEmpty()) }
+    return haystack.any { it.contains(query, ignoreCase = true) }
 }

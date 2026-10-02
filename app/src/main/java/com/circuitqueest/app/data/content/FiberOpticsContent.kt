@@ -6,7 +6,7 @@ object FiberOpticsContent {
         title = "Fiber Optics & Photonics",
         subtitle = "Optical fiber, lasers, and photonic communication",
         icon = "\uD83D\uDD2E",
-        order = 35,
+        order = 32,
         lesson = Lesson(
             title = "Fiber Optics & Photonics: Light as Information",
             sections = listOf(

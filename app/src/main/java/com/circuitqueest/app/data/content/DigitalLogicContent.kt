@@ -6,7 +6,7 @@ object DigitalLogicContent {
         title = "Digital Logic Gates",
         subtitle = "The foundation of digital electronics",
         icon = "\uD83E\uDDE0",
-        order = 9,
+        order = 14,
         lesson = Lesson(
             title = "Digital Logic: Zeros and Ones",
             sections = listOf(

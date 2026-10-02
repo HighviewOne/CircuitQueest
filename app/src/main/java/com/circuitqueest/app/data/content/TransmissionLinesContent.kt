@@ -6,7 +6,7 @@ object TransmissionLinesContent {
         title = "Transmission Lines",
         subtitle = "Signal propagation, reflections, and impedance matching",
         icon = "\uD83D\uDCE1",
-        order = 16,
+        order = 28,
         lesson = Lesson(
             title = "Transmission Lines: Signals on the Move",
             sections = listOf(

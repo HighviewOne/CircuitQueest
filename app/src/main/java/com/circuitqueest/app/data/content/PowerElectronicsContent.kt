@@ -6,7 +6,7 @@ object PowerElectronicsContent {
         title = "Power Electronics",
         subtitle = "Voltage regulation and DC-DC conversion",
         icon = "\uD83D\uDD0B",
-        order = 14,
+        order = 22,
         lesson = Lesson(
             title = "Power Electronics: Taming the Voltage",
             sections = listOf(

@@ -13,7 +13,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-import com.circuitqueest.app.ui.theme.CqGold
 import com.circuitqueest.app.ui.theme.CqText
 import com.circuitqueest.app.ui.theme.JetBrainsMono
 import com.circuitqueest.app.ui.theme.LocalCqPalette

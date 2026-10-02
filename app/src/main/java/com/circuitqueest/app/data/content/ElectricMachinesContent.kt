@@ -6,7 +6,7 @@ object ElectricMachinesContent {
         title = "Electric Machines",
         subtitle = "Motors, generators, and electromechanical energy conversion",
         icon = "\u2699\uFE0F",
-        order = 21,
+        order = 39,
         lesson = Lesson(
             title = "Electric Machines: From Electricity to Motion",
             sections = listOf(

@@ -6,7 +6,7 @@ object ElectromagneticsContent {
         title = "Electromagnetics",
         subtitle = "Fields, forces, and Maxwell's equations",
         icon = "\uD83E\uDDF2",
-        order = 18,
+        order = 27,
         lesson = Lesson(
             title = "Electromagnetics: Fields in Action",
             sections = listOf(

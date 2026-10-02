@@ -159,8 +159,8 @@ class ProgressRepositoryTest {
         
         val updatedProgress = progressCaptor.firstValue
         assertEquals(8, updatedProgress.bestScore) // Updated to new best
-        // XP: base (80) only, no first completion or perfect bonus
-        assertEquals(280, updatedProgress.xpEarned) // 200 previous + 80 new
+        // XP: only the improvement over the previous best (8 - 6) * 10
+        assertEquals(220, updatedProgress.xpEarned)
     }
 
     @Test
@@ -186,8 +186,8 @@ class ProgressRepositoryTest {
         
         val updatedProgress = progressCaptor.firstValue
         assertEquals(8, updatedProgress.bestScore) // Unchanged
-        // XP: base (40) only
-        assertEquals(340, updatedProgress.xpEarned) // 300 previous + 40 new
+        // Retaking below the best score earns nothing
+        assertEquals(300, updatedProgress.xpEarned)
     }
 
     @Test
@@ -222,5 +222,49 @@ class ProgressRepositoryTest {
         val result = repository.getQuizResults("topic1")
 
         verify(quizResultDao).getResultsForTopic("topic1")
+    }
+
+    @Test
+    fun saveQuizResult_failingFirstAttempt_doesNotComplete() = runBlocking {
+        val topicId = "topic1"
+        whenever(progressDao.getProgressOnce(topicId)).thenReturn(TopicProgress(topicId))
+
+        val xp = repository.recordQuizResult(topicId, score = 3, totalQuestions = 10)
+
+        val captor = argumentCaptor<TopicProgress>()
+        verify(progressDao).upsertProgress(captor.capture())
+        assertEquals(false, captor.firstValue.quizCompleted)
+        assertEquals(3, captor.firstValue.bestScore)
+        assertEquals(30, xp) // points, but no first-pass bonus
+    }
+
+    @Test
+    fun saveQuizResult_passAfterFail_paysBonusOnce() = runBlocking {
+        val topicId = "topic1"
+        val afterFail = TopicProgress(topicId, quizCompleted = false, bestScore = 3, xpEarned = 30)
+        whenever(progressDao.getProgressOnce(topicId)).thenReturn(afterFail)
+
+        val xp = repository.recordQuizResult(topicId, score = 7, totalQuestions = 10)
+
+        val captor = argumentCaptor<TopicProgress>()
+        verify(progressDao).upsertProgress(captor.capture())
+        assertEquals(true, captor.firstValue.quizCompleted)
+        assertEquals(140, xp) // (7 - 3) * 10 + 100
+        assertEquals(170, captor.firstValue.xpEarned)
+    }
+
+    @Test
+    fun saveQuizResult_failAfterPass_staysCompleted() = runBlocking {
+        val topicId = "topic1"
+        val passed = TopicProgress(topicId, quizCompleted = true, bestScore = 8, xpEarned = 180)
+        whenever(progressDao.getProgressOnce(topicId)).thenReturn(passed)
+
+        val xp = repository.recordQuizResult(topicId, score = 2, totalQuestions = 10)
+
+        val captor = argumentCaptor<TopicProgress>()
+        verify(progressDao).upsertProgress(captor.capture())
+        assertEquals(true, captor.firstValue.quizCompleted)
+        assertEquals(8, captor.firstValue.bestScore)
+        assertEquals(0, xp)
     }
 }

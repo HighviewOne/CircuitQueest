@@ -6,7 +6,7 @@ object BiomedicalElectronicsContent {
         title = "Biomedical Electronics",
         subtitle = "ECG, EEG, pacemakers, and patient safety",
         icon = "\uD83E\uDE7A",
-        order = 40,
+        order = 41,
         lesson = Lesson(
             title = "Biomedical Electronics: Where Circuits Save Lives",
             sections = listOf(

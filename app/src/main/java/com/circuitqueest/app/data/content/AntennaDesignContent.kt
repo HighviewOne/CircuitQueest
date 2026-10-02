@@ -6,7 +6,7 @@ object AntennaDesignContent {
         title = "Antenna Design",
         subtitle = "Radiation patterns, gain, and antenna types",
         icon = "\uD83D\uDCE1",
-        order = 26,
+        order = 30,
         lesson = Lesson(
             title = "Antenna Design: Reaching the Airwaves",
             sections = listOf(

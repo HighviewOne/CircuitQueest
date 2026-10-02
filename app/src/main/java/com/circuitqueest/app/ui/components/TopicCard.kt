@@ -27,6 +27,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,6 +48,7 @@ import com.circuitqueest.app.ui.theme.Radius
 import com.circuitqueest.app.ui.theme.SpaceGrotesk
 import com.circuitqueest.app.ui.theme.Spacing
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @Composable
 fun TopicCard(
@@ -109,7 +113,13 @@ fun TopicCard(
             .background(cardBg)
             .then(borderModifier)
             .alpha(if (isLocked) 0.65f else 1f)
-            .clickable {
+            .semantics(mergeDescendants = true) {
+                if (isLocked) stateDescription = "Locked"
+            }
+            .clickable(
+                onClickLabel = if (isLocked) null else "Open quest",
+                role = Role.Button
+            ) {
                 if (isLocked) {
                     scope.launch {
                         repeat(3) {
@@ -130,7 +140,7 @@ fun TopicCard(
         ) {
             // Topic number
             Text(
-                text = String.format("%02d", topicNumber),
+                text = String.format(Locale.ROOT, "%02d", topicNumber),
                 fontFamily = JetBrainsMono,
                 fontWeight = FontWeight.Medium,
                 fontSize = 11.sp,
@@ -160,7 +170,7 @@ fun TopicCard(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = if (isLocked) "Complete previous quest to unlock" else subtitle,
+                    text = if (isLocked) "Pass the previous quest to unlock" else subtitle,
                     fontFamily = SpaceGrotesk,
                     fontWeight = FontWeight.Normal,
                     fontSize = 12.sp,

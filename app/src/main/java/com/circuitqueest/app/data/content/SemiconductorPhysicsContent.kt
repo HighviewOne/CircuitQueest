@@ -6,7 +6,7 @@ object SemiconductorPhysicsContent {
         title = "Semiconductor Physics",
         subtitle = "Band theory, doping, and carrier transport",
         icon = "\u2699\uFE0F",
-        order = 19,
+        order = 9,
         lesson = Lesson(
             title = "Semiconductor Physics: Inside the Silicon",
             sections = listOf(
