@@ -26,14 +26,14 @@ Before releasing to production:
 ### Release Build
 ```bash
 ./gradlew assembleRelease
-# Output: app/build/outputs/apk/release/app-release.apk
+# Output: app/build/outputs/apk/release/app-release-unsigned.apk — sign it (see Code Signing)
 ```
 
 **Release builds include:**
 - ✅ ProGuard R8 code obfuscation
 - ✅ Resource shrinking
 - ✅ Minification (20-40% smaller APK)
-- ✅ Release signing (configured locally)
+- ✅ Release signing via `scripts/sign-release.sh` (key rotation; see Code Signing)
 
 ## Version Management
 
@@ -55,38 +55,42 @@ defaultConfig {
 
 ## Code Signing
 
-### Local Signing Setup
+Gradle builds the release APK **unsigned**; `scripts/sign-release.sh` signs it. No signing
+material is in the repo.
+
+### Keys and key rotation
+- Releases up to **v2.4** were signed with the Android debug key (`~/.android/debug.keystore`,
+  cert SHA-256 `6554e4a2…d3b12b`).
+- From **v2.5** on, the release key `~/.config/circuitqueest/release.jks` (alias `circuitqueest`,
+  cert SHA-256 `0fcd73f2…893bb7`, valid to 2054) takes over via **APK Signature Scheme v3.1 key
+  rotation**: `~/.config/circuitqueest/rotation.lineage` records the old key vouching for the new
+  one, so new releases install as updates over old ones and players keep their progress.
+  Android 13+ verifies against the new key; Android 8–12 against the old one.
+- Every release therefore needs **all four files**: `release.jks`, `keystore.properties`
+  (passwords), `rotation.lineage`, and `~/.android/debug.keystore`. Backups:
+  `hamptonserver:~/backups/circuitqueest-signing/`. Losing them means future releases can't
+  update existing installs.
+
+### Signing a release
 ```bash
-# Create keystore (one-time)
-keytool -genkey -v -keystore ~/.android/keystore.jks \
-  -keyalg RSA -keysize 2048 -validity 10000 -alias circuitqueest
+./gradlew assembleRelease
+scripts/sign-release.sh app/build/outputs/apk/release/app-release-unsigned.apk CircuitQueest-vX.Y.apk
+```
+The script prints the verification: expect v3/v3.1 `true`, a `minSdkVersion=33` signer with the
+release cert, and a `minSdkVersion=24` signer with the debug cert.
 
-# Store credentials in local.properties
-RELEASE_STORE_FILE=~/.android/keystore.jks
-RELEASE_STORE_PASSWORD=your_password
-RELEASE_KEY_ALIAS=circuitqueest
-RELEASE_KEY_PASSWORD=your_key_password
+### Testing an update before publishing
+Re-sign a staging build and install it over the existing `CQ Staging` (separate package, so the
+real app is untouched):
+```bash
+./gradlew assembleStaging
+scripts/sign-release.sh app/build/outputs/apk/staging/app-staging.apk staging-signed.apk
+adb install -r staging-signed.apk   # must succeed as an update, not require an uninstall
 ```
 
-### Configure Gradle
-```kotlin
-// app/build.gradle.kts
-android {
-    signingConfigs {
-        release {
-            storeFile = file(RELEASE_STORE_FILE)
-            storePassword = RELEASE_STORE_PASSWORD
-            keyAlias = RELEASE_KEY_ALIAS
-            keyPassword = RELEASE_KEY_PASSWORD
-        }
-    }
-    buildTypes {
-        release {
-            signingConfig = signingConfigs.release
-        }
-    }
-}
-```
+### Google Play
+Play App Signing uses its own app-signing key; upload with the release key as the upload key. The
+rotation lineage is for sideloaded APKs (GitHub releases).
 
 ## Play Store Submission
 

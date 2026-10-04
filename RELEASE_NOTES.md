@@ -1,3 +1,10 @@
+# Unreleased
+
+### Engineering
+- **Release signing key.** Releases are now signed with a dedicated release key instead of the Android debug key, using APK Signature Scheme v3.1 key rotation so the next version still installs as an update over v2.4 and earlier (no uninstall, progress kept). See `docs/DEPLOYMENT.md` → Code Signing.
+
+---
+
 # CircuitQuEEst v2.4 — Fair Progression & Launch-Crash Fix
 
 **Release Date:** October 4, 2026
