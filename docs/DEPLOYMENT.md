@@ -184,7 +184,7 @@ If issues detected post-release:
 ## CI/CD Integration
 
 ### GitHub Actions Workflows
-- **build.yml** - Push/PR to `master`: unit tests, debug APK, compiles instrumented tests
+- **build.yml** - Push/PR to `master`: unit tests, debug APK, compiles instrumented tests; `instrumented` job runs them on an API 34 emulator (report uploaded as an artifact)
 - **quality.yml** - Push/PR to `master`: detekt
 
 ### Manual Release Steps

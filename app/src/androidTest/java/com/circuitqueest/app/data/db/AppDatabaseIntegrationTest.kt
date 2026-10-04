@@ -42,7 +42,7 @@ class AppDatabaseIntegrationTest {
     }
 
     @Test
-    fun completeWorkflow_saveQuizAndProgress() = runBlocking {
+    fun completeWorkflow_saveQuizAndProgress(): Unit = runBlocking {
         val topicId = "ohms-law"
         
         // Create initial progress
@@ -87,7 +87,7 @@ class AppDatabaseIntegrationTest {
     }
 
     @Test
-    fun multipleTopics_isolation() = runBlocking {
+    fun multipleTopics_isolation(): Unit = runBlocking {
         // Insert data for two topics
         database.progressDao().upsertProgress(TopicProgress("topic1", xpEarned = 100))
         database.progressDao().upsertProgress(TopicProgress("topic2", xpEarned = 200))
@@ -110,7 +110,7 @@ class AppDatabaseIntegrationTest {
     }
 
     @Test
-    fun totalXp_aggregation_acrossTopics() = runBlocking {
+    fun totalXp_aggregation_acrossTopics(): Unit = runBlocking {
         database.progressDao().upsertProgress(TopicProgress("topic1", xpEarned = 100))
         database.progressDao().upsertProgress(TopicProgress("topic2", xpEarned = 150))
         database.progressDao().upsertProgress(TopicProgress("topic3", xpEarned = 250))
@@ -121,7 +121,7 @@ class AppDatabaseIntegrationTest {
     }
 
     @Test
-    fun progressionFlow_unlocking() = runBlocking {
+    fun progressionFlow_unlocking(): Unit = runBlocking {
         val topic1 = "ohms-law"
         val topic2 = "series-parallel"
 
@@ -152,7 +152,7 @@ class AppDatabaseIntegrationTest {
     }
 
     @Test
-    fun bestScoreTracking_workflow() = runBlocking {
+    fun bestScoreTracking_workflow(): Unit = runBlocking {
         val topicId = "test-topic"
 
         // First attempt
@@ -175,7 +175,7 @@ class AppDatabaseIntegrationTest {
     }
 
     @Test
-    fun reactiveUpdates_progressFlow() = runBlocking {
+    fun reactiveUpdates_progressFlow(): Unit = runBlocking {
         val topicId = "reactive-test"
 
         // Insert initial

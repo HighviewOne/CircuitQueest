@@ -1,630 +1,358 @@
 # API Documentation
 
-## Public APIs Reference
+Reference for the app's internal Kotlin APIs, as of v2.4. Everything lives under
+`app/src/main/java/com/circuitqueest/app/`. The app is offline-only: there is no network API.
 
-Complete documentation of public interfaces, classes, and methods available for developers extending CircuitQuEEst.
-
-## ViewModel APIs
-
-### HomeViewModel
-Manages the home screen state including topic list and user progress.
-
-```kotlin
-@HiltViewModel
-class HomeViewModel @Inject constructor(
-    private val repository: ProgressRepository,
-    private val topicsService: TopicsService,
-    savedStateHandle: SavedStateHandle
-) : ViewModel()
 ```
-
-#### Properties
-```kotlin
-// All topics available for learning
-val allTopics: StateFlow<List<Topic>>
-
-// User progress for each topic
-val userProgress: StateFlow<Map<String, Progress?>>
-
-// Total XP earned by user
-val totalXP: StateFlow<Int>
-
-// Currently selected topic
-val selectedTopic: StateFlow<Topic?>
-
-// Loading state
-val isLoading: StateFlow<Boolean>
-
-// Error messages
-val errorMessage: StateFlow<String?>
-```
-
-#### Methods
-```kotlin
-// Select a topic to view details
-fun selectTopic(topicId: String)
-
-// Refresh progress data
-suspend fun refreshProgress()
-
-// Clear error message
-fun clearError()
-```
-
-#### Example Usage
-```kotlin
-@Composable
-fun HomeScreen(viewModel: HomeViewModel) {
-    val topics by viewModel.allTopics.collectAsState()
-    val progress by viewModel.userProgress.collectAsState()
-    
-    LazyColumn {
-        items(topics) { topic ->
-            TopicCard(
-                topic = topic,
-                progress = progress[topic.id],
-                onClick = { viewModel.selectTopic(topic.id) }
-            )
-        }
-    }
-}
+UI (Compose screens) ──collectAsStateWithLifecycle──▶ ViewModels (StateFlow)
+                                                        │
+                       TopicsService (static content) ◀─┤
+                                                        ▼
+                                            ProgressRepository ──▶ Room DAOs ──▶ circuitqueest_db
 ```
 
 ---
 
-### QuizViewModel
-Manages quiz state and scoring.
+## Content
 
-```kotlin
-@HiltViewModel
-class QuizViewModel @Inject constructor(
-    private val repository: ProgressRepository,
-    private val topicsService: TopicsService,
-    savedStateHandle: SavedStateHandle
-) : ViewModel()
-```
+Lesson and quiz content is compiled into the app as Kotlin singleton objects
+(`data/content/*Content.kt`), one per topic.
 
-#### Properties
-```kotlin
-// Current quiz questions
-val currentQuiz: StateFlow<Quiz>
+### Data model (`data/content/TopicContent.kt`)
 
-// Current question index
-val currentQuestionIndex: StateFlow<Int>
-
-// User's selected answer for current question
-val selectedAnswer: StateFlow<String?>
-
-// Total score so far
-val currentScore: StateFlow<Int>
-
-// Quiz completion state
-val isQuizComplete: StateFlow<Boolean>
-
-// Percentage of quiz completed
-val progressPercentage: StateFlow<Float>
-```
-
-#### Methods
-```kotlin
-// Start quiz for given topic
-suspend fun startQuiz(topicId: String)
-
-// Select an answer for current question
-fun selectAnswer(answer: String)
-
-// Move to next question
-suspend fun nextQuestion()
-
-// Submit quiz and calculate score
-suspend fun submitQuiz(): QuizResult
-
-// Restart current quiz
-suspend fun restartQuiz()
-```
-
-#### Example Usage
-```kotlin
-@Composable
-fun QuizScreen(viewModel: QuizViewModel) {
-    val quiz by viewModel.currentQuiz.collectAsState()
-    val currentIndex by viewModel.currentQuestionIndex.collectAsState()
-    val selected by viewModel.selectedAnswer.collectAsState()
-    
-    val question = quiz.questions[currentIndex]
-    
-    Column {
-        Text(question.text)
-        question.options.forEach { option ->
-            Button(
-                onClick = { viewModel.selectAnswer(option) },
-                selected = selected == option
-            ) {
-                Text(option)
-            }
-        }
-    }
-}
-```
-
----
-
-### LessonViewModel
-Manages lesson content display.
-
-```kotlin
-@HiltViewModel
-class LessonViewModel @Inject constructor(
-    private val repository: ProgressRepository,
-    private val topicsService: TopicsService,
-    savedStateHandle: SavedStateHandle
-) : ViewModel()
-```
-
-#### Properties
-```kotlin
-// Current lesson being displayed
-val currentLesson: StateFlow<Lesson>
-
-// Lesson content sections
-val sections: StateFlow<List<Section>>
-
-// Current section index
-val currentSectionIndex: StateFlow<Int>
-
-// Is lesson content loaded
-val isLoaded: StateFlow<Boolean>
-```
-
-#### Methods
-```kotlin
-// Load lesson for topic
-suspend fun loadLesson(topicId: String)
-
-// Move to next section
-fun nextSection()
-
-// Move to previous section
-fun previousSection()
-
-// Start quiz for this lesson
-suspend fun startQuiz()
-```
-
----
-
-## Repository APIs
-
-### ProgressRepository
-Central data access point for user progress.
-
-```kotlin
-@Inject
-class ProgressRepository(
-    private val progressDao: ProgressDao,
-    private val quizResultDao: QuizResultDao
-)
-```
-
-#### Methods
-```kotlin
-// Get progress for specific topic
-suspend fun getProgress(topicId: String): Progress?
-
-// Get all user progress across topics
-suspend fun getAllProgress(): List<Progress>
-
-// Save quiz completion
-suspend fun saveQuizResult(result: QuizResult)
-
-// Get all quiz attempts for topic
-suspend fun getQuizResults(topicId: String): List<QuizResult>
-
-// Update best score for topic
-suspend fun updateBestScore(topicId: String, score: Int)
-
-// Get total XP earned
-suspend fun getTotalXP(): Int
-
-// Reset all progress (dangerous!)
-suspend fun resetProgress()
-```
-
-#### Data Classes
-```kotlin
-data class Progress(
-    val topicId: String,          // PK
-    val bestScore: Int,           // 0-100
-    val totalQuestions: Int,      // Total questions attempted
-    val lastAttempt: Long = 0     // Timestamp of last quiz
-)
-
-data class QuizResult(
-    val id: Int = 0,              // Auto-incremented PK
-    val topicId: String,          // FK to topic
-    val score: Int,               // 0-100
-    val totalQuestions: Int,      // Number of questions
-    val timestamp: Long           // When quiz was completed
-)
-```
-
-#### Example Usage
-```kotlin
-// In ViewModel
-viewModelScope.launch {
-    val progress = repository.getProgress("ohms_law")
-    if (progress != null) {
-        updateUI(progress)
-    }
-}
-
-// Save quiz results
-val result = QuizResult(
-    topicId = "ohms_law",
-    score = 85,
-    totalQuestions = 10,
-    timestamp = System.currentTimeMillis()
-)
-repository.saveQuizResult(result)
-```
-
----
-
-## DAO APIs
-
-### ProgressDao
-Direct database access for Progress entity.
-
-```kotlin
-@Dao
-interface ProgressDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertOrUpdate(progress: Progress)
-    
-    @Query("SELECT * FROM Progress WHERE topicId = :topicId")
-    suspend fun getProgress(topicId: String): Progress?
-    
-    @Query("SELECT * FROM Progress")
-    suspend fun getAllProgress(): List<Progress>
-    
-    @Query("DELETE FROM Progress WHERE topicId = :topicId")
-    suspend fun deleteProgress(topicId: String)
-    
-    @Query("DELETE FROM Progress")
-    suspend fun deleteAll()
-}
-```
-
----
-
-### QuizResultDao
-Direct database access for QuizResult entity.
-
-```kotlin
-@Dao
-interface QuizResultDao {
-    @Insert
-    suspend fun insert(result: QuizResult)
-    
-    @Query("SELECT * FROM QuizResult WHERE topicId = :topicId")
-    suspend fun getResults(topicId: String): List<QuizResult>
-    
-    @Query("SELECT AVG(score) FROM QuizResult WHERE topicId = :topicId")
-    suspend fun getAverageScore(topicId: String): Int?
-    
-    @Query("DELETE FROM QuizResult WHERE topicId = :topicId")
-    suspend fun deleteResults(topicId: String)
-}
-```
-
----
-
-## Service APIs
-
-### TopicsService
-Provides access to all educational content.
-
-```kotlin
-@Inject
-class TopicsService {
-    // Get all topics sorted by order
-    fun getAllTopics(): List<Topic>
-    
-    // Get specific topic
-    fun getTopic(topicId: String): Topic?
-    
-    // Get topics by category
-    fun getTopicsByCategory(category: String): List<Topic>
-}
-```
-
-#### Topic Data Structure
 ```kotlin
 data class Topic(
-    val id: String,              // Unique identifier
-    val name: String,            // Display name
-    val description: String,     // Brief description
-    val icon: String,            // Icon reference
-    val lessons: List<Lesson>,  // Course material
-    val quiz: Quiz,              // Quiz questions
-    val category: String         // Topic category
-)
-
-data class Lesson(
+    val id: String,          // stable key, e.g. "ohms_law" — used in routes and the database
     val title: String,
-    val sections: List<Section>
+    val subtitle: String,
+    val icon: String,        // emoji shown in the card badge
+    val order: Int,          // quest number = position in the unlock path (see TopicCategories)
+    val lesson: Lesson,
+    val quiz: Quiz
 )
 
-data class Section(
-    val title: String,
-    val content: String          // HTML or markdown
+data class Lesson(val title: String, val sections: List<LessonSection>)
+
+data class LessonSection(
+    val heading: String,
+    val content: String,
+    val formula: String? = null,   // rendered in a FormulaTile
+    val keyPoint: String? = null   // rendered as a "KEY INSIGHT" callout
 )
 
-data class Quiz(
-    val questions: List<Question>
-)
+data class Quiz(val title: String, val questions: List<Question>)
 
-data class Question(
-    val text: String,
-    val options: List<String>,   // Answer choices
-    val correctAnswer: String    // For validation
-)
-```
+sealed class Question {
+    abstract val id: String
+    abstract val questionText: String
+    abstract val explanation: String
+    abstract val points: Int        // default 1
 
-#### Example Usage
-```kotlin
-val topicsService: TopicsService = get()  // Via DI
-val allTopics = topicsService.getAllTopics()
-val topic = topicsService.getTopic("ohms_law")
+    data class MultipleChoice(
+        /* id, questionText, */ val options: List<String>, val correctIndex: Int,
+        /* explanation, points = 1 */
+    ) : Question()
 
-// Use in UI
-Column {
-    allTopics.forEach { topic ->
-        Text(topic.name)
-        Text(topic.description)
-    }
+    data class NumericInput(
+        /* id, questionText, */ val correctAnswer: Double,
+        val tolerance: Double = 0.01,   // absolute: |answer - correctAnswer| <= tolerance
+        val unit: String = "",          // shown next to the input, e.g. "Ω"
+        /* explanation, points = 1 */
+    ) : Question()
 }
 ```
+
+### `TopicsService` (`data/content/TopicsService.kt`)
+
+```kotlin
+object TopicsService {
+    val allTopics: List<Topic>   // all 42 topics, sorted by `order`
+}
+```
+
+Look a topic up with `TopicsService.allTopics.find { it.id == topicId }`.
+
+### `TopicCategories` (`data/content/TopicCategories.kt`)
+
+```kotlin
+data class TopicCategory(val name: String, val icon: String, val topicIds: List<String>)
+
+object TopicCategories {
+    val categories: List<TopicCategory>                 // 9 categories, in quest-map order
+    fun categoryFor(topicId: String): TopicCategory?
+}
+```
+
+The categories, top to bottom, define the **unlock order**. Each topic's `order` must equal its
+index in `categories.flatMap { it.topicIds }`; `HomeViewModelTest.unlockOrder_followsCategoryLayout`
+fails otherwise.
 
 ---
 
-## Navigation APIs
+## Progress rules — `QuizScoring` (`util/QuizScoring.kt`)
 
-### NavGraph Routes
-Type-safe navigation routes.
+All scoring and XP rules live here; nothing else hard-codes them.
 
-```kotlin
-// Home screen - no arguments
-val HOME = "home"
-
-// Lesson screen - requires topicId
-val LESSON = "lesson/{topicId}"
-
-// Quiz screen - requires topicId
-val QUIZ = "quiz/{topicId}"
-
-// Result screen - topicId, score, question count, and XP awarded
-val RESULT = "result/{topicId}/{score}/{total}/{xp}"
-```
-
-#### Navigation Example
-```kotlin
-val navController = rememberNavController()
-
-Button(onClick = {
-    navController.navigate("lesson/ohms_law")
-}) {
-    Text("Start Lesson")
-}
-
-// In NavHost
-composable("lesson/{topicId}") { backStackEntry ->
-    val topicId = backStackEntry.arguments?.getString("topicId") ?: ""
-    LessonScreen(topicId = topicId)
-}
-```
-
----
-
-## Utility Functions
-
-### QuizScoring
 ```kotlin
 object QuizScoring {
-    // Calculate score percentage
-    fun calculateScore(correctAnswers: Int, totalQuestions: Int): Int {
-        return if (totalQuestions > 0) {
-            (correctAnswers * 100) / totalQuestions
-        } else {
-            0
-        }
-    }
-    
-    // Calculate XP reward based on score
-    fun calculateXP(score: Int): Int {
-        return when {
-            score >= 90 -> 100
-            score >= 80 -> 75
-            score >= 70 -> 50
-            score >= 60 -> 25
-            else -> 10
-        }
-    }
+    const val PASS_PERCENT = 60        // minimum % to pass and unlock the next topic
+    const val XP_PER_POINT = 10
+    const val FIRST_PASS_BONUS = 100
+    const val LESSON_XP = 50
+
+    fun checkAnswer(question: Question, answer: Any?): Boolean
+    fun percentage(score: Int, totalQuestions: Int): Int            // 0 when totalQuestions == 0
+    fun isPassing(score: Int, totalQuestions: Int): Boolean
+    fun calculateXp(score: Int, previousBest: Int, isFirstPass: Boolean): Int
 }
 ```
 
-#### Example
+- `checkAnswer`: `MultipleChoice` expects an `Int` index; `NumericInput` accepts any `Number`
+  within `tolerance`. Anything else returns `false`.
+- `calculateXp` pays only for points **above the previous best**, plus `FIRST_PASS_BONUS` on the
+  first passing attempt. Retakes at or below the best score earn 0, so a topic's lifetime quiz XP is
+  `best × 10 (+100 once passed)`.
+
 ```kotlin
-val score = QuizScoring.calculateScore(8, 10)  // Returns 80
-val xp = QuizScoring.calculateXP(score)        // Returns 75
+QuizScoring.calculateXp(score = 7, previousBest = 0, isFirstPass = true)   // 170
+QuizScoring.calculateXp(score = 8, previousBest = 7, isFirstPass = false)  // 10
+QuizScoring.calculateXp(score = 7, previousBest = 7, isFirstPass = false)  // 0
 ```
 
 ---
 
-## Composable Components
+## Repository — `ProgressRepository` (`data/repository/ProgressRepository.kt`)
 
-### TopicCard
-Reusable component for displaying topic in list.
-
-```kotlin
-@Composable
-fun TopicCard(
-    topic: Topic,
-    progress: Progress?,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-)
-```
-
-**Parameters:**
-- `topic` - Topic to display
-- `progress` - User progress for topic (nullable)
-- `onClick` - Callback when tapped
-- `modifier` - Compose modifier (optional)
-
----
-
-### QuestionCard
-Display quiz question with answer options.
+The only class that writes progress. Hilt provides a singleton; inject it, don't construct it
+(tests construct it directly with DAOs from an in-memory database).
 
 ```kotlin
-@Composable
-fun QuestionCard(
-    question: Question,
-    selectedAnswer: String?,
-    onAnswerSelected: (String) -> Unit,
-    modifier: Modifier = Modifier
-)
-```
+class ProgressRepository(progressDao: ProgressDao, quizResultDao: QuizResultDao) {
+    fun getAllProgress(): Flow<List<TopicProgress>>
+    fun getProgress(topicId: String): Flow<TopicProgress?>
+    fun getTotalXp(): Flow<Int>
+    fun getQuizResults(topicId: String): Flow<List<QuizResult>>   // newest first
 
----
-
-### ProgressBar
-Display topic progress visualization.
-
-```kotlin
-@Composable
-fun ProgressBar(
-    progress: Progress,
-    modifier: Modifier = Modifier
-)
-```
-
-Shows:
-- Best score percentage
-- XP earned
-- Quiz attempts count
-
----
-
-## Dependency Injection
-
-### Using Hilt
-All dependencies are injected via Hilt. No manual factory needed.
-
-```kotlin
-@HiltViewModel
-class MyViewModel @Inject constructor(
-    private val repository: ProgressRepository,
-    private val topicsService: TopicsService
-) : ViewModel()
-```
-
-### Module Providers
-```kotlin
-@Module
-@InstallIn(SingletonComponent::class)
-object RepositoryModule {
-    @Provides
-    @Singleton
-    fun provideProgressRepository(
-        progressDao: ProgressDao,
-        quizResultDao: QuizResultDao
-    ): ProgressRepository = ProgressRepository(progressDao, quizResultDao)
+    suspend fun markLessonCompleted(topicId: String)               // +LESSON_XP the first time only
+    suspend fun recordQuizResult(topicId: String, score: Int, totalQuestions: Int): Int
+    suspend fun saveQuizResult(topicId: String, score: Int, totalQuestions: Int) // = recordQuizResult, ignoring the XP
 }
 ```
 
+`recordQuizResult` inserts a `QuizResult`, then updates the topic's `TopicProgress`:
+`bestScore = max(best, score)`; `quizCompleted` becomes `true` only on a passing attempt (and never
+reverts); XP is added per `QuizScoring.calculateXp`. It **returns the XP awarded**, which the quiz
+passes to the result screen.
+
+Writes are serialized with a `Mutex`, so concurrent updates to the same topic can't lose XP.
+
 ---
 
-## Database Access
+## Database
 
-### Room Database
+### `AppDatabase` (`data/db/AppDatabase.kt`)
+
 ```kotlin
-@Database(
-    entities = [TopicProgress::class, QuizResult::class],
-    version = 1,
-    exportSchema = true // JSON written to app/schemas/
-)
+@Database(entities = [TopicProgress::class, QuizResult::class], version = 1, exportSchema = true)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun progressDao(): ProgressDao
     abstract fun quizResultDao(): QuizResultDao
-
-    companion object {
-        const val DATABASE_NAME = "circuitqueest_db"
-    }
+    companion object { const val DATABASE_NAME = "circuitqueest_db" }
 }
 ```
 
-### Creating Instance
-Hilt provides the single instance (`data/di/RepositoryModule.kt`); inject `ProgressRepository`
-rather than building the database yourself:
+- **Never change `DATABASE_NAME`**: it would orphan every player's saved progress.
+- Schemas are exported to `app/schemas/`. To change an entity, bump `version`, add a `Migration`,
+  and test it with `MigrationTestHelper` (`room-testing` is already an `androidTest` dependency).
+
+### Entities (`data/db/entity/`)
+
 ```kotlin
-@Provides @Singleton
-fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
-    Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.DATABASE_NAME).build()
+@Entity(tableName = "topic_progress")
+data class TopicProgress(
+    @PrimaryKey val topicId: String,
+    val lessonCompleted: Boolean = false,
+    val quizCompleted: Boolean = false,   // true once any attempt passed — drives unlocking
+    val bestScore: Int = 0,
+    val totalQuestions: Int = 0,
+    val xpEarned: Int = 0,                // lesson + quiz XP for this topic
+    val lastAccessedTimestamp: Long = 0L
+)
+
+@Entity(tableName = "quiz_results")
+data class QuizResult(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val topicId: String,
+    val score: Int,
+    val totalQuestions: Int,
+    val timestamp: Long = System.currentTimeMillis()
+)
+```
+
+### DAOs (`data/db/dao/`)
+
+```kotlin
+@Dao interface ProgressDao {
+    fun getProgress(topicId: String): Flow<TopicProgress?>
+    suspend fun getProgressOnce(topicId: String): TopicProgress?
+    fun getAllProgress(): Flow<List<TopicProgress>>
+    @Insert(onConflict = REPLACE) suspend fun upsertProgress(progress: TopicProgress)
+    fun getTotalXp(): Flow<Int>                       // SUM(xpEarned), 0 when empty
+}
+
+@Dao interface QuizResultDao {
+    @Insert suspend fun insertResult(result: QuizResult)
+    fun getResultsForTopic(topicId: String): Flow<List<QuizResult>>   // ORDER BY timestamp DESC
+    fun getBestScore(topicId: String): Flow<Int?>                      // MAX(score)
+}
 ```
 
 ---
 
-## Error Handling
+## Dependency injection
 
-### Exception Types
+`CircuitQuestApplication` is annotated `@HiltAndroidApp`; `MainActivity` is `@AndroidEntryPoint`.
+`data/di/RepositoryModule.kt` (installed in `SingletonComponent`) provides:
+
 ```kotlin
-// Thrown when topic not found
-class TopicNotFoundException(topicId: String) : Exception()
-
-// Thrown when quiz validation fails
-class QuizValidationException(message: String) : Exception()
-
-// Generic app exception
-class CircuitQuestException(message: String) : Exception()
+@Provides @Singleton fun provideDatabase(@ApplicationContext context: Context): AppDatabase
+@Provides @Singleton fun provideProgressRepository(database: AppDatabase): ProgressRepository
 ```
 
-### Handling Errors
-```kotlin
-try {
-    val topic = topicsService.getTopic(topicId)
-} catch (e: TopicNotFoundException) {
-    showError("Topic not found")
-} catch (e: Exception) {
-    showError("An error occurred: ${e.message}")
-}
-```
+ViewModels are `@HiltViewModel` and obtained in composables with `hiltViewModel()`.
 
 ---
 
-## Best Practices
+## ViewModels (`viewmodel/`)
 
-1. **Use Hilt for DI** - Never instantiate services/repositories manually
-2. **Use StateFlow** - For observable state in ViewModels
-3. **Use Coroutines** - For async operations in viewModelScope
-4. **Use Type-Safe Navigation** - Leverage NavGraph route definitions
-5. **Handle Null Safety** - Always check nullable Progress/Topic values
-6. **Test Your Code** - Write tests for repository and ViewModel changes
+All state is exposed as `StateFlow`; screens read it with `collectAsStateWithLifecycle()`.
+`LessonViewModel` and `QuizViewModel` read `topicId` from the navigation arguments via
+`SavedStateHandle`.
+
+### `HomeViewModel`
+
+```kotlin
+data class TopicState(val topic: Topic, val progress: TopicProgress?, val isLocked: Boolean)
+data class CategoryState(val category: TopicCategory, val topics: List<TopicState>)
+
+val topicStates: StateFlow<List<TopicState>>          // in unlock order
+val categorizedTopics: StateFlow<List<CategoryState>> // grouped for the quest map
+val totalXp: StateFlow<Int>
+```
+
+Lock rule: the first topic is always open; any other topic is locked unless the previous topic's
+quiz was passed, **or** the topic itself already has progress (so saves made under the pre-2.4
+unlock order are never re-locked).
+
+### `LessonViewModel`
+
+```kotlin
+val topic: StateFlow<Topic?>          // null for an unknown id → LessonScreen shows QuestNotFound
+val lessonCompleted: StateFlow<Boolean>
+fun markLessonComplete()
+```
+
+### `QuizViewModel`
+
+```kotlin
+data class QuizState(
+    val topicId: String = "", val quizTitle: String = "",
+    val currentIndex: Int = 0, val score: Int = 0, val totalQuestions: Int = 0,
+    val xpEarned: Int = 0             // set when the attempt is saved
+)
+data class QuizFeedback(val isCorrect: Boolean, val explanation: String)
+
+val quizState: StateFlow<QuizState>
+val currentQuestion: StateFlow<Question?>
+val feedback: StateFlow<QuizFeedback?>   // non-null after answering, until nextQuestion()
+val quizComplete: StateFlow<Boolean>     // true after the attempt is saved
+
+fun answerMultipleChoice(selectedIndex: Int)
+fun answerNumeric(value: Double?)        // null (unparseable input) counts as wrong
+fun nextQuestion()
+```
+
+- Answers are ignored once `feedback` is set; `nextQuestion()` is ignored until it is.
+- On the last question, `nextQuestion()` saves via `ProgressRepository.recordQuizResult` exactly
+  once (repeat taps are ignored), stores the awarded XP in `quizState.xpEarned`, then sets
+  `quizComplete`.
+- `totalQuestions == 0` (unknown topic) → `QuizScreen` shows `QuestNotFound`.
+
+---
+
+## Navigation (`navigation/NavGraph.kt`)
+
+```kotlin
+object Routes {
+    const val HOME = "home"
+    const val LESSON = "lesson/{topicId}"
+    const val QUIZ = "quiz/{topicId}"
+    const val RESULT = "result/{topicId}/{score}/{total}/{xp}"
+
+    fun lesson(topicId: String): String
+    fun quiz(topicId: String): String
+    fun result(topicId: String, score: Int, total: Int, xp: Int): String
+}
+
+@Composable fun CircuitQueestNavGraph(onToggleBlueprint: () -> Unit = {}, blueprintMode: Boolean = false)
+```
+
+Always build routes with the `Routes` helpers:
+
+```kotlin
+navController.navigate(Routes.lesson("ohms_law"))
+navController.navigate(Routes.result(topicId, score, total, xp)) { popUpTo(Routes.HOME) }
+```
+
+The graph is wrapped in `SharedTransitionLayout`. Destinations expose
+`LocalNavSharedTransitionScope` / `LocalNavAnimatedVisibilityScope` so `TopicCard` and the lesson
+hero can share the bounds key `"topic_card_$topicId"`.
+
+---
+
+## Screens (`ui/screens/`)
+
+| Screen | Signature | Notes |
+|---|---|---|
+| `HomeScreen` | `(viewModel: HomeViewModel, onTopicClick: (String) -> Unit, onToggleBlueprint: () -> Unit = {}, blueprintMode: Boolean = false)` | Collapsible categories (expanded set survives rotation), search via `Topic.matchesSearch(query)`: title, subtitle, section headings, formulas |
+| `LessonScreen` | `(viewModel: LessonViewModel, onBack: () -> Unit, onStartQuiz: (String) -> Unit)` | Sticky CTA fades in past the hero (or immediately if nothing scrolls); inset above the nav bar |
+| `QuizScreen` | `(viewModel: QuizViewModel, onBack: () -> Unit, onQuizComplete: (topicId: String, score: Int, total: Int, xpEarned: Int) -> Unit)` | Confirms before leaving once an answer exists (close button and system back) |
+| `ResultScreen` | `(topicId: String, score: Int, totalQuestions: Int, xpEarned: Int, onRetry: (String) -> Unit, onHome: () -> Unit, onNextLesson: ((String) -> Unit)? = null)` | Shows the XP passed in, never recomputes it; "Up next" only when passed |
+
+---
+
+## Components (`ui/components/`)
+
+| Composable | Signature |
+|---|---|
+| `TopicCard` | `(topicId, topicNumber: Int, title, subtitle, topicIcon, isLocked, isCurrent, lessonCompleted, quizCompleted, quizScore: Int?, totalQuestions: Int?, accentColor: Color, onClick, modifier)`. Locked cards shake instead of calling `onClick` and expose a "Locked" state description |
+| `CategoryHeader` | `(imageVector, name, completedCount, totalCount, categoryXp, accentColor, isExpanded, onClick, modifier)` |
+| `XpBar` | `(totalXp: Int, modifier)`. Level = `totalXp / 500 + 1` |
+| `StatusChip` | `(status: ChipStatus, label: String? = null, modifier)` with `ChipStatus { DONE, IN_PROGRESS, LOCKED }` |
+| `TopicGlyphBadge` | `(imageVector: ImageVector? = null, label: String = "", accentColor = CqBlue, size = 40.dp, modifier)` |
+| `FormulaTile` | `(formula: String, modifier)`. Gold-bracketed formula, used by lesson sections |
+| `MultipleChoiceQuestion` | `(questionText, options, questionNumber, correctIndex, isSubmitted, onAnswer: (Int) -> Unit, modifier)` |
+| `NumericInputQuestion` | `(questionText, unit, questionNumber, isSubmitted, onAnswer: (Double?) -> Unit, modifier)`. Parses with `parseNumericAnswer`, which accepts `,` as the decimal separator |
+| `QuestionCard` | `(questionNumber, questionText, modifier)` |
+| `AnswerFeedback` | `(isCorrect, explanation, onNext, modifier)` |
+| `QuestNotFound` | `(onBack: () -> Unit)` |
+| `XpProgressBar`, `QuizScoreDisplay`, `FormulaDisplay` | `(currentXp, label = "Total XP", modifier)`, `(score, total, modifier)`, `(formula, modifier)`. Legacy, not used by current screens (`FormulaDisplay` just wraps `FormulaTile`) |
+
+Modifiers (`ModifierExtensions.kt`): `Modifier.goldBrackets()` (public) and
+`Modifier.dashedBorder(width, color, cornerRadius)` (internal).
+
+### Theming (`ui/theme/`)
+
+`CircuitQueestTheme(blueprintMode: Boolean = false, content)` provides the Material color scheme and
+`LocalCqPalette`. Use `LocalCqPalette.current` (`bg`, `bg2`, `surface`, `surface2`, `border`,
+`borderStrong`, `track`) for structural colors and the `Cq*` constants (`CqBlue`, `CqGold`,
+`CqGreen`, `CqRed`, `CqText*`) for accents. Never hard-code colors; the PR template checks this.
+Fonts: `SpaceGrotesk`, `JetBrainsMono`, `MonoLabel` (`Type.kt`); spacing and radii: `Spacing.s4…s64`,
+`Radius.sm…xl`.
 
 ---
 
 ## Versioning
 
-This API documentation matches CircuitQuEEst v1.0.0
-
-For updates, check:
-- [CHANGELOG.md](../CHANGELOG.md)
-- GitHub releases
-
----
-
-**Related Documentation:**
-- [ARCHITECTURE.md](ARCHITECTURE.md) - System design details
-- [DEVELOPMENT.md](DEVELOPMENT.md) - Development setup
-- [TESTING.md](TESTING.md) - Testing guide
+This document tracks the code on `master`. When you change a public signature above, update it in
+the same PR.
