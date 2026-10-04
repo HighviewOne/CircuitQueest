@@ -88,7 +88,7 @@ fun StatusChip(
         }
 
         ChipStatus.LOCKED -> {
-            val text = label ?: "⌗ Complete previous quest"
+            val text = label ?: "⌗ Locked"
             Box(
                 modifier = modifier
                     .dashedBorder(1.dp, pal.border, cornerRadius)

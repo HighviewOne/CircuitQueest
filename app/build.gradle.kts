@@ -30,6 +30,15 @@ android {
                 "proguard-rules.pro"
             )
         }
+        // Release-identical R8 build, debug-signed, with its own applicationId so it
+        // installs beside the real app (and its progress) for on-device smoke tests.
+        create("staging") {
+            initWith(getByName("release"))
+            applicationIdSuffix = ".staging"
+            versionNameSuffix = "-staging"
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+        }
     }
 
     compileOptions {

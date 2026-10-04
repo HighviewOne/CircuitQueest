@@ -7,6 +7,8 @@
 - The result screen shows the XP actually awarded.
 
 ### Fixes
+- **Launch crash (affects v2.2 and v2.3):** the four bundled Space Grotesk `.ttf` files were saved HTML pages, so the app crashed on first draw. Replaced with the real OFL fonts (SemiBold generated from the official variable font); a unit test now rejects non-font files.
+- Lesson "Complete" / "Start quiz" button no longer sits under the 3-button navigation bar.
 - Selected option / typed number no longer carries over to the next question.
 - Tapping "Next" quickly on the last question no longer saves the attempt (and XP) twice.
 - Numeric answers accept a comma decimal separator.
@@ -16,7 +18,9 @@
 - Locked quest cards announce "Locked" to screen readers; quest numbers always use Western digits.
 
 ### Engineering
-- Release APK ~6.2 MB → ~2.2 MB (removed blanket R8 keep rules).
+- Release APK ~6.2 MB → ~2.0 MB (removed blanket R8 keep rules; real fonts are smaller than the HTML files were).
+- New `staging` build type: release-identical R8 build, debug-signed, installs as `com.circuitqueest.app.staging` ("CQ Staging") beside the real app for on-device smoke tests.
+- Font licenses (SIL OFL) and provenance in `third_party/fonts/`.
 - Room schema exported to `app/schemas/`; Hilt provides the database.
 - Instrumented test suite rebuilt so it compiles, and CI now compiles it.
 - Removed the dead `CircuitQueestApp` class and duplicate workflow; test deps aligned with the Compose BOM; detekt 1.23.8.

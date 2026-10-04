@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -402,6 +403,9 @@ private fun StickyCtaBar(
             .fillMaxWidth()
             .graphicsLayer { this.alpha = alpha }
             .background(bgColor)
+            // The app draws edge-to-edge and Scaffold doesn't inset its bottomBar, so keep
+            // the button above the system navigation bar (it sat under 3-button nav).
+            .navigationBarsPadding()
             .padding(horizontal = Spacing.s20, vertical = Spacing.s12)
     ) {
         Button(
