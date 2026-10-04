@@ -6,7 +6,7 @@ object PowerSystemsContent {
         title = "Power Systems",
         subtitle = "Generation, transmission, and distribution of electrical power",
         icon = "\uD83C\uDFED",
-        order = 24,
+        order = 23,
         lesson = Lesson(
             title = "Power Systems: Delivering Energy",
             sections = listOf(

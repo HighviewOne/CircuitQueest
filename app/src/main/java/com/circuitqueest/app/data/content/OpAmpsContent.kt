@@ -6,7 +6,7 @@ object OpAmpsContent {
         title = "Op-Amps",
         subtitle = "Operational amplifier circuits and gain",
         icon = "\uD83D\uDD3A",
-        order = 5,
+        order = 10,
         lesson = Lesson(
             title = "Op-Amps: The Ultimate Amplifier",
             sections = listOf(

@@ -6,7 +6,7 @@ object SignalIntegrityContent {
         title = "Signal Integrity & EMC",
         subtitle = "Crosstalk, noise, and electromagnetic compatibility",
         icon = "\uD83D\uDEE1\uFE0F",
-        order = 28,
+        order = 37,
         lesson = Lesson(
             title = "Signal Integrity & EMC: Keeping Signals Clean",
             sections = listOf(

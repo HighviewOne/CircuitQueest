@@ -20,8 +20,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.circuitqueest.app.ui.theme.CqGold
@@ -90,7 +88,7 @@ fun StatusChip(
         }
 
         ChipStatus.LOCKED -> {
-            val text = label ?: "⌗ Complete previous quest"
+            val text = label ?: "⌗ Locked"
             Box(
                 modifier = modifier
                     .dashedBorder(1.dp, pal.border, cornerRadius)

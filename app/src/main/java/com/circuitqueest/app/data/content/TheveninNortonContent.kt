@@ -6,7 +6,7 @@ object TheveninNortonContent {
         title = "Th\u00E9venin & Norton",
         subtitle = "Simplify any circuit to its equivalent",
         icon = "\uD83D\uDD04",
-        order = 6,
+        order = 5,
         lesson = Lesson(
             title = "Th\u00E9venin & Norton: Circuit Simplification",
             sections = listOf(

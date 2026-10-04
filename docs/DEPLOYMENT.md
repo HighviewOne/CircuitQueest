@@ -4,8 +4,9 @@
 
 Before releasing to production:
 
-- [ ] All tests passing: `./gradlew test connectedAndroidTest`
-- [ ] Code quality checks passing: `./gradlew detekt ktlint`
+- [ ] All tests passing: `./gradlew test` (plus `connectedAndroidTest` on an emulator or spare device — it uninstalls the app afterwards)
+- [ ] Code quality checks passing: `./gradlew detekt`
+- [ ] Smoke-tested the shrunk build on a device: `./gradlew assembleStaging`, then `adb install -r app/build/outputs/apk/staging/app-staging.apk`. It installs as "CQ Staging" beside the real app, so the real app's progress is untouched. Launch it and play one lesson + quiz.
 - [ ] Version updated in build.gradle.kts
 - [ ] CHANGELOG updated with new features
 - [ ] Release notes prepared
@@ -183,8 +184,8 @@ If issues detected post-release:
 ## CI/CD Integration
 
 ### GitHub Actions Workflows
-- **build.yml** - Runs on every push/PR
-- **code-quality.yml** - Code quality checks
+- **build.yml** - Push/PR to `master`: unit tests, debug APK, compiles instrumented tests
+- **quality.yml** - Push/PR to `master`: detekt
 
 ### Manual Release Steps
 ```bash

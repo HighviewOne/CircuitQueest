@@ -6,7 +6,7 @@ object TransformersContent {
         title = "Transformers",
         subtitle = "Voltage transformation and power transfer",
         icon = "\u2694\uFE0F",
-        order = 12,
+        order = 21,
         lesson = Lesson(
             title = "Transformers: Changing Voltage Levels",
             sections = listOf(

@@ -6,7 +6,7 @@ object PcbDesignContent {
         title = "PCB Design",
         subtitle = "From schematic to physical circuit board",
         icon = "\uD83D\uDCCB",
-        order = 22,
+        order = 34,
         lesson = Lesson(
             title = "PCB Design: Building Real Circuits",
             sections = listOf(

@@ -6,7 +6,7 @@ object AnalogCircuitsContent {
         title = "Analog Circuit Design",
         subtitle = "Current mirrors, diff pairs, and references",
         icon = "\u2747\uFE0F",
-        order = 31,
+        order = 12,
         lesson = Lesson(
             title = "Analog Circuit Design: Precision in the Continuous Domain",
             sections = listOf(

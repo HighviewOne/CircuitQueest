@@ -6,7 +6,7 @@ object ElectricVehiclesContent {
         title = "Electric Vehicles",
         subtitle = "EV powertrains, inverters, and charging systems",
         icon = "\uD83D\uDE97",
-        order = 36,
+        order = 25,
         lesson = Lesson(
             title = "Electric Vehicles: Driving the Future",
             sections = listOf(

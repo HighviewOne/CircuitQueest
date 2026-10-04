@@ -6,7 +6,7 @@ object SignalsSystemsContent {
         title = "Signals & Systems",
         subtitle = "Frequency domain, Fourier, and Laplace transforms",
         icon = "\uD83D\uDCC8",
-        order = 13,
+        order = 18,
         lesson = Lesson(
             title = "Signals & Systems: Beyond the Time Domain",
             sections = listOf(

@@ -6,7 +6,7 @@ object EmbeddedSystemsContent {
         title = "Embedded Systems",
         subtitle = "Microcontrollers, peripherals, and communication",
         icon = "\uD83D\uDCDF",
-        order = 23,
+        order = 35,
         lesson = Lesson(
             title = "Embedded Systems: Computers Inside Everything",
             sections = listOf(

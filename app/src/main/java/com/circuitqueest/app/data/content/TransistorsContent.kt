@@ -6,7 +6,7 @@ object TransistorsContent {
         title = "Transistors (BJTs)",
         subtitle = "Amplification and switching with bipolar junction transistors",
         icon = "\uD83D\uDD00",
-        order = 8,
+        order = 7,
         lesson = Lesson(
             title = "Transistors: The Building Blocks of Electronics",
             sections = listOf(

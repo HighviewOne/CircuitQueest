@@ -6,7 +6,7 @@ object VlsiDesignContent {
         title = "VLSI Design",
         subtitle = "Integrated circuit fabrication and design",
         icon = "\uD83D\uDD2C",
-        order = 27,
+        order = 16,
         lesson = Lesson(
             title = "VLSI Design: Building Chips",
             sections = listOf(

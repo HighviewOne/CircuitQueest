@@ -6,7 +6,7 @@ object ControlSystemsContent {
         title = "Control Systems",
         subtitle = "Feedback, stability, and PID controllers",
         icon = "\uD83C\uDFAF",
-        order = 15,
+        order = 19,
         lesson = Lesson(
             title = "Control Systems: Mastering Feedback",
             sections = listOf(

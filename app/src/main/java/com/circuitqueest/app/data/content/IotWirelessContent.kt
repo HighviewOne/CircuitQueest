@@ -6,7 +6,7 @@ object IotWirelessContent {
         title = "IoT & Wireless",
         subtitle = "Wireless protocols, mesh networks, and low-power design",
         icon = "\uD83C\uDF10",
-        order = 33,
+        order = 38,
         lesson = Lesson(
             title = "IoT & Wireless: Connecting Everything",
             sections = listOf(

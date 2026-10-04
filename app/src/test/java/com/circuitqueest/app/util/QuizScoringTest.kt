@@ -65,62 +65,39 @@ class QuizScoringTest {
     }
 
     @Test
-    fun calculateXp_baseScoreOnly_correctCalculation() {
-        // score * 10 = 5 * 10 = 50
-        assertEquals(50, QuizScoring.calculateXp(score = 5, totalQuestions = 10, isFirstCompletion = false))
+    fun calculateXp_firstAttempt_paysEveryPoint() {
+        assertEquals(50, QuizScoring.calculateXp(score = 5, previousBest = 0, isFirstPass = false))
     }
 
     @Test
-    fun calculateXp_zeroScore_returnsZero() {
-        assertEquals(0, QuizScoring.calculateXp(score = 0, totalQuestions = 10, isFirstCompletion = false))
+    fun calculateXp_firstPass_addsOneTimeBonus() {
+        assertEquals(170, QuizScoring.calculateXp(score = 7, previousBest = 0, isFirstPass = true))
     }
 
     @Test
-    fun calculateXp_perfectScore_withFirstCompletionBonus_correctCalculation() {
-        // (10*10) + 100 (first) + 50 (perfect) = 250
-        assertEquals(250, QuizScoring.calculateXp(score = 10, totalQuestions = 10, isFirstCompletion = true))
+    fun calculateXp_retakeAtOrBelowBest_paysNothing() {
+        assertEquals(0, QuizScoring.calculateXp(score = 8, previousBest = 8, isFirstPass = false))
+        assertEquals(0, QuizScoring.calculateXp(score = 4, previousBest = 8, isFirstPass = false))
     }
 
     @Test
-    fun calculateXp_perfectScore_withoutFirstCompletionBonus_correctCalculation() {
-        // (10*10) + 50 (perfect) = 150
-        assertEquals(150, QuizScoring.calculateXp(score = 10, totalQuestions = 10, isFirstCompletion = false))
+    fun calculateXp_improvement_paysOnlyTheGain() {
+        assertEquals(20, QuizScoring.calculateXp(score = 8, previousBest = 6, isFirstPass = false))
     }
 
     @Test
-    fun calculateXp_imperfectScore_withFirstCompletionBonus_correctCalculation() {
-        // (7*10) + 100 (first) = 170
-        assertEquals(170, QuizScoring.calculateXp(score = 7, totalQuestions = 10, isFirstCompletion = true))
+    fun calculateXp_failThenPass_totalsBestPlusBonus() {
+        val first = QuizScoring.calculateXp(score = 3, previousBest = 0, isFirstPass = false)
+        val second = QuizScoring.calculateXp(score = 7, previousBest = 3, isFirstPass = true)
+        assertEquals(7 * 10 + 100, first + second)
     }
 
     @Test
-    fun calculateXp_multipleScores_allCalculationsCorrect() {
-        assertEquals(30, QuizScoring.calculateXp(3, 10, false))
-        assertEquals(130, QuizScoring.calculateXp(3, 10, true))
-        assertEquals(60, QuizScoring.calculateXp(6, 10, false))
-        assertEquals(160, QuizScoring.calculateXp(6, 10, true))
+    fun isPassing_atAndAroundThreshold() {
+        assertTrue(QuizScoring.isPassing(score = 6, totalQuestions = 10))
+        assertFalse(QuizScoring.isPassing(score = 5, totalQuestions = 10))
+        assertTrue(QuizScoring.isPassing(score = 3, totalQuestions = 5))
+        assertFalse(QuizScoring.isPassing(score = 0, totalQuestions = 0))
     }
 
-    @Test
-    fun calculateXp_partialScore_noBonus_exactCalculation() {
-        assertEquals(80, QuizScoring.calculateXp(score = 8, totalQuestions = 10, isFirstCompletion = false))
-    }
-
-    @Test
-    fun calculateXp_partialScore_firstCompletion_exactCalculation() {
-        // (8*10) + 100 (first) = 180
-        assertEquals(180, QuizScoring.calculateXp(score = 8, totalQuestions = 10, isFirstCompletion = true))
-    }
-
-    @Test
-    fun calculateXp_singleQuestion_perfectScore_correctCalculation() {
-        // (1*10) + 100 (first) + 50 (perfect) = 160
-        assertEquals(160, QuizScoring.calculateXp(score = 1, totalQuestions = 1, isFirstCompletion = true))
-    }
-
-    @Test
-    fun calculateXp_largeQuizSet_correctCalculation() {
-        // (95*10) + 100 (first) = 1050, no perfect bonus (95 != 100)
-        assertEquals(1050, QuizScoring.calculateXp(score = 95, totalQuestions = 100, isFirstCompletion = true))
-    }
 }

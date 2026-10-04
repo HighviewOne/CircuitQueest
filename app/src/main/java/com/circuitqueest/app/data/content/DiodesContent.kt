@@ -6,7 +6,7 @@ object DiodesContent {
         title = "Diodes & Rectifiers",
         subtitle = "One-way gates for current flow",
         icon = "\u25B6\uFE0F",
-        order = 7,
+        order = 6,
         lesson = Lesson(
             title = "Diodes & Rectifiers: The One-Way Street",
             sections = listOf(

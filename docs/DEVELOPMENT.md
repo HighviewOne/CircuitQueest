@@ -119,8 +119,6 @@ CircuitQueest/
 ### Code Quality
 ```bash
 ./gradlew detekt             # Run Detekt analysis
-./gradlew ktlint             # Check code formatting
-./gradlew ktlintFormat       # Auto-format code
 ```
 
 ### Build & Verify
@@ -146,7 +144,7 @@ git checkout -b feature/new-feature
 ./gradlew test
 
 # Check code quality
-./gradlew ktlint detekt
+./gradlew detekt
 
 # Build APK
 ./gradlew assembleDebug
@@ -177,7 +175,7 @@ git push origin feature/new-feature
 - Follow official [Kotlin style guide](https://kotlinlang.org/docs/coding-conventions.html)
 - 120 character line limit
 - 4-space indentation
-- Use ktlint for auto-formatting
+- Formatting: follow the official Kotlin style (`kotlin.code.style=official`); detekt flags issues
 
 ### Naming Conventions
 ```kotlin
@@ -345,7 +343,7 @@ Fixes #42
 ### Before Pushing
 ```bash
 # Verify code quality
-./gradlew detekt ktlint
+./gradlew detekt
 
 # Run tests
 ./gradlew test

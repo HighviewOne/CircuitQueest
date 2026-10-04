@@ -6,7 +6,7 @@ object DspContent {
         title = "Digital Signal Processing",
         subtitle = "Sampling, FFT, and digital filters",
         icon = "\uD83D\uDCC8",
-        order = 34,
+        order = 20,
         lesson = Lesson(
             title = "Digital Signal Processing: Crunching Signals with Math",
             sections = listOf(

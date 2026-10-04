@@ -6,7 +6,7 @@ object BatteryStorageContent {
         title = "Battery & Energy Storage",
         subtitle = "Chemistry, charging, and battery management",
         icon = "\uD83D\uDD0B",
-        order = 29,
+        order = 26,
         lesson = Lesson(
             title = "Battery & Energy Storage: Portable Power",
             sections = listOf(

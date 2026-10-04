@@ -175,7 +175,7 @@
 │  Components: TopicCard · CategoryHeader · XpProgressBar     │
 <span class="arch-layer">├─ ViewModel Layer ─────────────────────────────────────────┤</span>
 │  HomeViewModel · LessonViewModel · QuizViewModel            │
-│  StateFlow&lt;T&gt; → collectAsState() → recompose UI             │
+│  StateFlow&lt;T&gt; → collectAsStateWithLifecycle() → recompose UI             │
 <span class="arch-layer">├─ Repository Layer ────────────────────────────────────────┤</span>
 │  ProgressRepository (single source of truth)                │
 │  Room DAOs: TopicProgressDao · QuizResultDao                │
@@ -197,7 +197,7 @@
         <tr><td><code>home</code></td><td>HomeScreen — category list + search</td></tr>
         <tr><td><code>lesson/{topicId}</code></td><td>LessonScreen — scrollable lesson sections</td></tr>
         <tr><td><code>quiz/{topicId}</code></td><td>QuizScreen — 7-question quiz</td></tr>
-        <tr><td><code>result/{topicId}/{score}/{total}</code></td><td>ResultScreen — score + XP summary</td></tr>
+        <tr><td><code>result/{topicId}/{score}/{total}/{xp}</code></td><td>ResultScreen — score + XP actually awarded</td></tr>
       </tbody>
     </table>
 
@@ -233,11 +233,11 @@ sealed class Question {
     <p>XP is awarded as follows:</p>
     <ul>
       <li><strong>+50 XP</strong> — completing a lesson (first time)</li>
-      <li><strong>+score × 10 XP</strong> — for each quiz attempt</li>
-      <li><strong>+100 XP bonus</strong> — for the first quiz completion on a topic</li>
+      <li><strong>+10 XP per point above your best score</strong> — for each quiz attempt (retakes at or below your best earn nothing)</li>
+      <li><strong>+100 XP bonus</strong> — the first time you pass a topic's quiz</li>
     </ul>
     <p>
-      Sequential unlock: completing a topic's quiz sets <code>TopicProgress.quizCompleted = true</code>, which unlocks the next topic in global <code>order</code> sequence. This logic lives in <code>HomeViewModel</code> and is unaffected by category groupings.
+      A quiz passes at <strong>60%</strong>. Only a passing attempt sets <code>TopicProgress.quizCompleted = true</code>, which unlocks the next topic. Unlock order follows the categories on the quest map, top to bottom; each topic's <code>order</code> equals its position in that sequence. Any topic you've already started stays unlocked. The rules live in <code>QuizScoring</code>; the lock logic is in <code>HomeViewModel</code>.
     </p>
 
     <!-- Build -->
@@ -273,7 +273,7 @@ ANDROID_HOME=/path/to/android-sdk \
 
     <!-- Topics -->
     <h2 id="topics">All 42 Topics</h2>
-    <p>Topics are organized into 9 categories on the HomeScreen. Global unlock order follows the numeric sequence below.</p>
+    <p>Topics are organized into 9 categories on the HomeScreen. Topics unlock in the numeric sequence below, which follows the categories top to bottom.</p>
 
     <!-- Circuit Fundamentals -->
     <div class="cat-section">
@@ -291,7 +291,7 @@ ANDROID_HOME=/path/to/android-sdk \
             <tr><td>3</td><td><strong>Kirchhoff's Laws</strong></td><td>KCL, KVL, node and loop analysis</td></tr>
             <tr><td>4</td><td><strong>Capacitors &amp; Inductors</strong></td><td>C=Q/V, V=LdI/dt, RC/RL time constants</td></tr>
             <tr><td>5</td><td><strong>AC Circuits</strong></td><td>RMS values, reactance, impedance, RLC resonance</td></tr>
-            <tr><td>7</td><td><strong>Thevenin &amp; Norton</strong></td><td>Equivalent circuits, source transformation, max power</td></tr>
+            <tr><td>6</td><td><strong>Thevenin &amp; Norton</strong></td><td>Equivalent circuits, source transformation, max power</td></tr>
           </tbody>
         </table>
       </div>
@@ -308,10 +308,10 @@ ANDROID_HOME=/path/to/android-sdk \
         <table>
           <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
           <tbody>
-            <tr><td>8</td><td><strong>Diodes &amp; Rectifiers</strong></td><td>PN junctions, Zener, half/full-wave, LEDs</td></tr>
-            <tr><td>9</td><td><strong>Transistors (BJTs)</strong></td><td>NPN/PNP, beta, operating regions, switching</td></tr>
-            <tr><td>11</td><td><strong>MOSFETs</strong></td><td>NMOS/PMOS, threshold voltage, triode/saturation, CMOS</td></tr>
-            <tr><td>20</td><td><strong>Semiconductor Physics</strong></td><td>Band theory, doping, drift/diffusion, carrier transport</td></tr>
+            <tr><td>7</td><td><strong>Diodes &amp; Rectifiers</strong></td><td>PN junctions, Zener, half/full-wave, LEDs</td></tr>
+            <tr><td>8</td><td><strong>Transistors (BJTs)</strong></td><td>NPN/PNP, beta, operating regions, switching</td></tr>
+            <tr><td>9</td><td><strong>MOSFETs</strong></td><td>NMOS/PMOS, threshold voltage, triode/saturation, CMOS</td></tr>
+            <tr><td>10</td><td><strong>Semiconductor Physics</strong></td><td>Band theory, doping, drift/diffusion, carrier transport</td></tr>
           </tbody>
         </table>
       </div>
@@ -328,10 +328,10 @@ ANDROID_HOME=/path/to/android-sdk \
         <table>
           <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
           <tbody>
-            <tr><td>6</td><td><strong>Op-Amps</strong></td><td>Inverting/non-inverting gain, voltage follower, summing amp</td></tr>
+            <tr><td>11</td><td><strong>Op-Amps</strong></td><td>Inverting/non-inverting gain, voltage follower, summing amp</td></tr>
             <tr><td>12</td><td><strong>Filters</strong></td><td>Low/high/band-pass, cutoff frequency, roll-off, active filters</td></tr>
-            <tr><td>32</td><td><strong>Analog Circuit Design</strong></td><td>Current mirrors, diff pairs, feedback, bandgap, cascode</td></tr>
-            <tr><td>38</td><td><strong>Audio Electronics</strong></td><td>Amplifier classes, DACs, speakers, headphone amp design</td></tr>
+            <tr><td>13</td><td><strong>Analog Circuit Design</strong></td><td>Current mirrors, diff pairs, feedback, bandgap, cascode</td></tr>
+            <tr><td>14</td><td><strong>Audio Electronics</strong></td><td>Amplifier classes, DACs, speakers, headphone amp design</td></tr>
           </tbody>
         </table>
       </div>
@@ -348,10 +348,10 @@ ANDROID_HOME=/path/to/android-sdk \
         <table>
           <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
           <tbody>
-            <tr><td>10</td><td><strong>Digital Logic Gates</strong></td><td>AND/OR/NOT/NAND/NOR/XOR, Boolean algebra, Karnaugh maps</td></tr>
-            <tr><td>21</td><td><strong>Digital Systems</strong></td><td>Flip-flops, counters, finite state machines, memory</td></tr>
-            <tr><td>28</td><td><strong>VLSI Design</strong></td><td>CMOS fabrication, RTL-to-GDSII, DRC/LVS, timing, power</td></tr>
-            <tr><td>42</td><td><strong>Machine Learning Hardware</strong></td><td>GPUs, TPUs, quantization, inference engines, edge AI</td></tr>
+            <tr><td>15</td><td><strong>Digital Logic Gates</strong></td><td>AND/OR/NOT/NAND/NOR/XOR, Boolean algebra, Karnaugh maps</td></tr>
+            <tr><td>16</td><td><strong>Digital Systems</strong></td><td>Flip-flops, counters, finite state machines, memory</td></tr>
+            <tr><td>17</td><td><strong>VLSI Design</strong></td><td>CMOS fabrication, RTL-to-GDSII, DRC/LVS, timing, power</td></tr>
+            <tr><td>18</td><td><strong>Machine Learning Hardware</strong></td><td>GPUs, TPUs, quantization, inference engines, edge AI</td></tr>
           </tbody>
         </table>
       </div>
@@ -368,9 +368,9 @@ ANDROID_HOME=/path/to/android-sdk \
         <table>
           <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
           <tbody>
-            <tr><td>14</td><td><strong>Signals &amp; Systems</strong></td><td>Fourier/Laplace transforms, transfer functions, Bode plots</td></tr>
-            <tr><td>16</td><td><strong>Control Systems</strong></td><td>Feedback loops, PID controllers, stability, gain/phase margins</td></tr>
-            <tr><td>35</td><td><strong>Digital Signal Processing</strong></td><td>Sampling theorem, FFT, FIR/IIR filters, quantization noise</td></tr>
+            <tr><td>19</td><td><strong>Signals &amp; Systems</strong></td><td>Fourier/Laplace transforms, transfer functions, Bode plots</td></tr>
+            <tr><td>20</td><td><strong>Control Systems</strong></td><td>Feedback loops, PID controllers, stability, gain/phase margins</td></tr>
+            <tr><td>21</td><td><strong>Digital Signal Processing</strong></td><td>Sampling theorem, FFT, FIR/IIR filters, quantization noise</td></tr>
           </tbody>
         </table>
       </div>
@@ -387,12 +387,12 @@ ANDROID_HOME=/path/to/android-sdk \
         <table>
           <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
           <tbody>
-            <tr><td>13</td><td><strong>Transformers</strong></td><td>Turns ratio, impedance matching, efficiency, losses</td></tr>
-            <tr><td>15</td><td><strong>Power Electronics</strong></td><td>Linear regulators, LDOs, buck/boost converters, PWM</td></tr>
-            <tr><td>25</td><td><strong>Power Systems</strong></td><td>Three-phase power, transmission, power factor, protection</td></tr>
-            <tr><td>33</td><td><strong>Renewable Energy</strong></td><td>Solar cells, MPPT, wind turbines, grid-tie inverters</td></tr>
-            <tr><td>37</td><td><strong>Electric Vehicles</strong></td><td>Powertrains, inverters, regenerative braking, charging</td></tr>
-            <tr><td>30</td><td><strong>Battery &amp; Energy Storage</strong></td><td>Li-ion chemistry, C-rate, CC-CV charging, BMS, supercaps</td></tr>
+            <tr><td>22</td><td><strong>Transformers</strong></td><td>Turns ratio, impedance matching, efficiency, losses</td></tr>
+            <tr><td>23</td><td><strong>Power Electronics</strong></td><td>Linear regulators, LDOs, buck/boost converters, PWM</td></tr>
+            <tr><td>24</td><td><strong>Power Systems</strong></td><td>Three-phase power, transmission, power factor, protection</td></tr>
+            <tr><td>25</td><td><strong>Renewable Energy</strong></td><td>Solar cells, MPPT, wind turbines, grid-tie inverters</td></tr>
+            <tr><td>26</td><td><strong>Electric Vehicles</strong></td><td>Powertrains, inverters, regenerative braking, charging</td></tr>
+            <tr><td>27</td><td><strong>Battery &amp; Energy Storage</strong></td><td>Li-ion chemistry, C-rate, CC-CV charging, BMS, supercaps</td></tr>
           </tbody>
         </table>
       </div>
@@ -409,13 +409,13 @@ ANDROID_HOME=/path/to/android-sdk \
         <table>
           <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
           <tbody>
-            <tr><td>19</td><td><strong>Electromagnetics</strong></td><td>E/B fields, Faraday's law, Maxwell's equations, EM waves</td></tr>
-            <tr><td>17</td><td><strong>Transmission Lines</strong></td><td>Characteristic impedance, reflections, VSWR, Smith chart</td></tr>
-            <tr><td>18</td><td><strong>Communication Systems</strong></td><td>AM/FM modulation, SNR, Nyquist theorem, QAM</td></tr>
-            <tr><td>27</td><td><strong>Antenna Design</strong></td><td>Radiation patterns, gain, dipole/patch/dish, link budgets</td></tr>
-            <tr><td>31</td><td><strong>RF Circuit Design</strong></td><td>S-parameters, LNA design, oscillators, mixers, matching</td></tr>
-            <tr><td>36</td><td><strong>Fiber Optics &amp; Photonics</strong></td><td>Optical fiber, lasers, photodetectors, WDM systems</td></tr>
-            <tr><td>40</td><td><strong>Radar Systems</strong></td><td>Pulse radar, Doppler effect, phased arrays, automotive radar</td></tr>
+            <tr><td>28</td><td><strong>Electromagnetics</strong></td><td>E/B fields, Faraday's law, Maxwell's equations, EM waves</td></tr>
+            <tr><td>29</td><td><strong>Transmission Lines</strong></td><td>Characteristic impedance, reflections, VSWR, Smith chart</td></tr>
+            <tr><td>30</td><td><strong>Communication Systems</strong></td><td>AM/FM modulation, SNR, Nyquist theorem, QAM</td></tr>
+            <tr><td>31</td><td><strong>Antenna Design</strong></td><td>Radiation patterns, gain, dipole/patch/dish, link budgets</td></tr>
+            <tr><td>32</td><td><strong>RF Circuit Design</strong></td><td>S-parameters, LNA design, oscillators, mixers, matching</td></tr>
+            <tr><td>33</td><td><strong>Fiber Optics &amp; Photonics</strong></td><td>Optical fiber, lasers, photodetectors, WDM systems</td></tr>
+            <tr><td>34</td><td><strong>Radar Systems</strong></td><td>Pulse radar, Doppler effect, phased arrays, automotive radar</td></tr>
           </tbody>
         </table>
       </div>
@@ -432,11 +432,11 @@ ANDROID_HOME=/path/to/android-sdk \
         <table>
           <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
           <tbody>
-            <tr><td>23</td><td><strong>PCB Design</strong></td><td>Layer stackup, trace routing, decoupling, ground planes, Gerbers</td></tr>
-            <tr><td>24</td><td><strong>Embedded Systems</strong></td><td>MCU peripherals, GPIO, ADC/DAC, UART/SPI/I2C protocols</td></tr>
-            <tr><td>26</td><td><strong>Sensors &amp; Measurement</strong></td><td>Temperature sensors, Wheatstone bridge, instrumentation amps</td></tr>
-            <tr><td>29</td><td><strong>Signal Integrity &amp; EMC</strong></td><td>Crosstalk, ground bounce, EMI shielding, differential signaling</td></tr>
-            <tr><td>34</td><td><strong>IoT &amp; Wireless</strong></td><td>Wi-Fi/BLE/LoRa/Zigbee, mesh networking, low-power design</td></tr>
+            <tr><td>35</td><td><strong>PCB Design</strong></td><td>Layer stackup, trace routing, decoupling, ground planes, Gerbers</td></tr>
+            <tr><td>36</td><td><strong>Embedded Systems</strong></td><td>MCU peripherals, GPIO, ADC/DAC, UART/SPI/I2C protocols</td></tr>
+            <tr><td>37</td><td><strong>Sensors &amp; Measurement</strong></td><td>Temperature sensors, Wheatstone bridge, instrumentation amps</td></tr>
+            <tr><td>38</td><td><strong>Signal Integrity &amp; EMC</strong></td><td>Crosstalk, ground bounce, EMI shielding, differential signaling</td></tr>
+            <tr><td>39</td><td><strong>IoT &amp; Wireless</strong></td><td>Wi-Fi/BLE/LoRa/Zigbee, mesh networking, low-power design</td></tr>
           </tbody>
         </table>
       </div>
@@ -453,9 +453,9 @@ ANDROID_HOME=/path/to/android-sdk \
         <table>
           <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
           <tbody>
-            <tr><td>22</td><td><strong>Electric Machines</strong></td><td>DC/AC/stepper motors, torque-speed curves, drives</td></tr>
-            <tr><td>39</td><td><strong>MEMS</strong></td><td>Accelerometers, gyroscopes, pressure sensors, microfabrication</td></tr>
-            <tr><td>41</td><td><strong>Biomedical Electronics</strong></td><td>ECG/EEG signal acquisition, pacemakers, patient safety</td></tr>
+            <tr><td>40</td><td><strong>Electric Machines</strong></td><td>DC/AC/stepper motors, torque-speed curves, drives</td></tr>
+            <tr><td>41</td><td><strong>MEMS</strong></td><td>Accelerometers, gyroscopes, pressure sensors, microfabrication</td></tr>
+            <tr><td>42</td><td><strong>Biomedical Electronics</strong></td><td>ECG/EEG signal acquisition, pacemakers, patient safety</td></tr>
           </tbody>
         </table>
       </div>

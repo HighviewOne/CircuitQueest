@@ -1,5 +1,7 @@
 package com.circuitqueest.app.viewmodel
 
+import com.circuitqueest.app.data.content.TopicsService
+import com.circuitqueest.app.data.content.TopicCategories
 import com.circuitqueest.app.data.db.entity.TopicProgress
 import com.circuitqueest.app.data.repository.ProgressRepository
 import kotlinx.coroutines.Dispatchers
@@ -83,6 +85,28 @@ class HomeViewModelTest {
         viewModel = HomeViewModel(repository)
 
         assertTrue(viewModel.topicStates.value.getOrNull(1)?.isLocked == true)
+    }
+
+    @Test
+    fun topicStates_startedTopicStaysUnlockedEvenIfPreviousNotPassed() = runTest {
+        // Progress made under an older unlock order must not be re-locked.
+        val third = TopicsService.allTopics[2]
+        whenever(repository.getAllProgress()).thenReturn(
+            flowOf(listOf(TopicProgress(topicId = third.id, lessonCompleted = true)))
+        )
+        whenever(repository.getTotalXp()).thenReturn(flowOf(50))
+        viewModel = HomeViewModel(repository)
+
+        val job = launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.topicStates.collect {} }
+        assertTrue(viewModel.topicStates.value[1].isLocked)
+        assertFalse(viewModel.topicStates.value[2].isLocked)
+        job.cancel()
+    }
+
+    @Test
+    fun unlockOrder_followsCategoryLayout() {
+        val pathFromCategories = TopicCategories.categories.flatMap { it.topicIds }
+        assertEquals(pathFromCategories, TopicsService.allTopics.map { it.id })
     }
 
     @Test

@@ -30,8 +30,8 @@ CircuitQueest is an offline-first Android app that teaches electrical engineerin
 ## Features
 
 - **42 EE topics** spanning fundamentals through advanced — Ohm's Law, Kirchhoff, MOSFETs, VLSI, RF, ML Hardware, and more
-- **Quest progression** — complete a topic's quiz to unlock the next; no internet required
-- **XP system** — +50 XP per lesson, score-based quiz XP, +100 first-completion bonus
+- **Quest progression** — pass a topic's quiz (60%+) to unlock the next, in the order shown on the quest map; no internet required
+- **XP system** — +50 XP per lesson, 10 XP per point above your best quiz score, +100 bonus on your first pass
 - **Dual question types** — multiple choice and numeric input with tolerance-aware grading
 - **Blueprint mode** — toggleable alternate palette (deep navy + white-28% borders)
 - **Shared-element transitions** — topic cards morph into the lesson hero
@@ -140,7 +140,8 @@ Content is stored as Kotlin singleton objects in `data/content/` — no JSON, no
 
 1. Create `app/src/main/java/com/circuitqueest/app/data/content/YourTopicContent.kt` — a singleton `object` with a `Topic`, 6+ `LessonSection`s, and a 7-question `Quiz`.
 2. Add it to `TopicsService.allTopics`.
-3. Done — sequential unlock and XP handling are automatic.
+3. Add its id to a category in `TopicCategories`. The categories, top to bottom, define the unlock order, and each topic's `order` must equal its position in that list (a unit test checks this).
+4. Done — unlock and XP handling are automatic.
 
 See any existing `*Content.kt` file for the exact shape.
 

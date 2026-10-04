@@ -95,7 +95,7 @@ class ProgressDaoInstrumentedTest {
 ### All Tests
 ```bash
 ./gradlew test                      # Unit tests only
-./gradlew connectedAndroidTest      # Instrumented tests (requires device/emulator)
+./gradlew connectedAndroidTest      # Instrumented tests (requires device/emulator; uninstalls the app afterwards — use an emulator, not a phone with real progress)
 ./gradlew test connectedAndroidTest # Both (recommended for CI/CD)
 ```
 
@@ -247,8 +247,8 @@ fun scoring_eightOutOfTen_returns80Percent() {
 @Test
 fun repository_getProgress_callsDao() {
     // Arrange
-    val mockDao = mockk<ProgressDao>()
-    val repository = ProgressRepository(mockDao, mockk())
+    val mockDao: ProgressDao = mock()
+    val repository = ProgressRepository(mockDao, mock())
     
     // Act
     repository.getProgress("topic1")
@@ -339,8 +339,8 @@ Tests run automatically on:
 - Rebuild and try again
 
 **"Mocking issue: Cannot mock final class"**
-- Use mockk instead of Mockito
-- Or use interface-based mocking
+- mockito-kotlin 5 uses the inline mock maker, which mocks final classes
+- Make sure the test uses `org.mockito.kotlin.mock`, not a hand-rolled Mockito setup
 
 **"Database locked"**
 - Ensure @After tearDown closes database

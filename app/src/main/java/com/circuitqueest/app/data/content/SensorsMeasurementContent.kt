@@ -6,7 +6,7 @@ object SensorsMeasurementContent {
         title = "Sensors & Measurement",
         subtitle = "Transducers, signal conditioning, and instrumentation",
         icon = "\uD83C\uDF21\uFE0F",
-        order = 25,
+        order = 36,
         lesson = Lesson(
             title = "Sensors & Measurement: Reading the Physical World",
             sections = listOf(

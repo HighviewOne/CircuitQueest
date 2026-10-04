@@ -59,6 +59,7 @@ import com.circuitqueest.app.ui.theme.MonoLabel
 import com.circuitqueest.app.ui.theme.Radius
 import com.circuitqueest.app.ui.theme.SpaceGrotesk
 import com.circuitqueest.app.ui.theme.Spacing
+import com.circuitqueest.app.util.QuizScoring
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -68,14 +69,14 @@ fun ResultScreen(
     topicId: String,
     score: Int,
     totalQuestions: Int,
+    xpEarned: Int,
     onRetry: (String) -> Unit,
     onHome: () -> Unit,
     onNextLesson: ((String) -> Unit)? = null
 ) {
     val pal = LocalCqPalette.current
-    val percentage = if (totalQuestions > 0) (score * 100) / totalQuestions else 0
-    val passed = percentage >= 60
-    val xpEarned = score * 10 + if (passed) 100 else 0
+    val percentage = QuizScoring.percentage(score, totalQuestions)
+    val passed = QuizScoring.isPassing(score, totalQuestions)
 
     val topic = remember(topicId) { TopicsService.allTopics.find { it.id == topicId } }
     val topicTitle = topic?.title ?: "Quest"

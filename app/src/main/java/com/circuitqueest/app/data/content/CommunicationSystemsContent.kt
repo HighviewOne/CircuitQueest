@@ -6,7 +6,7 @@ object CommunicationSystemsContent {
         title = "Communication Systems",
         subtitle = "Modulation, bandwidth, and digital communications",
         icon = "\uD83D\uDCF6",
-        order = 17,
+        order = 29,
         lesson = Lesson(
             title = "Communication Systems: Sending Signals",
             sections = listOf(

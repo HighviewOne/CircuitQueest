@@ -6,7 +6,7 @@ object RadarSystemsContent {
         title = "Radar Systems",
         subtitle = "Pulse radar, Doppler, and phased arrays",
         icon = "\uD83D\uDCE1",
-        order = 39,
+        order = 33,
         lesson = Lesson(
             title = "Radar Systems: Seeing with Radio Waves",
             sections = listOf(

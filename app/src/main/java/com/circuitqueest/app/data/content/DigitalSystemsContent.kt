@@ -6,7 +6,7 @@ object DigitalSystemsContent {
         title = "Digital Systems",
         subtitle = "Flip-flops, counters, and state machines",
         icon = "\uD83D\uDD22",
-        order = 20,
+        order = 15,
         lesson = Lesson(
             title = "Digital Systems: Sequential Logic",
             sections = listOf(

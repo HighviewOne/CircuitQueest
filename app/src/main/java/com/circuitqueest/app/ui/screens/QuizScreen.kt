@@ -1,5 +1,6 @@
 package com.circuitqueest.app.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -24,23 +25,26 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +56,7 @@ import com.circuitqueest.app.data.content.Question
 import com.circuitqueest.app.ui.components.AnswerFeedback
 import com.circuitqueest.app.ui.components.MultipleChoiceQuestion
 import com.circuitqueest.app.ui.components.NumericInputQuestion
+import com.circuitqueest.app.ui.components.QuestNotFound
 import com.circuitqueest.app.ui.theme.CqGold
 import com.circuitqueest.app.ui.theme.CqText
 import com.circuitqueest.app.ui.theme.CqTextDim
@@ -66,17 +71,56 @@ import com.circuitqueest.app.viewmodel.QuizViewModel
 fun QuizScreen(
     viewModel: QuizViewModel,
     onBack: () -> Unit,
-    onQuizComplete: (String, Int, Int) -> Unit
+    onQuizComplete: (topicId: String, score: Int, total: Int, xpEarned: Int) -> Unit
 ) {
     val pal = LocalCqPalette.current
-    val quizState by viewModel.quizState.collectAsState()
-    val currentQuestion by viewModel.currentQuestion.collectAsState()
-    val feedback by viewModel.feedback.collectAsState()
-    val quizComplete by viewModel.quizComplete.collectAsState()
+    val quizState by viewModel.quizState.collectAsStateWithLifecycle()
+    val currentQuestion by viewModel.currentQuestion.collectAsStateWithLifecycle()
+    val feedback by viewModel.feedback.collectAsStateWithLifecycle()
+    val quizComplete by viewModel.quizComplete.collectAsStateWithLifecycle()
+
+    if (quizState.totalQuestions == 0) {
+        QuestNotFound(onBack = onBack)
+        return
+    }
+
+    // Leaving mid-quiz discards the attempt, so confirm first once anything is answered.
+    val attemptInProgress = (quizState.currentIndex > 0 || feedback != null) && !quizComplete
+    var showLeaveDialog by rememberSaveable { mutableStateOf(false) }
+    val requestLeave: () -> Unit = {
+        if (attemptInProgress) {
+            showLeaveDialog = true
+        } else {
+            onBack()
+        }
+    }
+    BackHandler(enabled = attemptInProgress) { showLeaveDialog = true }
+
+    if (showLeaveDialog) {
+        AlertDialog(
+            onDismissRequest = { showLeaveDialog = false },
+            title = { Text("Leave this quiz?") },
+            text = { Text("Your answers so far won't be saved.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showLeaveDialog = false
+                    onBack()
+                }) { Text("Leave") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLeaveDialog = false }) { Text("Keep going") }
+            }
+        )
+    }
 
     LaunchedEffect(quizComplete) {
         if (quizComplete) {
-            onQuizComplete(quizState.topicId, quizState.score, quizState.totalQuestions)
+            onQuizComplete(
+                quizState.topicId,
+                quizState.score,
+                quizState.totalQuestions,
+                quizState.xpEarned
+            )
         }
     }
 
@@ -91,7 +135,7 @@ fun QuizScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = requestLeave) {
                         Icon(Icons.Default.Close, contentDescription = "Close", tint = CqText)
                     }
                 },
@@ -124,22 +168,26 @@ fun QuizScreen(
                 )
 
                 currentQuestion?.let { question ->
-                    when (question) {
-                        is Question.MultipleChoice -> MultipleChoiceQuestion(
-                            questionText = question.questionText,
-                            options = question.options,
-                            questionNumber = quizState.currentIndex + 1,
-                            correctIndex = question.correctIndex,
-                            isSubmitted = feedback != null,
-                            onAnswer = { viewModel.answerMultipleChoice(it) }
-                        )
-                        is Question.NumericInput -> NumericInputQuestion(
-                            questionText = question.questionText,
-                            unit = question.unit,
-                            questionNumber = quizState.currentIndex + 1,
-                            isSubmitted = feedback != null,
-                            onAnswer = { viewModel.answerNumeric(it) }
-                        )
+                    // Keyed so the selected option / typed value doesn't carry over
+                    // into the next question when both use the same composable.
+                    key(question.id) {
+                        when (question) {
+                            is Question.MultipleChoice -> MultipleChoiceQuestion(
+                                questionText = question.questionText,
+                                options = question.options,
+                                questionNumber = quizState.currentIndex + 1,
+                                correctIndex = question.correctIndex,
+                                isSubmitted = feedback != null,
+                                onAnswer = { viewModel.answerMultipleChoice(it) }
+                            )
+                            is Question.NumericInput -> NumericInputQuestion(
+                                questionText = question.questionText,
+                                unit = question.unit,
+                                questionNumber = quizState.currentIndex + 1,
+                                isSubmitted = feedback != null,
+                                onAnswer = { viewModel.answerNumeric(it) }
+                            )
+                        }
                     }
                 }
 

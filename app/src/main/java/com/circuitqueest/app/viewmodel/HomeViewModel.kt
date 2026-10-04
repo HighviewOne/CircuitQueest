@@ -35,10 +35,17 @@ class HomeViewModel @Inject constructor(
             val progressMap = progressList.associateBy { it.topicId }
             TopicsService.allTopics.mapIndexed { index, topic ->
                 val progress = progressMap[topic.id]
-                val isLocked = if (index == 0) false else {
-                    val prevTopic = TopicsService.allTopics[index - 1]
-                    val prevProgress = progressMap[prevTopic.id]
-                    prevProgress?.quizCompleted != true
+                // A topic unlocks once the previous one's quiz is passed. Anything the
+                // player has already started stays open, so progress made under an
+                // older unlock order never gets re-locked.
+                val alreadyStarted = progress?.lessonCompleted == true ||
+                    progress?.quizCompleted == true
+                val isLocked = when {
+                    index == 0 || alreadyStarted -> false
+                    else -> {
+                        val prevTopic = TopicsService.allTopics[index - 1]
+                        progressMap[prevTopic.id]?.quizCompleted != true
+                    }
                 }
                 TopicState(
                     topic = topic,

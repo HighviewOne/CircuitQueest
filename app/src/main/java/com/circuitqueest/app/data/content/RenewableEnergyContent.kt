@@ -6,7 +6,7 @@ object RenewableEnergyContent {
         title = "Renewable Energy",
         subtitle = "Solar cells, wind turbines, and energy harvesting",
         icon = "\u2600\uFE0F",
-        order = 32,
+        order = 24,
         lesson = Lesson(
             title = "Renewable Energy: Powering the Future",
             sections = listOf(
