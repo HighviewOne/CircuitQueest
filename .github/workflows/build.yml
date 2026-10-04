@@ -37,7 +37,7 @@ jobs:
       - name: Build debug APK
         run: ./gradlew assembleDebug
 
-      # No emulator in CI, but compiling keeps the instrumented suite from rotting.
+      # Fast compile check; the `instrumented` job below runs them on an emulator.
       - name: Compile instrumented tests
         run: ./gradlew assembleDebugAndroidTest
 

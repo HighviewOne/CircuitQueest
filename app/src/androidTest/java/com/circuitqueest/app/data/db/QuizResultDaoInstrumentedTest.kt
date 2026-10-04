@@ -37,7 +37,7 @@ class QuizResultDaoInstrumentedTest {
     }
 
     @Test
-    fun insertResult_success() = runBlocking {
+    fun insertResult_success(): Unit = runBlocking {
         val result = QuizResult(
             topicId = "ohms-law",
             score = 9,
@@ -53,21 +53,20 @@ class QuizResultDaoInstrumentedTest {
     }
 
     @Test
-    fun multipleInserts_allRetrieved() = runBlocking {
+    fun multipleInserts_allRetrieved(): Unit = runBlocking {
         quizResultDao.insertResult(QuizResult(topicId = "topic1", score = 8, totalQuestions = 10))
         quizResultDao.insertResult(QuizResult(topicId = "topic1", score = 9, totalQuestions = 10))
         quizResultDao.insertResult(QuizResult(topicId = "topic1", score = 7, totalQuestions = 10))
 
         val results = quizResultDao.getResultsForTopic("topic1").first()
 
+        // Inserts in the same millisecond share a timestamp, so order is unspecified.
         assertEquals(3, results.size)
-        assertEquals(8, results[0].score)
-        assertEquals(9, results[1].score)
-        assertEquals(7, results[2].score)
+        assertEquals(listOf(7, 8, 9), results.map { it.score }.sorted())
     }
 
     @Test
-    fun getResultsForTopic_orderedByTimestampDesc() = runBlocking {
+    fun getResultsForTopic_orderedByTimestampDesc(): Unit = runBlocking {
         val timestamp1 = System.currentTimeMillis()
         quizResultDao.insertResult(QuizResult(topicId = "topic1", score = 8, totalQuestions = 10, timestamp = timestamp1))
         
@@ -87,7 +86,7 @@ class QuizResultDaoInstrumentedTest {
     }
 
     @Test
-    fun getBestScore_returnsMax() = runBlocking {
+    fun getBestScore_returnsMax(): Unit = runBlocking {
         quizResultDao.insertResult(QuizResult(topicId = "topic1", score = 6, totalQuestions = 10))
         quizResultDao.insertResult(QuizResult(topicId = "topic1", score = 9, totalQuestions = 10))
         quizResultDao.insertResult(QuizResult(topicId = "topic1", score = 8, totalQuestions = 10))
@@ -98,14 +97,14 @@ class QuizResultDaoInstrumentedTest {
     }
 
     @Test
-    fun getBestScore_noResults_returnsNull() = runBlocking {
+    fun getBestScore_noResults_returnsNull(): Unit = runBlocking {
         val best = quizResultDao.getBestScore("non-existent").first()
 
         assertNull(best)
     }
 
     @Test
-    fun getResultsForTopic_differentTopics_isolated() = runBlocking {
+    fun getResultsForTopic_differentTopics_isolated(): Unit = runBlocking {
         quizResultDao.insertResult(QuizResult(topicId = "topic1", score = 8, totalQuestions = 10))
         quizResultDao.insertResult(QuizResult(topicId = "topic1", score = 9, totalQuestions = 10))
         quizResultDao.insertResult(QuizResult(topicId = "topic2", score = 7, totalQuestions = 10))
@@ -121,7 +120,7 @@ class QuizResultDaoInstrumentedTest {
     }
 
     @Test
-    fun autoIncrement_id_generated() = runBlocking {
+    fun autoIncrement_id_generated(): Unit = runBlocking {
         val result1 = QuizResult(topicId = "topic1", score = 8, totalQuestions = 10)
         val result2 = QuizResult(topicId = "topic1", score = 9, totalQuestions = 10)
 
@@ -137,14 +136,14 @@ class QuizResultDaoInstrumentedTest {
     }
 
     @Test
-    fun getResults_emptyTopic_returnsEmpty() = runBlocking {
+    fun getResults_emptyTopic_returnsEmpty(): Unit = runBlocking {
         val results = quizResultDao.getResultsForTopic("empty-topic").first()
 
         assertEquals(0, results.size)
     }
 
     @Test
-    fun insertResult_preservesData_integrity() = runBlocking {
+    fun insertResult_preservesData_integrity(): Unit = runBlocking {
         val result = QuizResult(
             topicId = "test-topic",
             score = 95,

@@ -37,7 +37,7 @@ class ProgressDaoInstrumentedTest {
     }
 
     @Test
-    fun insertAndRetrieve_success() = runBlocking {
+    fun insertAndRetrieve_success(): Unit = runBlocking {
         val progress = TopicProgress(
             topicId = "ohms-law",
             lessonCompleted = true,
@@ -55,7 +55,7 @@ class ProgressDaoInstrumentedTest {
     }
 
     @Test
-    fun upsert_updates_existingProgress() = runBlocking {
+    fun upsert_updates_existingProgress(): Unit = runBlocking {
         val initial = TopicProgress(
             topicId = "series-parallel",
             lessonCompleted = false,
@@ -81,7 +81,7 @@ class ProgressDaoInstrumentedTest {
     }
 
     @Test
-    fun getAllProgress_returnsAll() = runBlocking {
+    fun getAllProgress_returnsAll(): Unit = runBlocking {
         progressDao.upsertProgress(TopicProgress("topic1", lessonCompleted = true))
         progressDao.upsertProgress(TopicProgress("topic2", lessonCompleted = false))
         progressDao.upsertProgress(TopicProgress("topic3", lessonCompleted = true))
@@ -95,7 +95,7 @@ class ProgressDaoInstrumentedTest {
     }
 
     @Test
-    fun getTotalXp_aggregatesCorrectly() = runBlocking {
+    fun getTotalXp_aggregatesCorrectly(): Unit = runBlocking {
         progressDao.upsertProgress(TopicProgress("topic1", xpEarned = 100))
         progressDao.upsertProgress(TopicProgress("topic2", xpEarned = 150))
         progressDao.upsertProgress(TopicProgress("topic3", xpEarned = 250))
@@ -106,14 +106,14 @@ class ProgressDaoInstrumentedTest {
     }
 
     @Test
-    fun getTotalXp_emptyDatabase_returnsZero() = runBlocking {
+    fun getTotalXp_emptyDatabase_returnsZero(): Unit = runBlocking {
         val total = progressDao.getTotalXp().first()
 
         assertEquals(0, total)
     }
 
     @Test
-    fun flowReactivity_updatesOnChange() = runBlocking {
+    fun flowReactivity_updatesOnChange(): Unit = runBlocking {
         val topicId = "kirchhoffs"
         
         progressDao.upsertProgress(TopicProgress(topicId, xpEarned = 100))
@@ -127,7 +127,7 @@ class ProgressDaoInstrumentedTest {
     }
 
     @Test
-    fun multipleUpdates_bestScoreTracking() = runBlocking {
+    fun multipleUpdates_bestScoreTracking(): Unit = runBlocking {
         val topicId = "capacitors"
         
         progressDao.upsertProgress(TopicProgress(topicId, bestScore = 6, xpEarned = 100))
@@ -141,7 +141,7 @@ class ProgressDaoInstrumentedTest {
     }
 
     @Test
-    fun nonExistent_returnsNull() = runBlocking {
+    fun nonExistent_returnsNull(): Unit = runBlocking {
         val result = progressDao.getProgressOnce("non-existent-topic")
 
         assertNull(result)
