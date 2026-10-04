@@ -5,7 +5,7 @@
 **Master Electrical Engineering through gamified quests**
 
 [![Build](https://github.com/HighviewOne/CircuitQueest/actions/workflows/build.yml/badge.svg)](https://github.com/HighviewOne/CircuitQueest/actions/workflows/build.yml)
-[![Version](https://img.shields.io/badge/version-2.3-2480FF?labelColor=0A0E1A)](https://github.com/HighviewOne/CircuitQueest/releases)
+[![Version](https://img.shields.io/badge/version-2.4-2480FF?labelColor=0A0E1A)](https://github.com/HighviewOne/CircuitQueest/releases)
 [![Android](https://img.shields.io/badge/Android-8.0%2B-34E090?logo=android&logoColor=white&labelColor=0A0E1A)](https://developer.android.com)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-7F52FF?logo=kotlin&logoColor=white&labelColor=0A0E1A)](https://kotlinlang.org)
 [![Compose](https://img.shields.io/badge/Jetpack_Compose-2024.12-4285F4?logo=android&logoColor=white&labelColor=0A0E1A)](https://developer.android.com/jetpack/compose)

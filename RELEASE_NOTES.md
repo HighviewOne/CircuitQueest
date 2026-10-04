@@ -1,4 +1,11 @@
-# Unreleased
+# CircuitQuEEst v2.4 — Fair Progression & Launch-Crash Fix
+
+**Release Date:** October 4, 2026
+**Status:** ✅ Production Ready
+**APK size:** ~2 MB (R8-shrunk release build)
+
+> **Upgrade from v2.2 / v2.3 recommended:** those builds bundled broken font files and crash on launch. v2.4 installs over them and keeps your progress.
+
 
 ### Gameplay
 - **Passing unlocks.** A quiz must score 60%+ to complete a topic and unlock the next. Failed attempts still record your best score.
