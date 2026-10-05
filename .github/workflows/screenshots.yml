@@ -1,0 +1,57 @@
+name: Store Screenshots
+
+# Regenerates Google Play screenshots on a 1080x1920 (16:9) emulator.
+# Runs on demand, or on PRs that touch the screenshot test or store assets.
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'app/src/androidTest/java/com/circuitqueest/app/screenshots/**'
+      - 'play-store/**'
+      - '.github/workflows/screenshots.yml'
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Capture screenshots on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: Nexus 5X
+          disable-animations: true
+          script: |
+            ./gradlew installDebug installDebugAndroidTest
+            adb shell am instrument -w -e package com.circuitqueest.app.screenshots com.circuitqueest.app.test/androidx.test.runner.AndroidJUnitRunner
+            mkdir -p screenshots
+            adb pull /sdcard/Android/data/com.circuitqueest.app/files/screenshots/. screenshots/
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: store-screenshots
+          path: screenshots/
+          retention-days: 14
