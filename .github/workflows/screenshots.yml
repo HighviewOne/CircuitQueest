@@ -8,6 +8,7 @@ on:
     branches: [ master ]
     paths:
       - 'app/src/androidTest/java/com/circuitqueest/app/screenshots/**'
+      - 'app/src/main/java/com/circuitqueest/app/ui/**'
       - 'play-store/**'
       - '.github/workflows/screenshots.yml'
 
