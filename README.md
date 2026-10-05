@@ -33,6 +33,7 @@ CircuitQueest is an offline-first Android app that teaches electrical engineerin
 - **Quest progression** — pass a topic's quiz (60%+) to unlock the next, in the order shown on the quest map; no internet required
 - **XP system** — +50 XP per lesson, 10 XP per point above your best quiz score, +100 bonus on your first pass
 - **Dual question types** — multiple choice and numeric input with tolerance-aware grading
+- **Review mode** — every missed question goes into a review queue (⟲ chip on the quest map, "Review mistakes" after a quiz); replay until you get them right
 - **Blueprint mode** — toggleable alternate palette (deep navy + white-28% borders)
 - **Shared-element transitions** — topic cards morph into the lesson hero
 - **Offline-first** — all content and progress in a local Room database; no account needed
@@ -100,12 +101,12 @@ CircuitQueest is an offline-first Android app that teaches electrical engineerin
 | Navigation | Navigation Compose with shared-element transitions |
 | Storage | Room 2.6.1 (offline-first, no backend) |
 | Fonts | Space Grotesk + JetBrains Mono (bundled, fully offline) |
-| Min SDK | 26 (Android 8.0) · Target SDK 35 |
-| Build | Gradle 8.11.1 · AGP 8.7.3 · KSP |
+| Min SDK | 26 (Android 8.0) · Target SDK 36 (Android 16) |
+| Build | Gradle 8.13 · AGP 8.13.2 · KSP |
 
 ## Quick Start
 
-**Prerequisites:** JDK 17, Android SDK (platform 35)
+**Prerequisites:** JDK 17, Android SDK (platform 36, build-tools 36)
 
 ```bash
 git clone https://github.com/HighviewOne/CircuitQueest.git
