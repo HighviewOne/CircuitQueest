@@ -72,6 +72,7 @@ fun ResultScreen(
     xpEarned: Int,
     onRetry: (String) -> Unit,
     onHome: () -> Unit,
+    onReviewMistakes: ((String) -> Unit)? = null,
     onNextLesson: ((String) -> Unit)? = null
 ) {
     val pal = LocalCqPalette.current
@@ -211,6 +212,26 @@ fun ResultScreen(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 15.sp
                 )
+            }
+            // Every question was just answered, so this attempt's misses are exactly the
+            // topic's review queue (each points 1).
+            val mistakes = (totalQuestions - score).coerceAtLeast(0)
+            if (mistakes > 0 && onReviewMistakes != null) {
+                Spacer(modifier = Modifier.height(Spacing.s8))
+                OutlinedButton(
+                    onClick = { onReviewMistakes(topicId) },
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    shape = RoundedCornerShape(Radius.md),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = CqGold),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, CqGold.copy(alpha = 0.6f))
+                ) {
+                    Text(
+                        text = if (mistakes == 1) "Review 1 mistake" else "Review $mistakes mistakes",
+                        fontFamily = SpaceGrotesk,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 14.sp
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(Spacing.s8))
             OutlinedButton(

@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace = "com.circuitqueest.app"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.circuitqueest.app"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 24
         versionName = "2.4"
 
@@ -52,6 +52,11 @@ android {
 
     buildFeatures {
         compose = true
+    }
+
+    // MigrationTestHelper reads the exported Room schemas as test assets.
+    sourceSets {
+        getByName("androidTest").assets.srcDir("$projectDir/schemas")
     }
 }
 

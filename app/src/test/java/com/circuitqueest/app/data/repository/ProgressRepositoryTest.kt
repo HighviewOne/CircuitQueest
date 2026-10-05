@@ -1,7 +1,9 @@
 package com.circuitqueest.app.data.repository
 
+import com.circuitqueest.app.data.db.dao.MissedQuestionDao
 import com.circuitqueest.app.data.db.dao.ProgressDao
 import com.circuitqueest.app.data.db.dao.QuizResultDao
+import com.circuitqueest.app.data.db.entity.MissedQuestion
 import com.circuitqueest.app.data.db.entity.TopicProgress
 import com.circuitqueest.app.data.db.entity.QuizResult
 import kotlinx.coroutines.flow.flowOf
@@ -16,13 +18,15 @@ class ProgressRepositoryTest {
 
     private lateinit var progressDao: ProgressDao
     private lateinit var quizResultDao: QuizResultDao
+    private lateinit var missedQuestionDao: MissedQuestionDao
     private lateinit var repository: ProgressRepository
 
     @Before
     fun setup() {
         progressDao = mock()
         quizResultDao = mock()
-        repository = ProgressRepository(progressDao, quizResultDao)
+        missedQuestionDao = mock()
+        repository = ProgressRepository(progressDao, quizResultDao, missedQuestionDao)
     }
 
     @Test
@@ -266,5 +270,33 @@ class ProgressRepositoryTest {
         assertEquals(true, captor.firstValue.quizCompleted)
         assertEquals(8, captor.firstValue.bestScore)
         assertEquals(0, xp)
+    }
+
+    @Test
+    fun recordAnswer_wrong_queuesQuestionForReview(): Unit = runBlocking {
+        repository.recordAnswer("ohms_law", "q3", correct = false)
+
+        val captor = argumentCaptor<MissedQuestion>()
+        verify(missedQuestionDao).upsert(captor.capture())
+        assertEquals("ohms_law", captor.firstValue.topicId)
+        assertEquals("q3", captor.firstValue.questionId)
+        verify(missedQuestionDao, never()).delete(any(), any())
+    }
+
+    @Test
+    fun recordAnswer_correct_clearsQuestion(): Unit = runBlocking {
+        repository.recordAnswer("ohms_law", "q3", correct = true)
+
+        verify(missedQuestionDao).delete("ohms_law", "q3")
+        verify(missedQuestionDao, never()).upsert(any())
+    }
+
+    @Test
+    fun getMissedQuestions_scopesToTopicOrAll(): Unit = runBlocking {
+        repository.getMissedQuestions("ohms_law")
+        repository.getMissedQuestions()
+
+        verify(missedQuestionDao).getForTopic("ohms_law")
+        verify(missedQuestionDao).getAll()
     }
 }

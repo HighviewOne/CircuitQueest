@@ -75,7 +75,7 @@ emulator -list-avds
 # Create new emulator
 # Android Studio → AVD Manager → Create Virtual Device
 # Or command line:
-sdkmanager "system-images;android-35;google_apis;x86_64"
+sdkmanager "system-images;android-36;google_apis;x86_64"
 ```
 
 #### "Test fails with timeout"
@@ -220,7 +220,7 @@ EXPLAIN QUERY PLAN SELECT * FROM Progress WHERE topicId = ?;
 sdkmanager --list
 
 # Create fresh AVD
-avdmanager create avd -n test_emulator -k "system-images;android-35;google_apis;x86_64"
+avdmanager create avd -n test_emulator -k "system-images;android-36;google_apis;x86_64"
 
 # Start with verbose logging
 emulator -avd test_emulator -verbose

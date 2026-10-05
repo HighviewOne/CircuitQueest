@@ -197,6 +197,7 @@
         <tr><td><code>home</code></td><td>HomeScreen — category list + search</td></tr>
         <tr><td><code>lesson/{topicId}</code></td><td>LessonScreen — scrollable lesson sections</td></tr>
         <tr><td><code>quiz/{topicId}</code></td><td>QuizScreen — 7-question quiz</td></tr>
+        <tr><td><code>review/{topicId}</code></td><td>QuizScreen in review mode — missed questions for one topic, or <code>all</code></td></tr>
         <tr><td><code>result/{topicId}/{score}/{total}/{xp}</code></td><td>ResultScreen — score + XP actually awarded</td></tr>
       </tbody>
     </table>
@@ -237,6 +238,7 @@ sealed class Question {
       <li><strong>+100 XP bonus</strong> — the first time you pass a topic's quiz</li>
     </ul>
     <p>
+      Wrong answers are queued for <strong>review mode</strong> (no XP; a correct answer clears them).
       A quiz passes at <strong>60%</strong>. Only a passing attempt sets <code>TopicProgress.quizCompleted = true</code>, which unlocks the next topic. Unlock order follows the categories on the quest map, top to bottom; each topic's <code>order</code> equals its position in that sequence. Any topic you've already started stays unlocked. The rules live in <code>QuizScoring</code>; the lock logic is in <code>HomeViewModel</code>.
     </p>
 
@@ -246,9 +248,9 @@ sealed class Question {
     <h3 id="requirements">Requirements</h3>
     <ul>
       <li>JDK 17 (Adoptium Temurin recommended)</li>
-      <li>Android SDK — platform 35, build-tools 35.0.0</li>
-      <li>Gradle Wrapper 8.11.1 (included in repo)</li>
-      <li>Android Gradle Plugin 8.7.3</li>
+      <li>Android SDK — platform 36, build-tools 36.0.0</li>
+      <li>Gradle Wrapper 8.13 (included in repo)</li>
+      <li>Android Gradle Plugin 8.13.2</li>
       <li>Kotlin 2.0.21</li>
     </ul>
 

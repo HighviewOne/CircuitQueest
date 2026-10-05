@@ -1,6 +1,6 @@
 # API Documentation
 
-Reference for the app's internal Kotlin APIs, as of v2.4. Everything lives under
+Reference for the app's internal Kotlin APIs, as of v2.5. Everything lives under
 `app/src/main/java/com/circuitqueest/app/`. The app is offline-only: there is no network API.
 
 ```
@@ -127,7 +127,7 @@ The only class that writes progress. Hilt provides a singleton; inject it, don't
 (tests construct it directly with DAOs from an in-memory database).
 
 ```kotlin
-class ProgressRepository(progressDao: ProgressDao, quizResultDao: QuizResultDao) {
+class ProgressRepository(progressDao: ProgressDao, quizResultDao: QuizResultDao, missedQuestionDao: MissedQuestionDao) {
     fun getAllProgress(): Flow<List<TopicProgress>>
     fun getProgress(topicId: String): Flow<TopicProgress?>
     fun getTotalXp(): Flow<Int>
@@ -136,6 +136,11 @@ class ProgressRepository(progressDao: ProgressDao, quizResultDao: QuizResultDao)
     suspend fun markLessonCompleted(topicId: String)               // +LESSON_XP the first time only
     suspend fun recordQuizResult(topicId: String, score: Int, totalQuestions: Int): Int
     suspend fun saveQuizResult(topicId: String, score: Int, totalQuestions: Int) // = recordQuizResult, ignoring the XP
+
+    // Review mode
+    suspend fun recordAnswer(topicId: String, questionId: String, correct: Boolean) // wrong → queue, right → clear
+    suspend fun getMissedQuestions(topicId: String? = null): List<MissedQuestion>  // null = all topics, oldest first
+    fun getMissedCount(): Flow<Int>
 }
 ```
 
@@ -153,17 +158,25 @@ Writes are serialized with a `Mutex`, so concurrent updates to the same topic ca
 ### `AppDatabase` (`data/db/AppDatabase.kt`)
 
 ```kotlin
-@Database(entities = [TopicProgress::class, QuizResult::class], version = 1, exportSchema = true)
+@Database(
+    entities = [TopicProgress::class, QuizResult::class, MissedQuestion::class],
+    version = 2,
+    exportSchema = true,
+    autoMigrations = [AutoMigration(from = 1, to = 2)]   // v2.5: adds missed_questions
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun progressDao(): ProgressDao
     abstract fun quizResultDao(): QuizResultDao
+    abstract fun missedQuestionDao(): MissedQuestionDao
     companion object { const val DATABASE_NAME = "circuitqueest_db" }
 }
 ```
 
 - **Never change `DATABASE_NAME`**: it would orphan every player's saved progress.
-- Schemas are exported to `app/schemas/`. To change an entity, bump `version`, add a `Migration`,
-  and test it with `MigrationTestHelper` (`room-testing` is already an `androidTest` dependency).
+- Schemas are exported to `app/schemas/` (also the androidTest assets). To change an entity, bump
+  `version`, add an `AutoMigration` (or a manual `Migration`), and add a case to `MigrationTest`, which
+  builds a database at the old version with real rows, migrates, and validates against the schema.
+  A missing or wrong migration crashes every existing install on launch.
 
 ### Entities (`data/db/entity/`)
 
@@ -187,6 +200,14 @@ data class QuizResult(
     val totalQuestions: Int,
     val timestamp: Long = System.currentTimeMillis()
 )
+
+// Review queue. Question ids are unique only within a topic, hence the composite key.
+@Entity(tableName = "missed_questions", primaryKeys = ["topicId", "questionId"])
+data class MissedQuestion(
+    val topicId: String,
+    val questionId: String,
+    val missedAt: Long = System.currentTimeMillis()
+)
 ```
 
 ### DAOs (`data/db/dao/`)
@@ -204,6 +225,14 @@ data class QuizResult(
     @Insert suspend fun insertResult(result: QuizResult)
     fun getResultsForTopic(topicId: String): Flow<List<QuizResult>>   // ORDER BY timestamp DESC
     fun getBestScore(topicId: String): Flow<Int?>                      // MAX(score)
+}
+
+@Dao interface MissedQuestionDao {
+    @Insert(onConflict = REPLACE) suspend fun upsert(missed: MissedQuestion)
+    suspend fun delete(topicId: String, questionId: String)
+    suspend fun getAll(): List<MissedQuestion>                         // ORDER BY missedAt
+    suspend fun getForTopic(topicId: String): List<MissedQuestion>
+    fun count(): Flow<Int>
 }
 ```
 
@@ -238,6 +267,7 @@ data class CategoryState(val category: TopicCategory, val topics: List<TopicStat
 val topicStates: StateFlow<List<TopicState>>          // in unlock order
 val categorizedTopics: StateFlow<List<CategoryState>> // grouped for the quest map
 val totalXp: StateFlow<Int>
+val missedCount: StateFlow<Int>                       // review queue size; drives the ⟲ chip
 ```
 
 Lock rule: the first topic is always open; any other topic is locked unless the previous topic's
@@ -258,7 +288,9 @@ fun markLessonComplete()
 data class QuizState(
     val topicId: String = "", val quizTitle: String = "",
     val currentIndex: Int = 0, val score: Int = 0, val totalQuestions: Int = 0,
-    val xpEarned: Int = 0             // set when the attempt is saved
+    val xpEarned: Int = 0,            // set when the attempt is saved
+    val isReview: Boolean = false,    // review mode: missed questions, no XP, no attempt record
+    val isLoading: Boolean = false    // review questions loading from the database
 )
 data class QuizFeedback(val isCorrect: Boolean, val explanation: String)
 
@@ -277,6 +309,12 @@ fun nextQuestion()
   once (repeat taps are ignored), stores the awarded XP in `quizState.xpEarned`, then sets
   `quizComplete`.
 - `totalQuestions == 0` (unknown topic) → `QuizScreen` shows `QuestNotFound`.
+- Every answer calls `ProgressRepository.recordAnswer` against the question's own topic, so wrong
+  answers queue for review and right ones clear the queue.
+- **Review mode** (`SavedStateHandle["review"] == true`, set by the review route): `topicId` is a topic
+  or `QuizViewModel.REVIEW_ALL` (`"all"`). Questions load from the review queue (entries whose
+  question no longer exists are skipped); finishing awards no XP and saves no `QuizResult`. An empty
+  queue shows "Nothing to review".
 
 ---
 
@@ -287,10 +325,12 @@ object Routes {
     const val HOME = "home"
     const val LESSON = "lesson/{topicId}"
     const val QUIZ = "quiz/{topicId}"
+    const val REVIEW = "review/{topicId}"   // nav arg review = true; topicId may be "all"
     const val RESULT = "result/{topicId}/{score}/{total}/{xp}"
 
     fun lesson(topicId: String): String
     fun quiz(topicId: String): String
+    fun review(topicId: String = QuizViewModel.REVIEW_ALL): String
     fun result(topicId: String, score: Int, total: Int, xp: Int): String
 }
 
@@ -314,10 +354,10 @@ hero can share the bounds key `"topic_card_$topicId"`.
 
 | Screen | Signature | Notes |
 |---|---|---|
-| `HomeScreen` | `(viewModel: HomeViewModel, onTopicClick: (String) -> Unit, onToggleBlueprint: () -> Unit = {}, blueprintMode: Boolean = false)` | Collapsible categories (expanded set survives rotation), search via `Topic.matchesSearch(query)`: title, subtitle, section headings, formulas |
+| `HomeScreen` | `(viewModel: HomeViewModel, onTopicClick: (String) -> Unit, onToggleBlueprint: () -> Unit = {}, blueprintMode: Boolean = false, onReview: () -> Unit = {})` | Collapsible categories (expanded set survives rotation), search via `Topic.matchesSearch(query)`: title, subtitle, section headings, formulas; gold "⟲ N" review chip when the queue isn't empty |
 | `LessonScreen` | `(viewModel: LessonViewModel, onBack: () -> Unit, onStartQuiz: (String) -> Unit)` | Sticky CTA fades in past the hero (or immediately if nothing scrolls); inset above the nav bar |
-| `QuizScreen` | `(viewModel: QuizViewModel, onBack: () -> Unit, onQuizComplete: (topicId: String, score: Int, total: Int, xpEarned: Int) -> Unit)` | Confirms before leaving once an answer exists (close button and system back) |
-| `ResultScreen` | `(topicId: String, score: Int, totalQuestions: Int, xpEarned: Int, onRetry: (String) -> Unit, onHome: () -> Unit, onNextLesson: ((String) -> Unit)? = null)` | Shows the XP passed in, never recomputes it; "Up next" only when passed |
+| `QuizScreen` | `(viewModel: QuizViewModel, onBack: () -> Unit, onQuizComplete: (topicId: String, score: Int, total: Int, xpEarned: Int) -> Unit)` | Confirms before leaving once an answer exists (close button and system back); in review mode: "Review ·" title, no leave dialog |
+| `ResultScreen` | `(topicId: String, score: Int, totalQuestions: Int, xpEarned: Int, onRetry: (String) -> Unit, onHome: () -> Unit, onReviewMistakes: ((String) -> Unit)? = null, onNextLesson: ((String) -> Unit)? = null)` | Shows the XP passed in, never recomputes it; "Up next" only when passed; "Review N mistakes" when any were missed |
 
 ---
 
@@ -335,7 +375,7 @@ hero can share the bounds key `"topic_card_$topicId"`.
 | `NumericInputQuestion` | `(questionText, unit, questionNumber, isSubmitted, onAnswer: (Double?) -> Unit, modifier)`. Parses with `parseNumericAnswer`, which accepts `,` as the decimal separator |
 | `QuestionCard` | `(questionNumber, questionText, modifier)` |
 | `AnswerFeedback` | `(isCorrect, explanation, onNext, modifier)` |
-| `QuestNotFound` | `(onBack: () -> Unit)` |
+| `QuestNotFound` | `(onBack: () -> Unit, title = "Quest not found", message = …)`. Also used for "Nothing to review" |
 | `XpProgressBar`, `QuizScoreDisplay`, `FormulaDisplay` | `(currentXp, label = "Total XP", modifier)`, `(score, total, modifier)`, `(formula, modifier)`. Legacy, not used by current screens (`FormulaDisplay` just wraps `FormulaTile`) |
 
 Modifiers (`ModifierExtensions.kt`): `Modifier.goldBrackets()` (public) and

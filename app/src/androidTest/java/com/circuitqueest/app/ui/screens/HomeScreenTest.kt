@@ -22,6 +22,7 @@ import com.circuitqueest.app.data.db.AppDatabase
 import com.circuitqueest.app.data.repository.ProgressRepository
 import com.circuitqueest.app.ui.theme.CircuitQueestTheme
 import com.circuitqueest.app.viewmodel.HomeViewModel
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -37,6 +38,7 @@ class HomeScreenTest {
 
     private lateinit var database: AppDatabase
     private lateinit var viewModel: HomeViewModel
+    private lateinit var repository: ProgressRepository
 
     private val ohmsLaw = TopicsService.allTopics.first { it.id == "ohms_law" }
     private val mosfets = TopicsService.allTopics.first { it.id == "mosfets" }
@@ -45,7 +47,10 @@ class HomeScreenTest {
     fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         database = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
-        viewModel = HomeViewModel(ProgressRepository(database.progressDao(), database.quizResultDao()))
+        repository = ProgressRepository(
+            database.progressDao(), database.quizResultDao(), database.missedQuestionDao()
+        )
+        viewModel = HomeViewModel(repository)
     }
 
     @After
@@ -54,7 +59,7 @@ class HomeScreenTest {
     }
 
     /** Mirrors MainActivity: blueprint state hoisted above the theme. */
-    private fun showHome(onTopicClick: (String) -> Unit = {}) {
+    private fun showHome(onTopicClick: (String) -> Unit = {}, onReview: () -> Unit = {}) {
         composeTestRule.setContent {
             var blueprint by remember { mutableStateOf(false) }
             CircuitQueestTheme(blueprintMode = blueprint) {
@@ -62,7 +67,8 @@ class HomeScreenTest {
                     viewModel = viewModel,
                     onTopicClick = onTopicClick,
                     onToggleBlueprint = { blueprint = !blueprint },
-                    blueprintMode = blueprint
+                    blueprintMode = blueprint,
+                    onReview = onReview
                 )
             }
         }
@@ -112,5 +118,29 @@ class HomeScreenTest {
         composeTestRule.onNodeWithText(ohmsLaw.title).performClick()
 
         composeTestRule.runOnIdle { assertEquals(listOf(ohmsLaw.id), clicked) }
+    }
+
+    @Test
+    fun reviewChip_hiddenWithNoMistakes() {
+        showHome()
+
+        composeTestRule.onNodeWithText("⟲", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun reviewChip_showsCountAndOpensReview() {
+        runBlocking {
+            repository.recordAnswer("ohms_law", "a", correct = false)
+            repository.recordAnswer("mosfets", "b", correct = false)
+        }
+        var opened = false
+        showHome(onReview = { opened = true })
+
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule.onAllNodesWithText("⟲ 2").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithText("⟲ 2").performClick()
+
+        composeTestRule.runOnIdle { assertTrue(opened) }
     }
 }

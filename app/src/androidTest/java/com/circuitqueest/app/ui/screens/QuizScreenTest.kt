@@ -20,6 +20,8 @@ import com.circuitqueest.app.data.content.TopicsService
 import com.circuitqueest.app.data.db.AppDatabase
 import com.circuitqueest.app.data.repository.ProgressRepository
 import com.circuitqueest.app.viewmodel.QuizViewModel
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -46,7 +48,9 @@ class QuizScreenTest {
     fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         database = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
-        repository = ProgressRepository(database.progressDao(), database.quizResultDao())
+        repository = ProgressRepository(
+            database.progressDao(), database.quizResultDao(), database.missedQuestionDao()
+        )
     }
 
     @After
@@ -101,5 +105,42 @@ class QuizScreenTest {
         composeTestRule.onNodeWithContentDescription("Close").performClick()
 
         composeTestRule.runOnIdle { kotlin.test.assertTrue(left) }
+    }
+
+    @Test
+    fun review_correctAnswer_clearsQuestionFromQueue() {
+        runBlocking { repository.recordAnswer(topic.id, firstQuestion.id, correct = false) }
+        var finished = false
+        val viewModel = QuizViewModel(
+            repository,
+            SavedStateHandle(mapOf("topicId" to QuizViewModel.REVIEW_ALL, "review" to true))
+        )
+        composeTestRule.setContent {
+            QuizScreen(viewModel = viewModel, onBack = {}, onQuizComplete = { _, _, _, _ -> finished = true })
+        }
+
+        composeTestRule.onNodeWithText("Review · Question 1 of 1").assertIsDisplayed()
+        composeTestRule.onAllNodesWithText(firstQuestion.options[firstQuestion.correctIndex]).onFirst()
+            .performClick()
+        composeTestRule.onNodeWithText("Submit Answer").performScrollTo().performClick()
+        composeTestRule.onNodeWithText("Next  →").performClick()
+
+        composeTestRule.runOnIdle { kotlin.test.assertTrue(finished) }
+        composeTestRule.waitUntil(5_000) {
+            runBlocking { repository.getMissedCount().first() } == 0
+        }
+    }
+
+    @Test
+    fun review_emptyQueue_saysNothingToReview() {
+        val viewModel = QuizViewModel(
+            repository,
+            SavedStateHandle(mapOf("topicId" to QuizViewModel.REVIEW_ALL, "review" to true))
+        )
+        composeTestRule.setContent {
+            QuizScreen(viewModel = viewModel, onBack = {}, onQuizComplete = { _, _, _, _ -> })
+        }
+
+        composeTestRule.onNodeWithText("Nothing to review").assertIsDisplayed()
     }
 }

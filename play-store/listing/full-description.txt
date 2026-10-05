@@ -1,0 +1,34 @@
+Learn electrical engineering one quest at a time.
+
+CircuitQuEEst turns EE fundamentals into a quest map. Read a short lesson, pass its quiz, and unlock the next topic — from Ohm's Law all the way to RF circuits, power electronics, and machine-learning hardware.
+
+⚡ 42 TOPICS IN 9 CATEGORIES
+• Circuit Fundamentals — Ohm's Law, series & parallel, Kirchhoff's laws, capacitors & inductors, AC circuits, Thévenin & Norton
+• Semiconductor Devices — diodes, BJTs, MOSFETs, semiconductor physics
+• Analog Design — op-amps, filters, analog and audio circuits
+• Digital Systems — logic gates, sequential logic, VLSI, ML hardware
+• Signals & Control — signals & systems, control systems, DSP
+• Power & Energy — transformers, power electronics, power systems, renewables, EVs, batteries
+• RF & Communications — electromagnetics, transmission lines, antennas, RF design, fiber optics, radar
+• Hardware & Embedded — PCB design, embedded systems, sensors, signal integrity, IoT
+• Specialized Applications — electric machines, MEMS, biomedical electronics
+
+📘 LESSONS THAT RESPECT YOUR TIME
+Each lesson is a handful of focused sections with the key formula highlighted and a "key insight" to remember.
+
+✅ QUIZZES THAT TEACH
+Multiple-choice and numeric questions with instant feedback and a worked explanation for every answer. Score 60% to pass and unlock the next quest.
+
+🔁 REVIEW MODE
+Every question you miss goes into your review queue. Replay just those questions until you get them right.
+
+🏆 XP AND LEVELS
+Earn XP for lessons, quiz points, and your first pass on each topic. Retakes only reward beating your best score, so your level reflects what you actually know.
+
+🔷 BLUEPRINT MODE
+Switch from the dark cockpit theme to a PCB-blueprint look with one tap.
+
+🔒 PRIVATE AND OFFLINE
+No account, no ads, no tracking. The app doesn't even request internet access — your progress stays on your device.
+
+Made for students, hobbyists, makers, and anyone brushing up for exams or interviews.
