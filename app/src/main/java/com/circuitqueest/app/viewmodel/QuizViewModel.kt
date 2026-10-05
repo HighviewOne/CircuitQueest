@@ -20,7 +20,11 @@ data class QuizState(
     val currentIndex: Int = 0,
     val score: Int = 0,
     val totalQuestions: Int = 0,
-    val xpEarned: Int = 0
+    val xpEarned: Int = 0,
+    /** Review mode: replays missed questions; awards no XP and records no attempt. */
+    val isReview: Boolean = false,
+    /** True while review questions load from the database. */
+    val isLoading: Boolean = false
 )
 
 data class QuizFeedback(
@@ -34,8 +38,12 @@ class QuizViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
+    /** A topic id, or [REVIEW_ALL] for a review across every topic. */
     private val topicId: String = checkNotNull(savedStateHandle["topicId"])
-    private val questions: List<Question>
+    private val isReview: Boolean = savedStateHandle.get<Boolean>("review") ?: false
+
+    /** Questions paired with the topic they belong to (ids are only unique per topic). */
+    private var questions: List<Pair<String, Question>> = emptyList()
     private val _quizState = MutableStateFlow(QuizState())
     val quizState: StateFlow<QuizState> = _quizState.asStateFlow()
 
@@ -51,54 +59,56 @@ class QuizViewModel @Inject constructor(
     private var isSaving = false
 
     init {
-        val topic = TopicsService.allTopics.find { it.id == topicId }
-        questions = topic?.quiz?.questions ?: emptyList()
-
-        _quizState.value = QuizState(
-            topicId = topicId,
-            quizTitle = topic?.quiz?.title ?: "Quiz",
-            currentIndex = 0,
-            score = 0,
-            totalQuestions = questions.size
-        )
-
-        if (questions.isNotEmpty()) {
-            _currentQuestion.value = questions[0]
+        if (isReview) {
+            _quizState.value = QuizState(topicId = topicId, quizTitle = "Review", isReview = true, isLoading = true)
+            viewModelScope.launch { start(loadReviewQuestions()) }
+        } else {
+            val topic = TopicsService.allTopics.find { it.id == topicId }
+            _quizState.value = QuizState(topicId = topicId, quizTitle = topic?.quiz?.title ?: "Quiz")
+            start(topic?.quiz?.questions.orEmpty().map { topicId to it })
         }
+    }
+
+    private suspend fun loadReviewQuestions(): List<Pair<String, Question>> {
+        val byTopic = TopicsService.allTopics.associateBy { it.id }
+        val scope = topicId.takeUnless { it == REVIEW_ALL }
+        // Skip entries whose question no longer exists in the content.
+        return repository.getMissedQuestions(scope).mapNotNull { missed ->
+            byTopic[missed.topicId]?.quiz?.questions
+                ?.firstOrNull { it.id == missed.questionId }
+                ?.let { missed.topicId to it }
+        }
+    }
+
+    private fun start(loaded: List<Pair<String, Question>>) {
+        questions = loaded
+        _quizState.value = _quizState.value.copy(totalQuestions = loaded.size, isLoading = false)
+        _currentQuestion.value = loaded.firstOrNull()?.second
     }
 
     fun answerMultipleChoice(selectedIndex: Int) {
         val question = _currentQuestion.value ?: return
         if (_feedback.value != null) return
-
-        val isCorrect = QuizScoring.checkAnswer(question, selectedIndex)
-        if (isCorrect) {
-            _quizState.value = _quizState.value.copy(
-                score = _quizState.value.score + question.points
-            )
-        }
-
-        _feedback.value = QuizFeedback(
-            isCorrect = isCorrect,
-            explanation = question.explanation
-        )
+        onAnswered(question, QuizScoring.checkAnswer(question, selectedIndex))
     }
 
     fun answerNumeric(value: Double?) {
         val question = _currentQuestion.value ?: return
         if (_feedback.value != null) return
+        onAnswered(question, value != null && QuizScoring.checkAnswer(question, value))
+    }
 
-        val isCorrect = value != null && QuizScoring.checkAnswer(question, value)
+    private fun onAnswered(question: Question, isCorrect: Boolean) {
         if (isCorrect) {
             _quizState.value = _quizState.value.copy(
                 score = _quizState.value.score + question.points
             )
         }
+        _feedback.value = QuizFeedback(isCorrect = isCorrect, explanation = question.explanation)
 
-        _feedback.value = QuizFeedback(
-            isCorrect = isCorrect,
-            explanation = question.explanation
-        )
+        // Wrong answers queue the question for review; right ones clear it.
+        val questionTopic = questions[_quizState.value.currentIndex].first
+        viewModelScope.launch { repository.recordAnswer(questionTopic, question.id, isCorrect) }
     }
 
     fun nextQuestion() {
@@ -109,6 +119,11 @@ class QuizViewModel @Inject constructor(
 
         if (nextIndex >= questions.size) {
             isSaving = true
+            if (isReview) {
+                // Reviews only clear mistakes (done per answer); no XP, no attempt record.
+                _quizComplete.value = true
+                return
+            }
             viewModelScope.launch {
                 val xp = repository.recordQuizResult(
                     topicId = topicId,
@@ -122,7 +137,12 @@ class QuizViewModel @Inject constructor(
         }
 
         _quizState.value = _quizState.value.copy(currentIndex = nextIndex)
-        _currentQuestion.value = questions[nextIndex]
+        _currentQuestion.value = questions[nextIndex].second
         _feedback.value = null
+    }
+
+    companion object {
+        /** Route topic id meaning "review missed questions from every topic". */
+        const val REVIEW_ALL = "all"
     }
 }

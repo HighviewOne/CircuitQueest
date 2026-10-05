@@ -26,6 +26,7 @@ object RepositoryModule {
     fun provideProgressRepository(database: AppDatabase): ProgressRepository =
         ProgressRepository(
             progressDao = database.progressDao(),
-            quizResultDao = database.quizResultDao()
+            quizResultDao = database.quizResultDao(),
+            missedQuestionDao = database.missedQuestionDao()
         )
 }

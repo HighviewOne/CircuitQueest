@@ -79,13 +79,27 @@ fun QuizScreen(
     val feedback by viewModel.feedback.collectAsStateWithLifecycle()
     val quizComplete by viewModel.quizComplete.collectAsStateWithLifecycle()
 
+    if (quizState.isLoading) {
+        Scaffold(containerColor = pal.bg) { Box(Modifier.padding(it)) }
+        return
+    }
     if (quizState.totalQuestions == 0) {
-        QuestNotFound(onBack = onBack)
+        if (quizState.isReview) {
+            QuestNotFound(
+                onBack = onBack,
+                title = "Nothing to review",
+                message = "You've cleared every missed question. Wrong answers in quizzes show up here."
+            )
+        } else {
+            QuestNotFound(onBack = onBack)
+        }
         return
     }
 
     // Leaving mid-quiz discards the attempt, so confirm first once anything is answered.
-    val attemptInProgress = (quizState.currentIndex > 0 || feedback != null) && !quizComplete
+    // Reviews save each answer as it's given, so there is nothing to lose.
+    val attemptInProgress = !quizState.isReview &&
+        (quizState.currentIndex > 0 || feedback != null) && !quizComplete
     var showLeaveDialog by rememberSaveable { mutableStateOf(false) }
     val requestLeave: () -> Unit = {
         if (attemptInProgress) {
@@ -129,7 +143,8 @@ fun QuizScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Question ${quizState.currentIndex + 1} of ${quizState.totalQuestions}",
+                        text = (if (quizState.isReview) "Review · " else "") +
+                            "Question ${quizState.currentIndex + 1} of ${quizState.totalQuestions}",
                         style = MonoLabel.copy(fontSize = 12.sp),
                         color = CqTextDim
                     )

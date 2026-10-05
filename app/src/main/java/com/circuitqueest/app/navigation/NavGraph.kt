@@ -30,10 +30,13 @@ object Routes {
     const val HOME = "home"
     const val LESSON = "lesson/{topicId}"
     const val QUIZ = "quiz/{topicId}"
+    /** Review mode reuses the quiz screen; topicId may be QuizViewModel.REVIEW_ALL. */
+    const val REVIEW = "review/{topicId}"
     const val RESULT = "result/{topicId}/{score}/{total}/{xp}"
 
     fun lesson(topicId: String) = "lesson/$topicId"
     fun quiz(topicId: String) = "quiz/$topicId"
+    fun review(topicId: String = QuizViewModel.REVIEW_ALL) = "review/$topicId"
     fun result(topicId: String, score: Int, total: Int, xp: Int) =
         "result/$topicId/$score/$total/$xp"
 }
@@ -60,7 +63,8 @@ fun CircuitQueestNavGraph(
                             navController.navigate(Routes.lesson(topicId))
                         },
                         onToggleBlueprint = onToggleBlueprint,
-                        blueprintMode = blueprintMode
+                        blueprintMode = blueprintMode,
+                        onReview = { navController.navigate(Routes.review()) }
                     )
                 }
             }
@@ -106,6 +110,22 @@ fun CircuitQueestNavGraph(
             }
 
             composable(
+                route = Routes.REVIEW,
+                arguments = listOf(
+                    navArgument("topicId") { type = NavType.StringType },
+                    navArgument("review") { type = NavType.BoolType; defaultValue = true }
+                )
+            ) {
+                val reviewViewModel: QuizViewModel = hiltViewModel()
+                QuizScreen(
+                    viewModel = reviewViewModel,
+                    onBack = { navController.popBackStack() },
+                    // Reviews award nothing to summarize; return to where they started.
+                    onQuizComplete = { _, _, _, _ -> navController.popBackStack() }
+                )
+            }
+
+            composable(
                 route = Routes.RESULT,
                 arguments = listOf(
                     navArgument("topicId") { type = NavType.StringType },
@@ -136,6 +156,11 @@ fun CircuitQueestNavGraph(
                         onHome = {
                             navController.navigate(Routes.HOME) {
                                 popUpTo(Routes.HOME) { inclusive = true }
+                            }
+                        },
+                        onReviewMistakes = { id ->
+                            navController.navigate(Routes.review(id)) {
+                                popUpTo(Routes.HOME)
                             }
                         },
                         onNextLesson = { id ->
