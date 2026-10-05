@@ -11,3 +11,11 @@
 local.properties
 CircuitQueest.zip
 .kotlin
+
+# Signing material lives in ~/.config/circuitqueest/ — never commit it
+*.jks
+*.keystore
+*.p12
+keystore.properties
+*.lineage
+*.idsig
