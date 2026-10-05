@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace = "com.circuitqueest.app"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.circuitqueest.app"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 24
         versionName = "2.4"
 
