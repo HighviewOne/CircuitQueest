@@ -9,11 +9,17 @@ the console steps. Text fields are within Play's limits (checked by `play-store/
 |---|---|---|
 | `graphics/icon-512.png` | App icon | 512×512 PNG |
 | `graphics/feature-graphic-1024x500.png` | Feature graphic | 1024×500, no alpha |
-| `screenshots/*.png` | Phone screenshots | 1080×1920 (≤ 2:1), 2–8 required; regenerate with the *Store Screenshots* workflow |
+| `screenshots/*.png` | Phone screenshots | 1080×1794 (≤ 2:1), 24-bit PNG; 6 shots (2–8 allowed) |
 | `listing/*.txt` | Store listing text | see below |
 | Privacy policy URL | App content → Privacy policy | https://highviewone.github.io/CircuitQueest/privacy.html |
 
 Build the upload bundle with `scripts/build-play-bundle.sh` → `CircuitQueest-vX.Y.aab`.
+
+**Refreshing screenshots:** the *Store Screenshots* workflow runs on PRs that change UI code, the
+screenshot test, or this folder. Download its `store-screenshots` artifact
+(`gh run download <run-id> -n store-screenshots -D play-store/screenshots`), then convert to 24-bit
+PNG, since Android saves them with an alpha channel and Play rejects alpha:
+`python3 -c "from PIL import Image;import glob;[Image.open(f).convert('RGB').save(f) for f in glob.glob('play-store/screenshots/*.png')]"`
 
 ---
 
