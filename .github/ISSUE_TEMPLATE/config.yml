@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Documentation
-    url: https://highviewone.github.io/CircuitQueest/documentation.html
+    url: https://circuitquest.mirarver.com/documentation.html
     about: Architecture, build instructions, and full topic list
   - name: Website
-    url: https://highviewone.github.io/CircuitQueest/
+    url: https://circuitquest.mirarver.com/
     about: App overview and curriculum
