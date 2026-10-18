@@ -11,7 +11,7 @@ the console steps. Text fields are within Play's limits (checked by `play-store/
 | `graphics/feature-graphic-1024x500.png` | Feature graphic | 1024×500, no alpha |
 | `screenshots/*.png` | Phone screenshots | 1080×1794 (≤ 2:1), 24-bit PNG; 6 shots (2–8 allowed) |
 | `listing/*.txt` | Store listing text | see below |
-| Privacy policy URL | App content → Privacy policy | https://highviewone.github.io/CircuitQueest/privacy.html |
+| Privacy policy URL | App content → Privacy policy | https://circuitquest.mirarver.com/privacy.html |
 
 Build the upload bundle with `scripts/build-play-bundle.sh` → `CircuitQueest-vX.Y.aab`.
 
@@ -56,13 +56,13 @@ The bundle itself is signed with `release.jks` as the **upload key** either way.
 - Full description: `listing/full-description.txt`
 - App icon, feature graphic, phone screenshots: `graphics/`, `screenshots/`
 - Category: **Education** · Tags: Education, Science
-- Contact email: an address you're happy to show publicly · Website:
-  https://highviewone.github.io/CircuitQueest/
+- Contact email: CircuitQuEEst@mirarver.com (circuitquest@mirarver.com also works) · Website:
+  https://circuitquest.mirarver.com/
 
 ### 5. App content (Policy → App content) — answers
 | Section | Answer |
 |---|---|
-| Privacy policy | https://highviewone.github.io/CircuitQueest/privacy.html |
+| Privacy policy | https://circuitquest.mirarver.com/privacy.html |
 | Ads | **No**, the app does not contain ads |
 | App access | **All functionality is available without special access** (no login) |
 | Content rating | Questionnaire category **Reference, News, or Educational**. Answer **No** to violence, sexuality, language, controlled substances, gambling, user interaction/communication, sharing location, digital purchases. Expected result: Everyone / PEGI 3 |

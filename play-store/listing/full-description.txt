@@ -32,3 +32,6 @@ Switch from the dark cockpit theme to a PCB-blueprint look with one tap.
 No account, no ads, no tracking. The app doesn't even request internet access — your progress stays on your device.
 
 Made for students, hobbyists, makers, and anyone brushing up for exams or interviews.
+
+🎧 COMPANION PODCAST
+Ready for more? EE Refresher is a free graduate-level EE podcast that builds on these quests: eerefresher.mirarver.com
