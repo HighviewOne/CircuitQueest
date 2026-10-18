@@ -521,7 +521,32 @@
 .lp__footer-links a:hover { color: #5da3ff; }
 
 @media (max-width: 980px) {
-  .lp__hero { grid-template-columns: 1fr; }
+  .lp__hero { grid-template-columns: minmax(0, 1fr); }
   .lp__title { font-size: 44px; }
   .lp__feature-grid, .lp__topic-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Phones: the desktop 48px gutters and 44–64px headings don't fit, and the nav
+   pushed the Download button off-screen. */
+@media (max-width: 600px) {
+  .lp__nav { padding: 14px 16px; gap: 12px; }
+  .lp__nav-links a:not(.lp__nav-cta) { display: none; }
+  .lp__nav-cta { padding: 7px 10px; letter-spacing: 0; white-space: nowrap; }
+  .lp__btn, .lp__btn-meta { white-space: nowrap; }
+  .lp__hero { padding: 48px 16px 40px; gap: 48px; }
+  .lp__eyebrow { max-width: 100%; box-sizing: border-box; letter-spacing: 0.1em; }
+  .lp__title { font-size: 40px; }
+  .lp__sub { font-size: 16px; }
+  .lp__phone { width: min(320px, 100%); box-sizing: border-box; }
+  .lp__readout { left: -8px; }
+  .lp__features, .lp__topics, .lp__podcast, .lp__cta { padding-left: 16px; padding-right: 16px; }
+  .lp__features, .lp__topics, .lp__cta { padding-top: 56px; padding-bottom: 56px; }
+  .lp__section-title { font-size: 32px; margin-bottom: 32px; }
+  .lp__feature-grid, .lp__topic-grid { grid-template-columns: 1fr; }
+  .lp__cta-card { padding: 40px 20px; }
+  .lp__cta-card h2 { font-size: 30px; line-height: 1.15; }
+  .lp__footer { padding: 28px 16px 40px; }
+}
+@media (max-width: 359px) {
+  .lp__btn-meta { display: none; }
 }
