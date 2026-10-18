@@ -326,7 +326,7 @@
 .lp__readout-row span:last-child { color: #f4b840; font-variant-numeric: tabular-nums; }
 
 /* Sections */
-.lp__features, .lp__topics, .lp__cta {
+.lp__features, .lp__topics, .lp__podcast, .lp__cta {
   max-width: 1200px;
   margin: 0 auto;
   padding: 80px 48px;
@@ -507,7 +507,11 @@
 .lp__footer-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
 .lp__footer-brand i { color: #5da3ff; font-style: normal; }
 .lp__footer-text { font-family: var(--cq-mono); font-size: 11px; color: #5d678f; letter-spacing: 0.04em; }
-.lp__footer-links { display: flex; gap: 20px; }
+.lp__podcast { padding-top: 0; }
+.lp__podcast .lp__sub { max-width: 700px; }
+.lp__podcast .lp__sub a { color: #5da3ff; }
+.lp__podcast .lp__cta-row { margin-bottom: 0; }
+.lp__footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
 .lp__footer-links a {
   color: #98a2c8;
   text-decoration: none;

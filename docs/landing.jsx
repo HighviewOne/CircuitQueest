@@ -46,8 +46,9 @@ function LandingPage() {
         <nav className="lp__nav-links">
           <a href="#features">Features</a>
           <a href="#topics">Topics</a>
-          <a href="#docs">Docs</a>
-          <a href="#" className="lp__nav-cta">Download APK ↓</a>
+          <a href="#podcast">Podcast</a>
+          <a href="documentation.html">Docs</a>
+          <a href="https://github.com/HighviewOne/CircuitQueest/releases/latest" className="lp__nav-cta">Download APK ↓</a>
         </nav>
       </header>
 
@@ -65,14 +66,14 @@ function LandingPage() {
             learn the math that makes electrons behave — offline, on Android.
           </p>
           <div className="lp__cta-row">
-            <a className="lp__btn lp__btn--primary" href="#">
+            <a className="lp__btn lp__btn--primary" href="https://github.com/HighviewOne/CircuitQueest/releases/latest">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M5 4 L5 16 L8 13 L12 17 L14 16 L10 12 L13 9 Z" fill="currentColor" />
               </svg>
               Get on Android
-              <span className="lp__btn-meta">free · 12 MB</span>
+              <span className="lp__btn-meta">free · 2 MB</span>
             </a>
-            <a className="lp__btn lp__btn--ghost" href="#">
+            <a className="lp__btn lp__btn--ghost" href="https://github.com/HighviewOne/CircuitQueest">
               <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><path d="M9 0a9 9 0 0 0-2.85 17.54c.45.08.62-.2.62-.43v-1.7c-2.5.55-3.04-1.05-3.04-1.05-.4-1.05-1-1.32-1-1.32-.83-.57.06-.55.06-.55.92.07 1.4.94 1.4.94.82 1.4 2.14 1 2.66.76.08-.6.32-1 .58-1.23-2-.23-4.1-1-4.1-4.46 0-.98.35-1.78.92-2.4-.1-.23-.4-1.15.08-2.4 0 0 .76-.24 2.5.92a8.6 8.6 0 0 1 4.55 0c1.74-1.16 2.5-.92 2.5-.92.5 1.25.18 2.17.1 2.4.57.62.92 1.42.92 2.4 0 3.46-2.1 4.22-4.1 4.45.32.28.62.83.62 1.68v2.5c0 .24.17.52.62.43A9 9 0 0 0 9 0z"/></svg>
               View on GitHub
             </a>
@@ -206,6 +207,21 @@ function LandingPage() {
         </div>
       </section>
 
+      <section id="podcast" className="lp__podcast">
+        <div className="lp__section-eyebrow">§ COMPANION PODCAST</div>
+        <h2 className="lp__section-title">Finished the quests? Keep listening.</h2>
+        <p className="lp__sub">
+          <a href="https://eerefresher.mirarver.com/">EE Refresher</a> is a free graduate-level EE podcast
+          that picks up where the quests leave off: grid-forming inverters, 5G numerology, field-oriented
+          motor control, gate-all-around transistors, and battery state-of-charge estimation. Each episode
+          page lists the CircuitQuEEst quests to warm up with first.
+        </p>
+        <div className="lp__cta-row">
+          <a className="lp__btn lp__btn--ghost" href="https://eerefresher.mirarver.com/">Listen to EE Refresher</a>
+          <a className="lp__btn lp__btn--ghost" href="https://eerefresher.mirarver.com/feed.xml">RSS feed</a>
+        </div>
+      </section>
+
       <section className="lp__cta">
         <div className="lp__cta-card">
           <div className="lp__cta-corners"><i/><i/><i/><i/></div>
@@ -213,8 +229,8 @@ function LandingPage() {
           <h2>Download CircuitQu<i>EE</i>st for Android.</h2>
           <p>Free. Open source. No ads, no accounts, no telemetry.</p>
           <div className="lp__cta-row">
-            <a className="lp__btn lp__btn--primary" href="#">Get on Android <span className="lp__btn-meta">v1.0 · 12 MB</span></a>
-            <a className="lp__btn lp__btn--ghost" href="#">Read the docs</a>
+            <a className="lp__btn lp__btn--primary" href="https://github.com/HighviewOne/CircuitQueest/releases/latest">Get on Android <span className="lp__btn-meta">latest · 2 MB</span></a>
+            <a className="lp__btn lp__btn--ghost" href="documentation.html">Read the docs</a>
           </div>
         </div>
       </section>
@@ -231,7 +247,8 @@ function LandingPage() {
         </div>
         <div className="lp__footer-text">MIT licensed · Built for engineers · © 2026 HighviewOne</div>
         <div className="lp__footer-links">
-          <a href="#">GitHub</a><a href="#">Privacy</a><a href="#">Issues</a>
+          <a href="https://github.com/HighviewOne/CircuitQueest">GitHub</a><a href="privacy.html">Privacy</a><a href="https://github.com/HighviewOne/CircuitQueest/issues">Issues</a>
+          <a href="https://eerefresher.mirarver.com/">Podcast</a><a href="mailto:CircuitQuEEst@mirarver.com">CircuitQuEEst@mirarver.com</a>
         </div>
       </footer>
     </div>
