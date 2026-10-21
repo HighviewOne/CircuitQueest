@@ -1,6 +1,6 @@
 # CircuitQuEEst v2.5 — Review Mode & Android 16
 
-**Release Date:** October 2026
+**Release Date:** October 20, 2026
 **APK size:** ~2 MB (R8-shrunk release build)
 **Requires:** Android 8.0+
 
