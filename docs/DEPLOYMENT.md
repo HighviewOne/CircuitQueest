@@ -10,6 +10,8 @@ Before releasing to production:
 - [ ] Version updated in build.gradle.kts
 - [ ] CHANGELOG updated with new features
 - [ ] Release notes prepared
+- [ ] After `gh release create`: update the landing page (`docs/index.html`) — the version in the
+      hero badge, both direct APK links (`releases/download/vX.Y/CircuitQueest-vX.Y.apk`) and the APK size
 - [ ] All deprecations removed
 - [ ] Performance profiling completed
 - [ ] Documentation updated
