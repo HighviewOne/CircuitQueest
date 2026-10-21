@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -208,7 +209,8 @@ private fun HeroCard(topic: Topic, parallaxOffset: Float = 0f) {
         modifier = Modifier
             .fillMaxWidth()
             .then(sharedModifier)
-            .height(210.dp)
+            // Minimum, not fixed: two-line subtitles otherwise push the stat pills out.
+            .heightIn(min = 210.dp)
             .clip(shape)
             .background(
                 Brush.linearGradient(

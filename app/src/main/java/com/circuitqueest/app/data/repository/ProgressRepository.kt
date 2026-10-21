@@ -1,7 +1,9 @@
 package com.circuitqueest.app.data.repository
 
+import com.circuitqueest.app.data.db.dao.MissedQuestionDao
 import com.circuitqueest.app.data.db.dao.ProgressDao
 import com.circuitqueest.app.data.db.dao.QuizResultDao
+import com.circuitqueest.app.data.db.entity.MissedQuestion
 import com.circuitqueest.app.data.db.entity.QuizResult
 import com.circuitqueest.app.data.db.entity.TopicProgress
 import com.circuitqueest.app.util.QuizScoring
@@ -11,7 +13,8 @@ import kotlinx.coroutines.sync.withLock
 
 class ProgressRepository(
     private val progressDao: ProgressDao,
-    private val quizResultDao: QuizResultDao
+    private val quizResultDao: QuizResultDao,
+    private val missedQuestionDao: MissedQuestionDao
 ) {
     // Progress updates are read-modify-write; serialize them so two writes to the
     // same topic (e.g. finishing a lesson while a quiz save is in flight) can't
@@ -79,4 +82,21 @@ class ProgressRepository(
 
     fun getQuizResults(topicId: String): Flow<List<QuizResult>> =
         quizResultDao.getResultsForTopic(topicId)
+
+    // ── Review mode ─────────────────────────────────────────────────────────
+
+    /** A wrong answer queues the question for review; a right one clears it. */
+    suspend fun recordAnswer(topicId: String, questionId: String, correct: Boolean) {
+        if (correct) {
+            missedQuestionDao.delete(topicId, questionId)
+        } else {
+            missedQuestionDao.upsert(MissedQuestion(topicId = topicId, questionId = questionId))
+        }
+    }
+
+    /** Missed questions, oldest first; all topics when [topicId] is null. */
+    suspend fun getMissedQuestions(topicId: String? = null): List<MissedQuestion> =
+        if (topicId == null) missedQuestionDao.getAll() else missedQuestionDao.getForTopic(topicId)
+
+    fun getMissedCount(): Flow<Int> = missedQuestionDao.count()
 }

@@ -97,7 +97,9 @@ class ProgressDaoInstrumentedTest {
 ./gradlew test                      # Unit tests only
 ./gradlew connectedAndroidTest      # Instrumented tests (requires device/emulator; uninstalls the app afterwards — use an emulator, not a phone with real progress)
 ./gradlew test connectedAndroidTest # Both
-# CI runs connectedDebugAndroidTest on an API 34 emulator (build.yml, `instrumented` job)
+# CI runs connectedDebugAndroidTest on an API 34 emulator (build.yml, `instrumented` job),
+# excluding the store-screenshot generator (package ...screenshots, run by screenshots.yml).
+# MigrationTest validates every Room schema step against app/schemas/ — add a case per new version.
 ```
 
 ### Specific Tests

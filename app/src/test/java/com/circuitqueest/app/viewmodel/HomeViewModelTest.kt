@@ -32,6 +32,7 @@ class HomeViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         repository = mock()
+        whenever(repository.getMissedCount()).thenReturn(flowOf(0))
     }
 
     @After

@@ -21,9 +21,16 @@ import com.circuitqueest.app.ui.theme.LocalCqPalette
 import com.circuitqueest.app.ui.theme.SpaceGrotesk
 import com.circuitqueest.app.ui.theme.Spacing
 
-/** Shown when a route names a topic that doesn't exist, instead of a blank screen. */
+/**
+ * Full-screen message with a Back button. Defaults cover a route naming a topic that
+ * doesn't exist; review mode reuses it for an empty review queue.
+ */
 @Composable
-fun QuestNotFound(onBack: () -> Unit) {
+fun QuestNotFound(
+    onBack: () -> Unit,
+    title: String = "Quest not found",
+    message: String = "This quest isn't available. Head back to the quest map."
+) {
     val pal = LocalCqPalette.current
     Scaffold(containerColor = pal.bg) { paddingValues ->
         Column(
@@ -35,14 +42,14 @@ fun QuestNotFound(onBack: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Quest not found",
+                text = title,
                 fontFamily = SpaceGrotesk,
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp,
                 color = CqText
             )
             Text(
-                text = "This quest isn't available. Head back to the quest map.",
+                text = message,
                 fontFamily = SpaceGrotesk,
                 fontSize = 15.sp,
                 color = CqTextDim,

@@ -1,0 +1,3 @@
+New in 2.5:
+• Review mode: questions you miss go into a review queue so you can practise them until you get them right. Start from the ⟲ chip on the quest map or "Review mistakes" after a quiz.
+• Updated for Android 16.

@@ -52,6 +52,7 @@ import com.circuitqueest.app.ui.components.TopicCard
 import com.circuitqueest.app.ui.components.XpBar
 import com.circuitqueest.app.ui.icons.SchematicIcons
 import com.circuitqueest.app.ui.theme.CqBlue
+import com.circuitqueest.app.ui.theme.CqGold
 import com.circuitqueest.app.ui.theme.CqText
 import com.circuitqueest.app.ui.theme.CqTextDim
 import com.circuitqueest.app.ui.theme.CqTextFaint
@@ -67,11 +68,13 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     onTopicClick: (String) -> Unit,
     onToggleBlueprint: () -> Unit = {},
-    blueprintMode: Boolean = false
+    blueprintMode: Boolean = false,
+    onReview: () -> Unit = {}
 ) {
     val pal = LocalCqPalette.current
     val categorizedTopics by viewModel.categorizedTopics.collectAsStateWithLifecycle()
     val totalXp by viewModel.totalXp.collectAsStateWithLifecycle()
+    val missedCount by viewModel.missedCount.collectAsStateWithLifecycle()
     var searchQuery by rememberSaveable { mutableStateOf("") }
     // Names of expanded categories; saveable so rotation doesn't collapse them.
     val expandedCategories = rememberSaveable(
@@ -113,6 +116,19 @@ fun HomeScreen(
                         color = CqText
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s8)) {
+                        // Review chip: only when there are missed questions to replay
+                        if (missedCount > 0) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(100.dp))
+                                    .background(CqGold.copy(alpha = 0.14f))
+                                    .border(1.dp, CqGold, RoundedCornerShape(100.dp))
+                                    .clickable(onClickLabel = "Review missed questions") { onReview() }
+                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                            ) {
+                                Text(text = "⟲ $missedCount", style = MonoLabel, color = CqGold)
+                            }
+                        }
                         // Blueprint mode toggle
                         Box(
                             modifier = Modifier

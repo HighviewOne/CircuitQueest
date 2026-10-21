@@ -78,6 +78,8 @@ material is in the repo.
 ./gradlew assembleRelease
 scripts/sign-release.sh app/build/outputs/apk/release/app-release-unsigned.apk CircuitQueest-vX.Y.apk
 ```
+`apksigner` needs `java` on PATH (this Dell has none by default):
+`export PATH=~/.local/jdk-17/bin:$PATH` first.
 The script prints the verification: expect v3/v3.1 `true`, a `minSdkVersion=33` signer with the
 release cert, and a `minSdkVersion=24` signer with the debug cert.
 
@@ -91,8 +93,10 @@ adb install -r staging-signed.apk   # must succeed as an update, not require an 
 ```
 
 ### Google Play
-Play App Signing uses its own app-signing key; upload with the release key as the upload key. The
-rotation lineage is for sideloaded APKs (GitHub releases).
+Build the upload bundle with `scripts/build-play-bundle.sh` (signed with the release key as upload
+key). The full Play setup — app signing choice, listing, form answers, closed testing — is in
+[`play-store/README.md`](../play-store/README.md). The rotation lineage only applies to sideloaded
+APKs (GitHub releases).
 
 ## Play Store Submission
 
@@ -242,7 +246,7 @@ FirebaseAnalytics.getInstance(context).logEvent("app_opened", null)
 ## Supported Devices
 
 - **Min SDK:** 26 (Android 8.0)
-- **Target SDK:** 35 (Android 15)
+- **Target SDK:** 36 (Android 16) — Google Play's minimum for new apps and updates since 2026-08-31
 - **Recommended:** Android 10+ (SDK 29+)
 
 ### Device Testing

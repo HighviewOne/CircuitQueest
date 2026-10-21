@@ -27,12 +27,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.unit.dp
 import com.circuitqueest.app.ui.theme.CqBlue
 import com.circuitqueest.app.ui.theme.CqBlueLight
 import com.circuitqueest.app.ui.theme.CqCyan
 import com.circuitqueest.app.ui.theme.CqGold
-import com.circuitqueest.app.ui.theme.CqTextDim
+import com.circuitqueest.app.ui.theme.CqText
 import com.circuitqueest.app.ui.theme.LocalCqPalette
 import com.circuitqueest.app.ui.theme.MonoLabel
 import com.circuitqueest.app.ui.theme.Radius
@@ -57,6 +58,11 @@ fun XpBar(
     val pal = LocalCqPalette.current
     val info = computeLevel(totalXp)
     val shape = RoundedCornerShape(Radius.lg)
+    // Labels sit over both the dark track and the bright gradient fill; a soft shadow keeps
+    // them readable on either.
+    val labelStyle = MonoLabel.copy(
+        shadow = Shadow(color = Color.Black.copy(alpha = 0.7f), offset = Offset(0f, 1f), blurRadius = 4f)
+    )
 
     val fillProgress by animateFloatAsState(
         targetValue = info.progress,
@@ -118,13 +124,13 @@ fun XpBar(
         ) {
             Text(
                 text = "Level ${info.level} · ${totalXp} XP",
-                style = MonoLabel,
-                color = CqTextDim
+                style = labelStyle,
+                color = CqText
             )
             Text(
                 text = "→ ${info.xpToNext} to Level ${info.level + 1}",
-                style = MonoLabel,
-                color = CqTextDim
+                style = labelStyle,
+                color = CqText
             )
         }
     }

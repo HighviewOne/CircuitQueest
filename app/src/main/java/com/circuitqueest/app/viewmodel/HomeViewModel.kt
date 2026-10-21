@@ -83,6 +83,14 @@ class HomeViewModel @Inject constructor(
             }
         )
 
+    /** Questions waiting in review mode; drives the "Review" chip on the quest map. */
+    val missedCount: StateFlow<Int> = repository.getMissedCount()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = 0
+        )
+
     val totalXp: StateFlow<Int> = repository.getTotalXp()
         .stateIn(
             scope = viewModelScope,
