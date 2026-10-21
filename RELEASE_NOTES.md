@@ -1,7 +1,17 @@
-# Unreleased
+# CircuitQuEEst v2.5 — Review Mode & Android 16
+
+**Release Date:** October 2026
+**APK size:** ~2 MB (R8-shrunk release build)
+**Requires:** Android 8.0+
+
+> Installs as an update over v2.4 and earlier and keeps your progress. This is the first release signed with the new release key (see Engineering).
 
 ### New
 - **Review mode.** Every question you get wrong goes into a review queue. Replay them from the ⟲ chip on the quest map or "Review N mistakes" after a quiz; a correct answer clears the question. Reviews award no XP, so they can't be farmed.
+
+### Fixes
+- Lesson header no longer clips its stat pills when the subtitle wraps to two lines.
+- XP bar labels stay readable when the bar is nearly full.
 
 ### Platform
 - **Targets Android 16 (API 36)**, as Google Play requires since August 31, 2026. AGP 8.13.2, Gradle 8.13.
