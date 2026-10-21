@@ -82,7 +82,7 @@ QuizResult
 ```
 
 #### Content Layer
-- **Topics:** 41 educational topics with lessons & quizzes
+- **Topics:** 42 educational topics with lessons & quizzes
 - **TopicsService:** Singleton holding all topics sorted by order
 - **Content Modules:** OhmsLawContent, KirchhoffsContent, etc.
 
@@ -205,7 +205,7 @@ app/src/main/java/com/circuitqueest/app/
 5. **Coroutines** - Non-blocking database operations
 
 ### Scalability
-- Supports 41+ topics without performance degradation
+- Supports 42+ topics without performance degradation
 - Database designed for 1000+ quiz attempts
 - UI efficiently handles large lists via LazyColumn
 

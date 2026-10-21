@@ -11,7 +11,7 @@
 [![Compose](https://img.shields.io/badge/Jetpack_Compose-2024.12-4285F4?logo=android&logoColor=white&labelColor=0A0E1A)](https://developer.android.com/jetpack/compose)
 [![License](https://img.shields.io/badge/license-MIT-F4B840?labelColor=0A0E1A)](LICENSE)
 
-[**Website**](https://highviewone.github.io/CircuitQueest/) · [**Documentation**](https://highviewone.github.io/CircuitQueest/documentation.html) · [**Privacy**](https://highviewone.github.io/CircuitQueest/privacy.html)
+[**Website**](https://circuitquest.mirarver.com/) · [**Documentation**](https://circuitquest.mirarver.com/documentation.html) · [**Privacy**](https://circuitquest.mirarver.com/privacy.html)
 
 </div>
 

@@ -2,9 +2,26 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>CircuitQueest — Master Electronics, One Quest at a Time</title>
+<title>CircuitQuEEst — Learn Electrical Engineering, One Quest at a Time</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="A gamified, offline-first Android app for learning electronics engineering. 42 quests across 9 disciplines, from Ohm's Law to RF circuits.">
+<meta name="description" content="A free, offline Android app for learning electrical engineering. 42 quests across 9 tracks, from Ohm's Law to RF circuits, with lessons, quizzes and XP.">
+<link rel="canonical" href="https://circuitquest.mirarver.com/">
+<meta name="theme-color" content="#0a0e1a">
+<link rel="icon" href="favicon.ico" sizes="48x48">
+<link rel="icon" href="img/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CircuitQuEEst">
+<meta property="og:title" content="CircuitQuEEst — Learn electrical engineering, one quest at a time">
+<meta property="og:description" content="42 quests across 9 tracks, from Ohm's Law to RF circuits. Free, offline, no ads, no accounts. Android 8.0+.">
+<meta property="og:url" content="https://circuitquest.mirarver.com/">
+<meta property="og:image" content="https://circuitquest.mirarver.com/img/og-card.png">
+<meta property="og:image:width" content="1024">
+<meta property="og:image:height" content="500">
+<meta property="og:image:alt" content="CircuitQuEEst logo: Learn electrical engineering, one quest at a time. 42 topics, quizzes, XP, offline.">
+<meta name="twitter:card" content="summary_large_image">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,21 +32,264 @@
     --cq-mono: 'JetBrains Mono', 'Fira Code', monospace;
   }
   html, body { margin: 0; padding: 0; background: #0a0e1a; font-family: var(--cq-display); color: #e6ecff; }
+  html { scroll-behavior: smooth; }
 </style>
 </head>
 <body>
 
-<div id="root"></div>
+<div class="lp">
+  <div class="lp__pcb" aria-hidden="true">
+    <svg width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <pattern id="lp-grid" width="32" height="32" patternUnits="userSpaceOnUse">
+          <circle cx="1" cy="1" r="1" fill="#355397" opacity="0.25" />
+        </pattern>
+        <radialGradient id="lp-vig" cx="50%" cy="0%" r="80%">
+          <stop offset="0%" stop-color="#2480ff" stop-opacity="0.18" />
+          <stop offset="50%" stop-color="#0a0e1a" stop-opacity="0" />
+        </radialGradient>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#lp-grid)" />
+      <rect width="100%" height="100%" fill="url(#lp-vig)" />
+      <g stroke="#355397" stroke-width="1.2" fill="none" opacity="0.45">
+        <path d="M 0 180 H 200 L 240 220 H 480 L 520 200 H 720" />
+        <path d="M 0 360 H 120 L 160 320 H 360" />
+        <path d="M 480 480 L 520 520 H 720" />
+      </g>
+      <g fill="#5da3ff" opacity="0.7">
+        <circle cx="200" cy="180" r="3" />
+        <circle cx="480" cy="220" r="3" />
+        <circle cx="120" cy="360" r="3" />
+        <circle cx="520" cy="520" r="3" />
+      </g>
+    </svg>
+  </div>
 
-<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <header class="lp__nav">
+    <a class="lp__brand" href="./">
+      <span class="cq-brand__mark">
+        <svg viewBox="0 0 28 28" width="24" height="24" aria-hidden="true">
+          <circle cx="14" cy="14" r="13" fill="none" stroke="#5da3ff" stroke-width="1.5" />
+          <path d="M16 5 L9 16 H14 L12 23 L19 12 H14 Z" fill="#f4b840" />
+        </svg>
+      </span>
+      <span>CircuitQu<i>EE</i>st</span>
+    </a>
+    <nav class="lp__nav-links">
+      <a href="#features">Features</a>
+      <a href="#screens">Screens</a>
+      <a href="#topics">Topics</a>
+      <a href="#podcast">Podcast</a>
+      <a href="documentation.html">Docs</a>
+      <a href="#install" class="lp__nav-cta">Download APK ↓</a>
+    </nav>
+  </header>
 
-<script type="text/babel" src="landing.jsx"></script>
+  <main>
+  <section class="lp__hero">
+    <div class="lp__hero-text">
+      <div class="lp__eyebrow">
+        <span class="lp__eyebrow-dot"></span>
+        v2.4 · Android 8.0+ · Free &amp; open source
+      </div>
+      <h1 class="lp__title">
+        Master <span class="lp__title-grad">electrical engineering</span> through quests.
+      </h1>
+      <p class="lp__sub">
+        42 topics. 5-minute lessons. Boss-battle quizzes. Earn XP, unlock advanced material, and
+        learn the math that makes electrons behave — offline, on Android.
+      </p>
+      <div class="lp__cta-row">
+        <a class="lp__btn lp__btn--primary" href="https://github.com/HighviewOne/CircuitQueest/releases/download/v2.4/CircuitQueest-v2.4.apk">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M10 2 V13 M5 8.5 L10 13.5 L15 8.5 M4 17 H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Download for Android
+          <span class="lp__btn-meta">APK · 2 MB</span>
+        </a>
+        <a class="lp__btn lp__btn--ghost" href="https://github.com/HighviewOne/CircuitQueest">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor" aria-hidden="true"><path d="M9 0a9 9 0 0 0-2.85 17.54c.45.08.62-.2.62-.43v-1.7c-2.5.55-3.04-1.05-3.04-1.05-.4-1.05-1-1.32-1-1.32-.83-.57.06-.55.06-.55.92.07 1.4.94 1.4.94.82 1.4 2.14 1 2.66.76.08-.6.32-1 .58-1.23-2-.23-4.1-1-4.1-4.46 0-.98.35-1.78.92-2.4-.1-.23-.4-1.15.08-2.4 0 0 .76-.24 2.5.92a8.6 8.6 0 0 1 4.55 0c1.74-1.16 2.5-.92 2.5-.92.5 1.25.18 2.17.1 2.4.57.62.92 1.42.92 2.4 0 3.46-2.1 4.22-4.1 4.45.32.28.62.83.62 1.68v2.5c0 .24.17.52.62.43A9 9 0 0 0 9 0z"/></svg>
+          View on GitHub
+        </a>
+      </div>
+      <p class="lp__install-hint">New to installing APKs? <a href="#install">Three steps below</a>.</p>
+      <div class="lp__stats">
+        <div class="lp__stat"><div class="lp__stat-num">42</div><div class="lp__stat-lbl">Topics</div></div>
+        <div class="lp__stat"><div class="lp__stat-num">9</div><div class="lp__stat-lbl">Tracks</div></div>
+        <div class="lp__stat"><div class="lp__stat-num">2<i>MB</i></div><div class="lp__stat-lbl">Download</div></div>
+        <div class="lp__stat"><div class="lp__stat-num">100%</div><div class="lp__stat-lbl">Offline</div></div>
+      </div>
+    </div>
 
-<script type="text/babel" data-presets="env,react">
-  ReactDOM.createRoot(document.getElementById('root')).render(<LandingPage />);
-</script>
+    <div class="lp__hero-visual">
+      <div class="lp__phone-glow"></div>
+      <div class="lp__phone">
+        <img class="lp__phone-shot" src="img/1-quest-map.webp" width="540" height="960"
+             alt="The CircuitQuEEst quest map: XP bar at Level 2, search box, and the Circuit Fundamentals quests with scores like 7/7.">
+      </div>
+      <div class="lp__readout" aria-hidden="true">
+        <div class="lp__readout-row"><span>V</span><span>9.00 V</span></div>
+        <div class="lp__readout-row"><span>I</span><span>0.090 A</span></div>
+        <div class="lp__readout-row"><span>P</span><span>0.81 W</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="lp__features">
+    <div class="lp__section-eyebrow">§ FEATURES</div>
+    <h2 class="lp__section-title">Built for engineers who learn by doing.</h2>
+    <div class="lp__feature-grid">
+      <div class="lp__feature">
+        <div class="lp__feature-glyph lp__feature-glyph--gold">⚡</div>
+        <h3>Quest progression</h3>
+        <p>Pass a quest's quiz to unlock the next one. No skipping — the math compounds.</p>
+      </div>
+      <div class="lp__feature">
+        <div class="lp__feature-glyph lp__feature-glyph--blue">∑</div>
+        <h3>Boss-battle quizzes</h3>
+        <p>Multiple-choice and numeric input with tolerance. Get a wrong answer? See exactly why.</p>
+      </div>
+      <div class="lp__feature">
+        <div class="lp__feature-glyph lp__feature-glyph--cyan">◐</div>
+        <h3>42 topics, 9 tracks</h3>
+        <p>From Ohm's Law to ML hardware. Deep enough for ECE coursework, friendly enough for tinkerers.</p>
+      </div>
+      <div class="lp__feature">
+        <div class="lp__feature-glyph lp__feature-glyph--blue">◌</div>
+        <h3>Offline-first</h3>
+        <p>Every lesson, quiz, and progress entry lives on your device. No internet permission, no accounts, no ads.</p>
+      </div>
+      <div class="lp__feature">
+        <div class="lp__feature-glyph lp__feature-glyph--gold">↑</div>
+        <h3>XP you actually earn</h3>
+        <p>+50 XP per lesson, +100 the first time you pass a quiz, and +10 for every point you beat your best score. Retaking an easy quiz earns nothing.</p>
+      </div>
+      <div class="lp__feature">
+        <div class="lp__feature-glyph lp__feature-glyph--cyan">⊞</div>
+        <h3>Blueprint mode</h3>
+        <p>One tap turns the whole app into an engineering blueprint. Same quests, drafting-table look.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="screens" class="lp__screens">
+    <div class="lp__section-eyebrow">§ SCREENS</div>
+    <h2 class="lp__section-title">What the app actually looks like.</h2>
+    <div class="lp__shot-strip">
+      <figure class="lp__shot">
+        <img src="img/2-lesson.webp" width="540" height="960" loading="lazy" alt="A lesson screen with a short explanation and formula.">
+        <figcaption>Lesson</figcaption>
+      </figure>
+      <figure class="lp__shot">
+        <img src="img/3-quiz-feedback.webp" width="540" height="960" loading="lazy" alt="A quiz question, 'What does Ohm's Law state?', answered correctly with the explanation 'Circuit closed!'.">
+        <figcaption>Quiz feedback</figcaption>
+      </figure>
+      <figure class="lp__shot">
+        <img src="img/4-result.webp" width="540" height="960" loading="lazy" alt="The result screen for Thévenin &amp; Norton: 85%, 6 of 7 correct, +160 XP, pass, with Diodes &amp; Rectifiers up next.">
+        <figcaption>Result</figcaption>
+      </figure>
+      <figure class="lp__shot">
+        <img src="img/6-blueprint.webp" width="540" height="960" loading="lazy" alt="The quest map in blueprint mode, drawn in blueprint blues.">
+        <figcaption>Blueprint mode</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="topics" class="lp__topics">
+    <div class="lp__section-eyebrow">§ CURRICULUM</div>
+    <h2 class="lp__section-title">Nine tracks, forty-two quests.</h2>
+    <div class="lp__topic-grid">
+      <div class="lp__track">
+        <div class="lp__track-head"><span class="lp__track-glyph">Ω</span><div><div class="lp__track-name">Circuit Fundamentals</div><div class="lp__track-meta">6 quests</div></div></div>
+        <ul class="lp__track-topics"><li>Ohm's Law</li><li>Series &amp; Parallel</li><li>Kirchhoff's Laws</li><li>Capacitors &amp; Inductors</li><li>AC Circuits</li><li>Thévenin–Norton</li></ul>
+      </div>
+      <div class="lp__track">
+        <div class="lp__track-head"><span class="lp__track-glyph">◐</span><div><div class="lp__track-name">Semiconductor Devices</div><div class="lp__track-meta">4 quests</div></div></div>
+        <ul class="lp__track-topics"><li>Diodes</li><li>BJT Transistors</li><li>MOSFETs</li><li>Semiconductor Physics</li></ul>
+      </div>
+      <div class="lp__track">
+        <div class="lp__track-head"><span class="lp__track-glyph">∿</span><div><div class="lp__track-name">Analog Design</div><div class="lp__track-meta">4 quests</div></div></div>
+        <ul class="lp__track-topics"><li>Op-Amps</li><li>Filters</li><li>Analog Circuits</li><li>Audio Electronics</li></ul>
+      </div>
+      <div class="lp__track">
+        <div class="lp__track-head"><span class="lp__track-glyph">01</span><div><div class="lp__track-name">Digital Systems</div><div class="lp__track-meta">4 quests</div></div></div>
+        <ul class="lp__track-topics"><li>Digital Logic</li><li>Digital Systems</li><li>VLSI</li><li>ML Hardware</li></ul>
+      </div>
+      <div class="lp__track">
+        <div class="lp__track-head"><span class="lp__track-glyph">ƒ</span><div><div class="lp__track-name">Signals &amp; Control</div><div class="lp__track-meta">3 quests</div></div></div>
+        <ul class="lp__track-topics"><li>Signals &amp; Systems</li><li>Control Systems</li><li>DSP</li></ul>
+      </div>
+      <div class="lp__track">
+        <div class="lp__track-head"><span class="lp__track-glyph">⚡</span><div><div class="lp__track-name">Power &amp; Energy</div><div class="lp__track-meta">6 quests</div></div></div>
+        <ul class="lp__track-topics"><li>Transformers</li><li>Power Electronics</li><li>Power Systems</li><li>Renewables</li><li>Electric Vehicles</li><li>Battery Storage</li></ul>
+      </div>
+      <div class="lp__track">
+        <div class="lp__track-head"><span class="lp__track-glyph">◌</span><div><div class="lp__track-name">RF &amp; Communications</div><div class="lp__track-meta">7 quests</div></div></div>
+        <ul class="lp__track-topics"><li>Electromagnetics</li><li>Transmission Lines</li><li>Comms</li><li>Antennas</li><li>RF Circuits</li><li>Fiber Optics</li><li>Radar</li></ul>
+      </div>
+      <div class="lp__track">
+        <div class="lp__track-head"><span class="lp__track-glyph">⌘</span><div><div class="lp__track-name">Hardware &amp; Embedded</div><div class="lp__track-meta">5 quests</div></div></div>
+        <ul class="lp__track-topics"><li>PCB Design</li><li>Embedded</li><li>Sensors</li><li>Signal Integrity</li><li>IoT</li></ul>
+      </div>
+      <div class="lp__track">
+        <div class="lp__track-head"><span class="lp__track-glyph">✚</span><div><div class="lp__track-name">Specialized</div><div class="lp__track-meta">3 quests</div></div></div>
+        <ul class="lp__track-topics"><li>Electric Machines</li><li>MEMS</li><li>Biomedical</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="podcast" class="lp__podcast">
+    <div class="lp__section-eyebrow">§ COMPANION PODCAST</div>
+    <h2 class="lp__section-title">Finished the quests? Keep listening.</h2>
+    <p class="lp__sub">
+      <a href="https://eerefresher.mirarver.com/">EE Refresher</a> is a free graduate-level EE podcast
+      that picks up where the quests leave off: grid-forming inverters, 5G numerology, field-oriented
+      motor control, gate-all-around transistors, and battery state-of-charge estimation. Each episode
+      page lists the CircuitQuEEst quests to warm up with first.
+    </p>
+    <div class="lp__cta-row">
+      <a class="lp__btn lp__btn--ghost" href="https://eerefresher.mirarver.com/">Listen to EE Refresher</a>
+      <a class="lp__btn lp__btn--ghost" href="https://eerefresher.mirarver.com/feed.xml">RSS feed</a>
+    </div>
+  </section>
+
+  <section id="install" class="lp__cta">
+    <div class="lp__cta-card">
+      <div class="lp__cta-corners"><i></i><i></i><i></i><i></i></div>
+      <div class="lp__cta-eyebrow">READY TO START THE QUEST?</div>
+      <h2>Download CircuitQu<i>EE</i>st for Android.</h2>
+      <p>Free. Open source (MIT). No ads, no accounts, no telemetry.</p>
+      <div class="lp__cta-row">
+        <a class="lp__btn lp__btn--primary" href="https://github.com/HighviewOne/CircuitQueest/releases/download/v2.4/CircuitQueest-v2.4.apk">Download APK <span class="lp__btn-meta">v2.4 · 2 MB</span></a>
+        <a class="lp__btn lp__btn--ghost" href="https://github.com/HighviewOne/CircuitQueest/releases/latest">Release notes</a>
+      </div>
+      <ol class="lp__steps">
+        <li><span><b>Download</b> the APK on your phone (Android 8.0 or newer).</span></li>
+        <li><span><b>Open it</b> from your notifications or Downloads. If Android asks, allow your browser to
+          “install unknown apps” — that setting only applies to the browser, and you can turn it off afterwards.</span></li>
+        <li><span><b>Install</b> and open CircuitQuEEst. Later versions install over the top and keep your progress.</span></li>
+      </ol>
+    </div>
+  </section>
+  </main>
+
+  <footer class="lp__footer">
+    <div class="lp__footer-brand">
+      <span class="cq-brand__mark">
+        <svg viewBox="0 0 28 28" width="20" height="20" aria-hidden="true">
+          <circle cx="14" cy="14" r="13" fill="none" stroke="#5da3ff" stroke-width="1.5" />
+          <path d="M16 5 L9 16 H14 L12 23 L19 12 H14 Z" fill="#f4b840" />
+        </svg>
+      </span>
+      <span>CircuitQu<i>EE</i>st</span>
+    </div>
+    <div class="lp__footer-text">MIT licensed · Built for engineers · © 2026 HighviewOne</div>
+    <div class="lp__footer-links">
+      <a href="https://github.com/HighviewOne/CircuitQueest">GitHub</a><a href="privacy.html">Privacy</a><a href="https://github.com/HighviewOne/CircuitQueest/issues">Issues</a>
+      <a href="https://eerefresher.mirarver.com/">Podcast</a><a href="mailto:CircuitQuEEst@mirarver.com">CircuitQuEEst@mirarver.com</a>
+    </div>
+  </footer>
+</div>
 
 </body>
 </html>

@@ -27,6 +27,7 @@
 }
 .lp__brand {
   display: flex; align-items: center; gap: 10px;
+  color: inherit; text-decoration: none;
   font-size: 18px; font-weight: 700; letter-spacing: -0.02em;
 }
 .lp__brand i { color: #5da3ff; font-style: normal; }
@@ -82,6 +83,10 @@
   background: #4fd6e8;
   box-shadow: 0 0 8px #4fd6e8;
   animation: cq-pulse 2s ease-in-out infinite;
+}
+@keyframes cq-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
 }
 
 .lp__title {
@@ -146,6 +151,13 @@
   font-weight: 500;
 }
 
+.lp__install-hint {
+  margin: -32px 0 40px;
+  font-size: 14px;
+  color: #98a2c8;
+}
+.lp__install-hint a { color: #5da3ff; }
+
 .lp__stats { display: flex; gap: 40px; flex-wrap: wrap; }
 .lp__stat-num {
   font-size: 32px;
@@ -180,7 +192,6 @@
 }
 .lp__phone {
   width: 320px;
-  height: 600px;
   background: #161b2e;
   border: 2px solid #2a3258;
   border-radius: 36px;
@@ -188,121 +199,17 @@
   position: relative;
   box-shadow: 0 0 80px rgba(36,128,255,0.25), 0 30px 60px rgba(0,0,0,0.6);
 }
-.lp__phone-notch {
-  width: 80px; height: 6px;
-  background: #2a3258;
-  border-radius: 4px;
-  margin: 0 auto 14px;
-}
-.lp__phone-screen {
-  background: #0a0e1a;
-  border: 1px solid #2a3258;
-  border-radius: 24px;
-  padding: 16px;
-  height: calc(100% - 20px);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.lp__phone-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  margin-bottom: 4px;
-}
-.lp__phone-bar i { font-style: normal; }
-.lp__phone-xp-label {
-  font-family: var(--cq-mono);
-  font-size: 10px;
-  color: #f4b840;
-  letter-spacing: 0.04em;
-  font-weight: 600;
-}
-.lp__phone-xp {
-  height: 8px;
-  background: #1f2647;
-  border-radius: 4px;
-  border: 1px solid #2a3258;
-  overflow: hidden;
-  position: relative;
-  margin-bottom: 8px;
-}
-.lp__phone-xp-fill {
-  width: 82%;
-  height: 100%;
-  background: linear-gradient(90deg, #2480ff, #4fd6e8, #f4b840);
-  border-radius: 3px;
-  box-shadow: 0 0 12px #4fd6e8;
-  animation: lp-fill 2s cubic-bezier(.2,.8,.2,1) forwards;
-}
-@keyframes lp-fill {
-  from { width: 0; }
-  to { width: 82%; }
-}
-.lp__phone-eyebrow {
-  font-family: var(--cq-mono);
-  font-size: 9px;
-  letter-spacing: 0.18em;
-  color: #5d678f;
-  margin: 4px 0 4px;
-}
 
-.lp__phone-card {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px;
-  background: linear-gradient(180deg, #1d2340, #161b2e);
+
+/* Real screenshot inside the phone frame */
+.lp__phone-shot {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 24px;
   border: 1px solid #2a3258;
-  border-radius: 12px;
-  position: relative;
+  box-sizing: border-box;
 }
-.lp__phone-glyph {
-  width: 38px; height: 38px;
-  border-radius: 10px;
-  background: #0a0e1a;
-  border: 1px solid #2a3258;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--cq-mono);
-  font-size: 11px;
-  font-weight: 700;
-  color: #5da3ff;
-  flex-shrink: 0;
-}
-.lp__phone-glyph--gold { color: #f4b840; border-color: rgba(244,184,64,0.4); }
-.lp__phone-title { font-size: 13px; font-weight: 600; }
-.lp__phone-sub { font-size: 11px; color: #98a2c8; font-family: var(--cq-mono); margin-top: 2px; }
-.lp__phone-status {
-  font-family: var(--cq-mono);
-  font-size: 10px;
-  color: #f4b840;
-  margin-top: 4px;
-  letter-spacing: 0.04em;
-}
-.lp__phone-card--current {
-  border-color: #f4b840;
-  box-shadow: 0 0 20px rgba(244,184,64,0.18);
-}
-.lp__phone-card--done .lp__phone-glyph { color: #34e090; border-color: rgba(52,224,144,0.3); }
-.lp__phone-check {
-  margin-left: auto;
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  background: #34e090;
-  color: #0a0e1a;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700;
-  box-shadow: 0 0 12px #34e090;
-}
-.lp__phone-card--locked {
-  opacity: 0.5;
-  border-style: dashed;
-  background: #0f1422;
-}
-.lp__phone-card--locked .lp__phone-glyph { opacity: 0.5; }
 
 /* Readout */
 .lp__readout {
@@ -326,7 +233,7 @@
 .lp__readout-row span:last-child { color: #f4b840; font-variant-numeric: tabular-nums; }
 
 /* Sections */
-.lp__features, .lp__topics, .lp__cta {
+.lp__features, .lp__screens, .lp__topics, .lp__podcast, .lp__cta {
   max-width: 1200px;
   margin: 0 auto;
   padding: 80px 48px;
@@ -388,6 +295,32 @@
   color: #98a2c8;
   margin: 0;
   text-wrap: pretty;
+}
+
+/* Screenshots */
+.lp__screens { padding-top: 0; }
+.lp__shot-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.lp__shot { margin: 0; }
+.lp__shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 20px;
+  border: 1px solid #2a3258;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.45);
+}
+.lp__shot figcaption {
+  font-family: var(--cq-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #5d678f;
+  margin-top: 12px;
+  text-align: center;
 }
 
 /* Topics */
@@ -491,6 +424,39 @@
   margin-bottom: 0;
   position: relative;
 }
+.lp__steps {
+  position: relative;
+  max-width: 560px;
+  margin: 36px auto 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.lp__steps li {
+  counter-increment: step;
+  display: flex;
+  gap: 14px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #98a2c8;
+}
+.lp__steps li::before {
+  content: counter(step);
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 1px solid #5da3ff;
+  color: #5da3ff;
+  font-family: var(--cq-mono);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.lp__steps b { color: #e6ecff; font-weight: 600; }
 
 /* Footer */
 .lp__footer {
@@ -507,7 +473,11 @@
 .lp__footer-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
 .lp__footer-brand i { color: #5da3ff; font-style: normal; }
 .lp__footer-text { font-family: var(--cq-mono); font-size: 11px; color: #5d678f; letter-spacing: 0.04em; }
-.lp__footer-links { display: flex; gap: 20px; }
+.lp__podcast { padding-top: 0; }
+.lp__podcast .lp__sub { max-width: 700px; }
+.lp__podcast .lp__sub a { color: #5da3ff; }
+.lp__podcast .lp__cta-row { margin-bottom: 0; }
+.lp__footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
 .lp__footer-links a {
   color: #98a2c8;
   text-decoration: none;
@@ -517,7 +487,36 @@
 .lp__footer-links a:hover { color: #5da3ff; }
 
 @media (max-width: 980px) {
-  .lp__hero { grid-template-columns: 1fr; }
+  .lp__hero { grid-template-columns: minmax(0, 1fr); }
   .lp__title { font-size: 44px; }
-  .lp__feature-grid, .lp__topic-grid { grid-template-columns: repeat(2, 1fr); }
+  .lp__feature-grid, .lp__topic-grid, .lp__shot-strip { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Phones: the desktop 48px gutters and 44–64px headings don't fit, and the nav
+   pushed the Download button off-screen. */
+@media (max-width: 600px) {
+  .lp__nav { padding: 14px 16px; gap: 12px; }
+  .lp__nav-links a:not(.lp__nav-cta) { display: none; }
+  .lp__nav-cta { padding: 7px 10px; letter-spacing: 0; white-space: nowrap; }
+  .lp__btn, .lp__btn-meta { white-space: nowrap; }
+  .lp__hero { padding: 48px 16px 40px; gap: 48px; }
+  .lp__eyebrow { max-width: 100%; box-sizing: border-box; letter-spacing: 0.1em; }
+  .lp__title { font-size: 40px; }
+  .lp__sub { font-size: 16px; }
+  .lp__phone { width: min(320px, 100%); box-sizing: border-box; }
+  .lp__readout { left: -8px; }
+  .lp__install-hint { margin: -36px 0 32px; }
+  .lp__stats { gap: 24px; }
+  .lp__shot-strip { gap: 12px; }
+  .lp__features, .lp__screens, .lp__topics, .lp__podcast, .lp__cta { padding-left: 16px; padding-right: 16px; }
+  .lp__features, .lp__topics, .lp__cta { padding-top: 56px; padding-bottom: 56px; }
+  .lp__section-title { font-size: 32px; margin-bottom: 32px; }
+  .lp__feature-grid, .lp__topic-grid { grid-template-columns: 1fr; }
+  .lp__cta-card { padding: 40px 20px; }
+  .lp__cta-card h2 { font-size: 30px; line-height: 1.15; }
+  .lp__steps li { font-size: 14px; }
+  .lp__footer { padding: 28px 16px 40px; }
+}
+@media (max-width: 359px) {
+  .lp__btn-meta { display: none; }
 }

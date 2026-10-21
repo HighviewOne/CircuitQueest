@@ -49,7 +49,7 @@ class QuizScoringTest {
 2. **Repository** (16 tests) - CRUD operations, data consistency
 3. **ViewModels** (14 tests) - State management, lifecycle
 4. **Edge Cases** (23 tests) - Boundary conditions, error handling
-5. **Content** (84 tests) - All 41 topics validated
+5. **Content** (84 tests) - All 42 topics validated
 6. **DAO** (17 tests) - Mocked database operations
 7. **Navigation** (9 tests) - Route definitions, arguments
 8. **Other** (37 tests) - Utilities, services
