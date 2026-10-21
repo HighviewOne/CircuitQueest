@@ -3,6 +3,7 @@ package com.circuitqueest.app.data.di
 import android.content.Context
 import androidx.room.Room
 import com.circuitqueest.app.data.db.AppDatabase
+import com.circuitqueest.app.data.db.LegacyDatabaseImport
 import com.circuitqueest.app.data.repository.ProgressRepository
 import dagger.Module
 import dagger.Provides
@@ -19,6 +20,7 @@ object RepositoryModule {
     @Provides
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.DATABASE_NAME)
+            .addCallback(LegacyDatabaseImport(context.getDatabasePath(AppDatabase.LEGACY_DATABASE_NAME)))
             .build()
 
     @Singleton

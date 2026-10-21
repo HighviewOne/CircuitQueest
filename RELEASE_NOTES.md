@@ -1,3 +1,14 @@
+# CircuitQuEEst v2.5.1 — Progress Recovery
+
+**Release Date:** October 2026
+**APK size:** ~2 MB (R8-shrunk release build)
+**Requires:** Android 8.0+
+
+### Fixes
+- **Restores progress lost when updating from v2.0 or earlier.** Versions 1.0–2.0 saved progress in a differently named database file, and v2.2 started a new one without moving the old data across, so anyone who updated from those versions saw their XP and completed quests reset. On first launch, v2.5.1 finds the old file and brings its progress back. If you've played since, the two are merged, keeping the better result for each topic. The old file is kept (renamed), not deleted.
+
+---
+
 # CircuitQuEEst v2.5 — Review Mode & Android 16
 
 **Release Date:** October 20, 2026

@@ -31,5 +31,8 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         /** On-disk name; changing it orphans every existing player's progress. */
         const val DATABASE_NAME = "circuitqueest_db"
+
+        /** Name used by v1.0–v2.0; [LegacyDatabaseImport] moves its progress into [DATABASE_NAME]. */
+        const val LEGACY_DATABASE_NAME = "circuitqueest-db"
     }
 }
