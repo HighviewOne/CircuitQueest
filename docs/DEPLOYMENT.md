@@ -78,6 +78,8 @@ material is in the repo.
 ./gradlew assembleRelease
 scripts/sign-release.sh app/build/outputs/apk/release/app-release-unsigned.apk CircuitQueest-vX.Y.apk
 ```
+`apksigner` needs `java` on PATH (this Dell has none by default):
+`export PATH=~/.local/jdk-17/bin:$PATH` first.
 The script prints the verification: expect v3/v3.1 `true`, a `minSdkVersion=33` signer with the
 release cert, and a `minSdkVersion=24` signer with the debug cert.
 
