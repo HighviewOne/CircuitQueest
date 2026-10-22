@@ -10,6 +10,9 @@
   <link rel="icon" href="favicon.ico" sizes="48x48">
   <link rel="icon" href="img/icon-192.png" type="image/png" sizes="192x192">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <style>
     .docs-layout {
@@ -17,15 +20,11 @@
       margin: 0 auto;
       padding: 2.5rem 1.5rem 4rem;
       display: grid;
-      grid-template-columns: 220px 1fr;
+      grid-template-columns: 220px minmax(0, 1fr);
       gap: 3rem;
       align-items: start;
     }
 
-    @media (max-width: 768px) {
-      .docs-layout { grid-template-columns: 1fr; }
-      .docs-sidebar { display: none; }
-    }
 
     /* Sidebar */
     .docs-sidebar {
@@ -38,11 +37,12 @@
     }
 
     .sidebar-title {
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: var(--text-muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-dim);
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.18em;
       margin-bottom: 0.75rem;
     }
 
@@ -61,10 +61,10 @@
     .sidebar-nav .sub { padding-left: 1rem; font-size: 0.8rem; }
 
     /* Content */
-    .docs-content h1 { font-size: 2rem; margin-bottom: 0.4rem; }
+    .docs-content h1 { font-size: 44px; letter-spacing: -0.03em; margin-bottom: 0.4rem; }
     .docs-content h2 {
-      font-size: 1.35rem;
-      color: var(--blue-light);
+      font-size: 1.6rem;
+      color: var(--text);
       margin-top: 2.5rem;
       margin-bottom: 0.75rem;
       padding-bottom: 0.4rem;
@@ -80,6 +80,8 @@
     .docs-content ul { margin: 0.5rem 0 0.75rem 1.25rem; color: var(--text-muted); }
     .docs-content ul li { margin-bottom: 0.3rem; }
     .docs-content strong { color: var(--text); }
+    .docs-content table { margin-bottom: 1rem; }
+    .topic-table-wrap table { margin-bottom: 0; }
 
     /* Architecture diagram */
     .arch-box {
@@ -87,11 +89,12 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 1.25rem;
-      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-family: var(--mono);
       font-size: 0.8rem;
       line-height: 1.8;
       color: var(--text-muted);
       overflow-x: auto;
+      white-space: pre;
     }
     .arch-layer { color: var(--blue-light); font-weight: 700; }
     .arch-arrow { color: var(--gold); }
@@ -115,20 +118,49 @@
       overflow: hidden;
       margin-bottom: 1.5rem;
     }
+
+    /* Phones: the sidebar becomes a sticky, swipeable row of section links under the nav. */
+    @media (max-width: 760px) {
+      .docs-layout { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; padding: 0 0 3rem; }
+      .docs-sidebar {
+        top: 56px;
+        z-index: 50;
+        border-radius: 0;
+        border-width: 0 0 1px;
+        background: rgba(10,14,26,0.92);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        padding: 10px 16px;
+      }
+      .sidebar-title { display: none; }
+      .sidebar-nav { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+      .sidebar-nav::-webkit-scrollbar { display: none; }
+      .sidebar-nav li { margin: 0; flex-shrink: 0; }
+      .sidebar-nav li:has(> .sub) { display: none; }
+      .sidebar-nav a { white-space: nowrap; border: 1px solid var(--border); border-radius: 100px; padding: 5px 12px; }
+      .docs-content { padding: 0 16px; }
+      .docs-content h1 { font-size: 34px; }
+      .topic-table-wrap { overflow-x: auto; }
+      .topic-table-wrap td code { white-space: nowrap; }
+    }
   </style>
 </head>
 <body>
 
 <nav>
-  <a href="index.html" class="nav-brand">
-    <span class="bolt">⚡</span> CircuitQuEEst
+  <a href="./" class="nav-brand" aria-label="CircuitQuEEst home">
+    <svg viewBox="0 0 28 28" width="24" height="24" aria-hidden="true">
+      <circle cx="14" cy="14" r="13" fill="none" stroke="#5da3ff" stroke-width="1.5" />
+      <path d="M16 5 L9 16 H14 L12 23 L19 12 H14 Z" fill="#f4b840" />
+    </svg>
+    <span class="brand-text">CircuitQu<i>EE</i>st</span>
   </a>
   <ul class="nav-links">
-    <li><a href="index.html">Home</a></li>
-    <li><a href="documentation.html" class="active">Docs</a></li>
+    <li><a href="./">Home</a></li>
+    <li><a href="documentation.html" class="active" aria-current="page">Docs</a></li>
     <li><a href="privacy.html">Privacy</a></li>
-    <li><a href="https://eerefresher.mirarver.com/" target="_blank" rel="noopener">Podcast ↗</a></li>
-    <li><a href="https://github.com/HighviewOne/CircuitQueest" target="_blank" rel="noopener">GitHub ↗</a></li>
+    <li class="ext"><a href="https://eerefresher.mirarver.com/">Podcast</a></li>
+    <li class="ext"><a href="https://github.com/HighviewOne/CircuitQueest">GitHub</a></li>
   </ul>
 </nav>
 
@@ -153,6 +185,7 @@
 
   <!-- Main content -->
   <main class="docs-content">
+    <div class="page-eyebrow">§ DOCUMENTATION</div>
     <h1>Documentation</h1>
     <p>Technical reference for CircuitQuEEst — architecture, content model, build instructions, and the full topic list.</p>
 
@@ -164,39 +197,39 @@
     <ul>
       <li><strong>Language:</strong> 100% Kotlin</li>
       <li><strong>UI:</strong> Jetpack Compose + Material 3</li>
-      <li><strong>Architecture:</strong> MVVM (ViewModel + Repository pattern)</li>
+      <li><strong>Architecture:</strong> MVVM (ViewModel + Repository pattern), Hilt dependency injection</li>
       <li><strong>Storage:</strong> Room database (offline-first, SQLite)</li>
       <li><strong>Navigation:</strong> Jetpack Navigation Compose</li>
       <li><strong>Build system:</strong> Gradle Kotlin DSL + version catalog</li>
-      <li><strong>Min SDK:</strong> 26 (Android 8.0 Oreo) &nbsp;/&nbsp; <strong>Target SDK:</strong> 35</li>
+      <li><strong>Min SDK:</strong> 26 (Android 8.0 Oreo) &nbsp;/&nbsp; <strong>Target SDK:</strong> 36 (Android 16)</li>
     </ul>
 
     <!-- Architecture -->
     <h2 id="architecture">Architecture</h2>
 
     <h3 id="layers">Layer overview</h3>
-    <div class="arch-box">
-<span class="arch-layer">┌─ UI Layer (Jetpack Compose) ──────────────────────────────┐</span>
-│  HomeScreen · LessonScreen · QuizScreen · ResultScreen      │
-│  Components: TopicCard · CategoryHeader · XpProgressBar     │
-<span class="arch-layer">├─ ViewModel Layer ─────────────────────────────────────────┤</span>
-│  HomeViewModel · LessonViewModel · QuizViewModel            │
-│  StateFlow&lt;T&gt; → collectAsStateWithLifecycle() → recompose UI             │
-<span class="arch-layer">├─ Repository Layer ────────────────────────────────────────┤</span>
-│  ProgressRepository (single source of truth)                │
-│  Room DAOs: TopicProgressDao · QuizResultDao                │
-<span class="arch-layer">├─ Data Layer ──────────────────────────────────────────────┤</span>
-│  Room DB (CircuitQueestDatabase)                            │
-│  Entities: TopicProgress · QuizResult                       │
-<span class="arch-layer">└─ Content Layer (compile-time) ────────────────────────────┘</span>
-   Kotlin singleton objects — one file per topic              │
-   TopicCategories — maps topicId → category (UI-only)       │
-    </div>
+    <div class="arch-box"><span class="arch-layer">┌─ UI Layer (Jetpack Compose) ──────────────────────────────────┐</span>
+│  HomeScreen · LessonScreen · QuizScreen · ResultScreen        │
+│  Components: TopicCard · CategoryHeader · XpBar               │
+<span class="arch-layer">├─ ViewModel Layer (@HiltViewModel) ────────────────────────────┤</span>
+│  HomeViewModel · LessonViewModel · QuizViewModel              │
+│  StateFlow → collectAsStateWithLifecycle() → recompose UI     │
+<span class="arch-layer">├─ Repository Layer ────────────────────────────────────────────┤</span>
+│  ProgressRepository (single source of truth)                  │
+│  DAOs: ProgressDao · QuizResultDao · MissedQuestionDao        │
+<span class="arch-layer">├─ Data Layer ──────────────────────────────────────────────────┤</span>
+│  Room DB (AppDatabase, provided by Hilt)                      │
+│  Entities: TopicProgress · QuizResult · MissedQuestion        │
+<span class="arch-layer">├─ Content Layer (compile-time) ────────────────────────────────┤</span>
+│  Kotlin singleton objects — one file per topic                │
+│  TopicCategories — maps topicId → category (UI-only)          │
+<span class="arch-layer">└───────────────────────────────────────────────────────────────┘</span></div>
 
     <h3 id="navigation">Navigation</h3>
     <p>
-      A single <code>NavGraph.kt</code> defines all routes using Jetpack Navigation Compose. The repository is injected at the NavGraph level and passed into ViewModel factories.
+      A single <code>NavGraph.kt</code> defines all routes using Jetpack Navigation Compose. ViewModels are <code>@HiltViewModel</code>s obtained with <code>hiltViewModel()</code>; Hilt provides the database and <code>ProgressRepository</code>.
     </p>
+    <div class="topic-table-wrap">
     <table>
       <thead><tr><th>Route</th><th>Screen</th></tr></thead>
       <tbody>
@@ -207,6 +240,7 @@
         <tr><td><code>result/{topicId}/{score}/{total}/{xp}</code></td><td>ResultScreen — score + XP actually awarded</td></tr>
       </tbody>
     </table>
+    </div>
 
     <h3 id="content">Content model</h3>
     <p>
@@ -217,7 +251,7 @@
     val title: String,
     val subtitle: String,
     val icon: String,      // emoji
-    val order: Int,        // global sort order (1–42)
+    val order: Int,        // quest number and unlock order (0–41)
     val lesson: Lesson,
     val quiz: Quiz
 )
@@ -269,7 +303,7 @@ cd CircuitQueest
 ./gradlew assembleDebug
 
 # Output location
-# app/build/outputs/apk/debug/app-debug.apk (~10 MB)</code></pre>
+# app/build/outputs/apk/debug/app-debug.apk</code></pre>
 
     <p>If your environment variables aren't set:</p>
     <pre><code>JAVA_HOME=/path/to/jdk-17 \
@@ -281,12 +315,12 @@ ANDROID_HOME=/path/to/android-sdk \
 
     <!-- Topics -->
     <h2 id="topics">All 42 Topics</h2>
-    <p>Topics are organized into 9 categories on the HomeScreen. Topics unlock in the numeric sequence below, which follows the categories top to bottom.</p>
+    <p>Topics are organized into 9 categories on the HomeScreen. The numbers are the quest numbers shown in the app (00–41); topics unlock in that order, following the categories top to bottom.</p>
 
     <!-- Circuit Fundamentals -->
     <div class="cat-section">
       <div class="cat-header">
-        <span class="icon">⚡</span>
+        <span class="icon" aria-hidden="true">⚡</span>
         <h3>Circuit Fundamentals</h3>
         <span class="count">(6 topics)</span>
       </div>
@@ -294,12 +328,12 @@ ANDROID_HOME=/path/to/android-sdk \
         <table>
           <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
           <tbody>
-            <tr><td>1</td><td><strong>Ohm's Law</strong></td><td>V=IR, power calculations, basic circuit analysis</td></tr>
-            <tr><td>2</td><td><strong>Series &amp; Parallel Circuits</strong></td><td>Resistance combinations, voltage/current division</td></tr>
-            <tr><td>3</td><td><strong>Kirchhoff's Laws</strong></td><td>KCL, KVL, node and loop analysis</td></tr>
-            <tr><td>4</td><td><strong>Capacitors &amp; Inductors</strong></td><td>C=Q/V, V=LdI/dt, RC/RL time constants</td></tr>
-            <tr><td>5</td><td><strong>AC Circuits</strong></td><td>RMS values, reactance, impedance, RLC resonance</td></tr>
-            <tr><td>6</td><td><strong>Thevenin &amp; Norton</strong></td><td>Equivalent circuits, source transformation, max power</td></tr>
+            <tr><td>00</td><td><strong>Ohm's Law</strong></td><td>V=IR, power calculations, basic circuit analysis</td></tr>
+            <tr><td>01</td><td><strong>Series &amp; Parallel Circuits</strong></td><td>Resistance combinations, voltage/current division</td></tr>
+            <tr><td>02</td><td><strong>Kirchhoff's Laws</strong></td><td>KCL, KVL, node and loop analysis</td></tr>
+            <tr><td>03</td><td><strong>Capacitors &amp; Inductors</strong></td><td>C=Q/V, V=LdI/dt, RC/RL time constants</td></tr>
+            <tr><td>04</td><td><strong>AC Circuits</strong></td><td>RMS values, reactance, impedance, RLC resonance</td></tr>
+            <tr><td>05</td><td><strong>Thevenin &amp; Norton</strong></td><td>Equivalent circuits, source transformation, max power</td></tr>
           </tbody>
         </table>
       </div>
@@ -308,7 +342,7 @@ ANDROID_HOME=/path/to/android-sdk \
     <!-- Semiconductor Devices -->
     <div class="cat-section">
       <div class="cat-header">
-        <span class="icon">🔌</span>
+        <span class="icon" aria-hidden="true">🔌</span>
         <h3>Semiconductor Devices</h3>
         <span class="count">(4 topics)</span>
       </div>
@@ -316,10 +350,10 @@ ANDROID_HOME=/path/to/android-sdk \
         <table>
           <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
           <tbody>
-            <tr><td>7</td><td><strong>Diodes &amp; Rectifiers</strong></td><td>PN junctions, Zener, half/full-wave, LEDs</td></tr>
-            <tr><td>8</td><td><strong>Transistors (BJTs)</strong></td><td>NPN/PNP, beta, operating regions, switching</td></tr>
-            <tr><td>9</td><td><strong>MOSFETs</strong></td><td>NMOS/PMOS, threshold voltage, triode/saturation, CMOS</td></tr>
-            <tr><td>10</td><td><strong>Semiconductor Physics</strong></td><td>Band theory, doping, drift/diffusion, carrier transport</td></tr>
+            <tr><td>06</td><td><strong>Diodes &amp; Rectifiers</strong></td><td>PN junctions, Zener, half/full-wave, LEDs</td></tr>
+            <tr><td>07</td><td><strong>Transistors (BJTs)</strong></td><td>NPN/PNP, beta, operating regions, switching</td></tr>
+            <tr><td>08</td><td><strong>MOSFETs</strong></td><td>NMOS/PMOS, threshold voltage, triode/saturation, CMOS</td></tr>
+            <tr><td>09</td><td><strong>Semiconductor Physics</strong></td><td>Band theory, doping, drift/diffusion, carrier transport</td></tr>
           </tbody>
         </table>
       </div>
@@ -328,7 +362,7 @@ ANDROID_HOME=/path/to/android-sdk \
     <!-- Analog Design -->
     <div class="cat-section">
       <div class="cat-header">
-        <span class="icon">〰️</span>
+        <span class="icon" aria-hidden="true">〰️</span>
         <h3>Analog Design</h3>
         <span class="count">(4 topics)</span>
       </div>
@@ -336,10 +370,10 @@ ANDROID_HOME=/path/to/android-sdk \
         <table>
           <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
           <tbody>
-            <tr><td>11</td><td><strong>Op-Amps</strong></td><td>Inverting/non-inverting gain, voltage follower, summing amp</td></tr>
-            <tr><td>12</td><td><strong>Filters</strong></td><td>Low/high/band-pass, cutoff frequency, roll-off, active filters</td></tr>
-            <tr><td>13</td><td><strong>Analog Circuit Design</strong></td><td>Current mirrors, diff pairs, feedback, bandgap, cascode</td></tr>
-            <tr><td>14</td><td><strong>Audio Electronics</strong></td><td>Amplifier classes, DACs, speakers, headphone amp design</td></tr>
+            <tr><td>10</td><td><strong>Op-Amps</strong></td><td>Inverting/non-inverting gain, voltage follower, summing amp</td></tr>
+            <tr><td>11</td><td><strong>Filters</strong></td><td>Low/high/band-pass, cutoff frequency, roll-off, active filters</td></tr>
+            <tr><td>12</td><td><strong>Analog Circuit Design</strong></td><td>Current mirrors, diff pairs, feedback, bandgap, cascode</td></tr>
+            <tr><td>13</td><td><strong>Audio Electronics</strong></td><td>Amplifier classes, DACs, speakers, headphone amp design</td></tr>
           </tbody>
         </table>
       </div>
@@ -348,7 +382,7 @@ ANDROID_HOME=/path/to/android-sdk \
     <!-- Digital Systems -->
     <div class="cat-section">
       <div class="cat-header">
-        <span class="icon">💻</span>
+        <span class="icon" aria-hidden="true">💻</span>
         <h3>Digital Systems</h3>
         <span class="count">(4 topics)</span>
       </div>
@@ -356,10 +390,10 @@ ANDROID_HOME=/path/to/android-sdk \
         <table>
           <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
           <tbody>
-            <tr><td>15</td><td><strong>Digital Logic Gates</strong></td><td>AND/OR/NOT/NAND/NOR/XOR, Boolean algebra, Karnaugh maps</td></tr>
-            <tr><td>16</td><td><strong>Digital Systems</strong></td><td>Flip-flops, counters, finite state machines, memory</td></tr>
-            <tr><td>17</td><td><strong>VLSI Design</strong></td><td>CMOS fabrication, RTL-to-GDSII, DRC/LVS, timing, power</td></tr>
-            <tr><td>18</td><td><strong>Machine Learning Hardware</strong></td><td>GPUs, TPUs, quantization, inference engines, edge AI</td></tr>
+            <tr><td>14</td><td><strong>Digital Logic Gates</strong></td><td>AND/OR/NOT/NAND/NOR/XOR, Boolean algebra, Karnaugh maps</td></tr>
+            <tr><td>15</td><td><strong>Digital Systems</strong></td><td>Flip-flops, counters, finite state machines, memory</td></tr>
+            <tr><td>16</td><td><strong>VLSI Design</strong></td><td>CMOS fabrication, RTL-to-GDSII, DRC/LVS, timing, power</td></tr>
+            <tr><td>17</td><td><strong>Machine Learning Hardware</strong></td><td>GPUs, TPUs, quantization, inference engines, edge AI</td></tr>
           </tbody>
         </table>
       </div>
@@ -368,7 +402,7 @@ ANDROID_HOME=/path/to/android-sdk \
     <!-- Signals & Control -->
     <div class="cat-section">
       <div class="cat-header">
-        <span class="icon">📊</span>
+        <span class="icon" aria-hidden="true">📊</span>
         <h3>Signals &amp; Control</h3>
         <span class="count">(3 topics)</span>
       </div>
@@ -376,9 +410,9 @@ ANDROID_HOME=/path/to/android-sdk \
         <table>
           <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
           <tbody>
-            <tr><td>19</td><td><strong>Signals &amp; Systems</strong></td><td>Fourier/Laplace transforms, transfer functions, Bode plots</td></tr>
-            <tr><td>20</td><td><strong>Control Systems</strong></td><td>Feedback loops, PID controllers, stability, gain/phase margins</td></tr>
-            <tr><td>21</td><td><strong>Digital Signal Processing</strong></td><td>Sampling theorem, FFT, FIR/IIR filters, quantization noise</td></tr>
+            <tr><td>18</td><td><strong>Signals &amp; Systems</strong></td><td>Fourier/Laplace transforms, transfer functions, Bode plots</td></tr>
+            <tr><td>19</td><td><strong>Control Systems</strong></td><td>Feedback loops, PID controllers, stability, gain/phase margins</td></tr>
+            <tr><td>20</td><td><strong>Digital Signal Processing</strong></td><td>Sampling theorem, FFT, FIR/IIR filters, quantization noise</td></tr>
           </tbody>
         </table>
       </div>
@@ -387,7 +421,7 @@ ANDROID_HOME=/path/to/android-sdk \
     <!-- Power & Energy -->
     <div class="cat-section">
       <div class="cat-header">
-        <span class="icon">🔋</span>
+        <span class="icon" aria-hidden="true">🔋</span>
         <h3>Power &amp; Energy</h3>
         <span class="count">(6 topics)</span>
       </div>
@@ -395,12 +429,12 @@ ANDROID_HOME=/path/to/android-sdk \
         <table>
           <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
           <tbody>
-            <tr><td>22</td><td><strong>Transformers</strong></td><td>Turns ratio, impedance matching, efficiency, losses</td></tr>
-            <tr><td>23</td><td><strong>Power Electronics</strong></td><td>Linear regulators, LDOs, buck/boost converters, PWM</td></tr>
-            <tr><td>24</td><td><strong>Power Systems</strong></td><td>Three-phase power, transmission, power factor, protection</td></tr>
-            <tr><td>25</td><td><strong>Renewable Energy</strong></td><td>Solar cells, MPPT, wind turbines, grid-tie inverters</td></tr>
-            <tr><td>26</td><td><strong>Electric Vehicles</strong></td><td>Powertrains, inverters, regenerative braking, charging</td></tr>
-            <tr><td>27</td><td><strong>Battery &amp; Energy Storage</strong></td><td>Li-ion chemistry, C-rate, CC-CV charging, BMS, supercaps</td></tr>
+            <tr><td>21</td><td><strong>Transformers</strong></td><td>Turns ratio, impedance matching, efficiency, losses</td></tr>
+            <tr><td>22</td><td><strong>Power Electronics</strong></td><td>Linear regulators, LDOs, buck/boost converters, PWM</td></tr>
+            <tr><td>23</td><td><strong>Power Systems</strong></td><td>Three-phase power, transmission, power factor, protection</td></tr>
+            <tr><td>24</td><td><strong>Renewable Energy</strong></td><td>Solar cells, MPPT, wind turbines, grid-tie inverters</td></tr>
+            <tr><td>25</td><td><strong>Electric Vehicles</strong></td><td>Powertrains, inverters, regenerative braking, charging</td></tr>
+            <tr><td>26</td><td><strong>Battery &amp; Energy Storage</strong></td><td>Li-ion chemistry, C-rate, CC-CV charging, BMS, supercaps</td></tr>
           </tbody>
         </table>
       </div>
@@ -409,7 +443,7 @@ ANDROID_HOME=/path/to/android-sdk \
     <!-- RF & Communications -->
     <div class="cat-section">
       <div class="cat-header">
-        <span class="icon">📡</span>
+        <span class="icon" aria-hidden="true">📡</span>
         <h3>RF &amp; Communications</h3>
         <span class="count">(7 topics)</span>
       </div>
@@ -417,13 +451,13 @@ ANDROID_HOME=/path/to/android-sdk \
         <table>
           <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
           <tbody>
-            <tr><td>28</td><td><strong>Electromagnetics</strong></td><td>E/B fields, Faraday's law, Maxwell's equations, EM waves</td></tr>
-            <tr><td>29</td><td><strong>Transmission Lines</strong></td><td>Characteristic impedance, reflections, VSWR, Smith chart</td></tr>
-            <tr><td>30</td><td><strong>Communication Systems</strong></td><td>AM/FM modulation, SNR, Nyquist theorem, QAM</td></tr>
-            <tr><td>31</td><td><strong>Antenna Design</strong></td><td>Radiation patterns, gain, dipole/patch/dish, link budgets</td></tr>
-            <tr><td>32</td><td><strong>RF Circuit Design</strong></td><td>S-parameters, LNA design, oscillators, mixers, matching</td></tr>
-            <tr><td>33</td><td><strong>Fiber Optics &amp; Photonics</strong></td><td>Optical fiber, lasers, photodetectors, WDM systems</td></tr>
-            <tr><td>34</td><td><strong>Radar Systems</strong></td><td>Pulse radar, Doppler effect, phased arrays, automotive radar</td></tr>
+            <tr><td>27</td><td><strong>Electromagnetics</strong></td><td>E/B fields, Faraday's law, Maxwell's equations, EM waves</td></tr>
+            <tr><td>28</td><td><strong>Transmission Lines</strong></td><td>Characteristic impedance, reflections, VSWR, Smith chart</td></tr>
+            <tr><td>29</td><td><strong>Communication Systems</strong></td><td>AM/FM modulation, SNR, Nyquist theorem, QAM</td></tr>
+            <tr><td>30</td><td><strong>Antenna Design</strong></td><td>Radiation patterns, gain, dipole/patch/dish, link budgets</td></tr>
+            <tr><td>31</td><td><strong>RF Circuit Design</strong></td><td>S-parameters, LNA design, oscillators, mixers, matching</td></tr>
+            <tr><td>32</td><td><strong>Fiber Optics &amp; Photonics</strong></td><td>Optical fiber, lasers, photodetectors, WDM systems</td></tr>
+            <tr><td>33</td><td><strong>Radar Systems</strong></td><td>Pulse radar, Doppler effect, phased arrays, automotive radar</td></tr>
           </tbody>
         </table>
       </div>
@@ -432,7 +466,7 @@ ANDROID_HOME=/path/to/android-sdk \
     <!-- Hardware & Embedded -->
     <div class="cat-section">
       <div class="cat-header">
-        <span class="icon">🔧</span>
+        <span class="icon" aria-hidden="true">🔧</span>
         <h3>Hardware &amp; Embedded</h3>
         <span class="count">(5 topics)</span>
       </div>
@@ -440,11 +474,11 @@ ANDROID_HOME=/path/to/android-sdk \
         <table>
           <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
           <tbody>
-            <tr><td>35</td><td><strong>PCB Design</strong></td><td>Layer stackup, trace routing, decoupling, ground planes, Gerbers</td></tr>
-            <tr><td>36</td><td><strong>Embedded Systems</strong></td><td>MCU peripherals, GPIO, ADC/DAC, UART/SPI/I2C protocols</td></tr>
-            <tr><td>37</td><td><strong>Sensors &amp; Measurement</strong></td><td>Temperature sensors, Wheatstone bridge, instrumentation amps</td></tr>
-            <tr><td>38</td><td><strong>Signal Integrity &amp; EMC</strong></td><td>Crosstalk, ground bounce, EMI shielding, differential signaling</td></tr>
-            <tr><td>39</td><td><strong>IoT &amp; Wireless</strong></td><td>Wi-Fi/BLE/LoRa/Zigbee, mesh networking, low-power design</td></tr>
+            <tr><td>34</td><td><strong>PCB Design</strong></td><td>Layer stackup, trace routing, decoupling, ground planes, Gerbers</td></tr>
+            <tr><td>35</td><td><strong>Embedded Systems</strong></td><td>MCU peripherals, GPIO, ADC/DAC, UART/SPI/I2C protocols</td></tr>
+            <tr><td>36</td><td><strong>Sensors &amp; Measurement</strong></td><td>Temperature sensors, Wheatstone bridge, instrumentation amps</td></tr>
+            <tr><td>37</td><td><strong>Signal Integrity &amp; EMC</strong></td><td>Crosstalk, ground bounce, EMI shielding, differential signaling</td></tr>
+            <tr><td>38</td><td><strong>IoT &amp; Wireless</strong></td><td>Wi-Fi/BLE/LoRa/Zigbee, mesh networking, low-power design</td></tr>
           </tbody>
         </table>
       </div>
@@ -453,7 +487,7 @@ ANDROID_HOME=/path/to/android-sdk \
     <!-- Specialized Applications -->
     <div class="cat-section">
       <div class="cat-header">
-        <span class="icon">🏥</span>
+        <span class="icon" aria-hidden="true">🏥</span>
         <h3>Specialized Applications</h3>
         <span class="count">(3 topics)</span>
       </div>
@@ -461,9 +495,9 @@ ANDROID_HOME=/path/to/android-sdk \
         <table>
           <thead><tr><th>#</th><th>Topic</th><th>Key concepts</th></tr></thead>
           <tbody>
-            <tr><td>40</td><td><strong>Electric Machines</strong></td><td>DC/AC/stepper motors, torque-speed curves, drives</td></tr>
-            <tr><td>41</td><td><strong>MEMS</strong></td><td>Accelerometers, gyroscopes, pressure sensors, microfabrication</td></tr>
-            <tr><td>42</td><td><strong>Biomedical Electronics</strong></td><td>ECG/EEG signal acquisition, pacemakers, patient safety</td></tr>
+            <tr><td>39</td><td><strong>Electric Machines</strong></td><td>DC/AC/stepper motors, torque-speed curves, drives</td></tr>
+            <tr><td>40</td><td><strong>MEMS</strong></td><td>Accelerometers, gyroscopes, pressure sensors, microfabrication</td></tr>
+            <tr><td>41</td><td><strong>Biomedical Electronics</strong></td><td>ECG/EEG signal acquisition, pacemakers, patient safety</td></tr>
           </tbody>
         </table>
       </div>
@@ -473,15 +507,11 @@ ANDROID_HOME=/path/to/android-sdk \
 </div>
 
 <footer>
-  <p>
-    <strong style="color:var(--text);">⚡ CircuitQuEEst</strong> &nbsp;·&nbsp;
-    <a href="index.html">Home</a> &nbsp;·&nbsp;
-    <a href="documentation.html">Docs</a> &nbsp;·&nbsp;
-    <a href="privacy.html">Privacy</a> &nbsp;·&nbsp;
-    <a href="https://github.com/HighviewOne/CircuitQueest" target="_blank" rel="noopener">GitHub</a> &nbsp;·&nbsp;
-    <a href="https://eerefresher.mirarver.com/" target="_blank" rel="noopener">EE Refresher podcast</a> &nbsp;·&nbsp;
-    <a href="mailto:CircuitQuEEst@mirarver.com">CircuitQuEEst@mirarver.com</a>
-  </p>
+  MIT licensed · © 2026 HighviewOne ·
+  <a href="./">Home</a> · <a href="documentation.html">Docs</a> · <a href="privacy.html">Privacy</a> ·
+  <a href="https://github.com/HighviewOne/CircuitQueest">GitHub</a> ·
+  <a href="https://eerefresher.mirarver.com/">EE Refresher podcast</a> ·
+  <a href="mailto:CircuitQuEEst@mirarver.com">CircuitQuEEst@mirarver.com</a>
 </footer>
 
 </body>
