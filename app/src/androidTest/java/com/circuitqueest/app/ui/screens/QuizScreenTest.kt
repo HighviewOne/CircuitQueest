@@ -56,7 +56,10 @@ class QuizScreenTest {
 
     @After
     fun tearDown() {
-        database.close()
+        // The ViewModel outlives the test, and its last write (or Room's invalidation
+        // refresh after it) can still be running here. Closing the database then crashes
+        // the instrumentation run, so let the in-memory database be collected instead.
+        composeTestRule.waitForIdle()
     }
 
     private fun showQuiz(onBack: () -> Unit = {}) {
@@ -127,8 +130,11 @@ class QuizScreenTest {
         composeTestRule.onNodeWithText("Next  →").performClick()
 
         composeTestRule.runOnIdle { kotlin.test.assertTrue(finished) }
+        // recordAnswer clears the question, then logs the study day; wait for both.
         composeTestRule.waitUntil(5_000) {
-            runBlocking { repository.getMissedCount().first() } == 0
+            runBlocking {
+                repository.getMissedCount().first() == 0 && repository.getStudyDays().first().isNotEmpty()
+            }
         }
     }
 
