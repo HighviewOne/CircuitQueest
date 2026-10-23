@@ -301,8 +301,8 @@
 .lp__screens { padding-top: 0; }
 .lp__shot-strip {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
 }
 .lp__shot { margin: 0; }
 .lp__shot img {
@@ -489,7 +489,15 @@
 @media (max-width: 980px) {
   .lp__hero { grid-template-columns: minmax(0, 1fr); }
   .lp__title { font-size: 44px; }
-  .lp__feature-grid, .lp__topic-grid, .lp__shot-strip { grid-template-columns: repeat(2, 1fr); }
+  .lp__feature-grid, .lp__topic-grid { grid-template-columns: repeat(2, 1fr); }
+  /* Five screenshots don't split evenly, so below desktop they become a swipeable row. */
+  .lp__shot-strip {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 12px;
+  }
+  .lp__shot { flex: 0 0 min(260px, 62%); scroll-snap-align: start; }
 }
 
 /* Phones: the desktop 48px gutters and 44–64px headings don't fit, and the nav
@@ -507,7 +515,6 @@
   .lp__readout { left: -8px; }
   .lp__install-hint { margin: -36px 0 32px; }
   .lp__stats { gap: 24px; }
-  .lp__shot-strip { gap: 12px; }
   .lp__features, .lp__screens, .lp__topics, .lp__podcast, .lp__cta { padding-left: 16px; padding-right: 16px; }
   .lp__features, .lp__topics, .lp__cta { padding-top: 56px; padding-bottom: 56px; }
   .lp__section-title { font-size: 32px; margin-bottom: 32px; }

@@ -23,9 +23,10 @@ CircuitQueest is an offline-first Android app that teaches electrical engineerin
 
 ## Screenshots
 
-| Home | Lesson | Quiz | Result |
-|------|--------|------|--------|
-| Collapsible categories · search · XP bar | PCB hero · parallax scroll · sticky CTA | Progress nodes · option feedback | Animated score ring · up-next card |
+| Quest map | Lesson | Quiz feedback | Result | Review mode | Blueprint mode |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| <img src="docs/img/1-quest-map.webp" width="160" alt="Quest map with XP bar, search and the Circuit Fundamentals quests"> | <img src="docs/img/2-lesson.webp" width="160" alt="Lesson screen"> | <img src="docs/img/3-quiz-feedback.webp" width="160" alt="Quiz question answered correctly, with explanation"> | <img src="docs/img/4-result.webp" width="160" alt="Result screen: 85%, +160 XP, pass"> | <img src="docs/img/5-review.webp" width="160" alt="Review mode replaying a missed numeric question"> | <img src="docs/img/6-blueprint.webp" width="160" alt="Quest map in blueprint mode"> |
+| Categories · search · XP bar | PCB hero · formulas | Instant explanation | Score ring · up-next | Replays missed questions | Alternate palette |
 
 ## Features
 
@@ -42,52 +43,52 @@ CircuitQueest is an offline-first Android app that teaches electrical engineerin
 ## Topic Curriculum
 
 <details>
-<summary>All 42 topics across 9 categories</summary>
+<summary>All 42 topics across 9 categories, in unlock order (quest numbers as shown in the app)</summary>
 
 | # | Topic | Category |
 |---|-------|----------|
-| 1 | Ohm's Law | Fundamentals |
-| 2 | Series & Parallel Circuits | Fundamentals |
-| 3 | Kirchhoff's Laws | Fundamentals |
-| 4 | Capacitors & Inductors | Fundamentals |
-| 5 | AC Circuits | Fundamentals |
-| 6 | Operational Amplifiers | Fundamentals |
-| 7 | Thévenin & Norton | Analog |
-| 8 | Diodes & Rectifiers | Analog |
-| 9 | Transistors (BJTs) | Analog |
-| 10 | Digital Logic Gates | Digital |
-| 11 | MOSFETs | Analog |
-| 12 | Filters | Analog |
-| 13 | Transformers | Power |
-| 14 | Signals & Systems | Systems |
-| 15 | Power Electronics | Power |
-| 16 | Control Systems | Systems |
-| 17 | Transmission Lines | RF |
-| 18 | Communication Systems | RF |
-| 19 | Electromagnetics | Physics |
-| 20 | Semiconductor Physics | Physics |
-| 21 | Digital Systems | Digital |
-| 22 | Electric Machines | Power |
-| 23 | PCB Design | Hardware |
-| 24 | Embedded Systems | Hardware |
-| 25 | Power Systems | Power |
-| 26 | Sensors & Measurement | Hardware |
-| 27 | Antenna Design | RF |
-| 28 | VLSI Design | Advanced |
-| 29 | Signal Integrity & EMC | Advanced |
-| 30 | Battery & Energy Storage | Advanced |
-| 31 | RF Circuit Design | RF |
-| 32 | Analog Circuit Design | Analog |
-| 33 | Renewable Energy | Power |
-| 34 | IoT & Wireless | Hardware |
-| 35 | Digital Signal Processing | Systems |
-| 36 | Fiber Optics & Photonics | Advanced |
-| 37 | Electric Vehicles | Power |
-| 38 | Audio Electronics | Analog |
-| 39 | MEMS | Advanced |
-| 40 | Radar Systems | RF |
-| 41 | Biomedical Electronics | Advanced |
-| 42 | Machine Learning Hardware | Advanced |
+| 00 | Ohm's Law | Circuit Fundamentals |
+| 01 | Series & Parallel | Circuit Fundamentals |
+| 02 | Kirchhoff's Laws | Circuit Fundamentals |
+| 03 | Capacitors & Inductors | Circuit Fundamentals |
+| 04 | AC Circuits | Circuit Fundamentals |
+| 05 | Thévenin & Norton | Circuit Fundamentals |
+| 06 | Diodes & Rectifiers | Semiconductor Devices |
+| 07 | Transistors (BJTs) | Semiconductor Devices |
+| 08 | MOSFETs | Semiconductor Devices |
+| 09 | Semiconductor Physics | Semiconductor Devices |
+| 10 | Op-Amps | Analog Design |
+| 11 | Filters | Analog Design |
+| 12 | Analog Circuit Design | Analog Design |
+| 13 | Audio Electronics | Analog Design |
+| 14 | Digital Logic Gates | Digital Systems |
+| 15 | Digital Systems | Digital Systems |
+| 16 | VLSI Design | Digital Systems |
+| 17 | Machine Learning Hardware | Digital Systems |
+| 18 | Signals & Systems | Signals & Control |
+| 19 | Control Systems | Signals & Control |
+| 20 | Digital Signal Processing | Signals & Control |
+| 21 | Transformers | Power & Energy |
+| 22 | Power Electronics | Power & Energy |
+| 23 | Power Systems | Power & Energy |
+| 24 | Renewable Energy | Power & Energy |
+| 25 | Electric Vehicles | Power & Energy |
+| 26 | Battery & Energy Storage | Power & Energy |
+| 27 | Electromagnetics | RF & Communications |
+| 28 | Transmission Lines | RF & Communications |
+| 29 | Communication Systems | RF & Communications |
+| 30 | Antenna Design | RF & Communications |
+| 31 | RF Circuit Design | RF & Communications |
+| 32 | Fiber Optics & Photonics | RF & Communications |
+| 33 | Radar Systems | RF & Communications |
+| 34 | PCB Design | Hardware & Embedded |
+| 35 | Embedded Systems | Hardware & Embedded |
+| 36 | Sensors & Measurement | Hardware & Embedded |
+| 37 | Signal Integrity & EMC | Hardware & Embedded |
+| 38 | IoT & Wireless | Hardware & Embedded |
+| 39 | Electric Machines | Specialized Applications |
+| 40 | MEMS | Specialized Applications |
+| 41 | Biomedical Electronics | Specialized Applications |
 
 </details>
 

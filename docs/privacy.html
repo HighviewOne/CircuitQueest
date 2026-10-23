@@ -10,6 +10,9 @@
   <link rel="icon" href="favicon.ico" sizes="48x48">
   <link rel="icon" href="img/icon-192.png" type="image/png" sizes="192x192">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <style>
     .policy-body {
@@ -19,7 +22,7 @@
     }
 
     .policy-body h2 {
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       color: var(--blue-light);
       margin-top: 2rem;
       margin-bottom: 0.5rem;
@@ -36,10 +39,13 @@
     }
 
     .policy-body ul li { margin-bottom: 0.3rem; }
+    .policy-body strong { color: var(--text); }
+    .page-lede .badge { margin-bottom: 10px; }
+    @media (max-width: 760px) { .policy-body { padding: 2rem 16px 3rem; } }
 
     .no-data-banner {
-      background: rgba(0,230,118,0.08);
-      border: 1px solid rgba(0,230,118,0.25);
+      background: rgba(52,224,144,0.06);
+      border: 1px solid rgba(52,224,144,0.3);
       border-radius: var(--radius);
       padding: 1.25rem 1.5rem;
       margin-bottom: 2rem;
@@ -56,27 +62,29 @@
 <body>
 
 <nav>
-  <a href="index.html" class="nav-brand">
-    <span class="bolt">⚡</span> CircuitQuEEst
+  <a href="./" class="nav-brand" aria-label="CircuitQuEEst home">
+    <svg viewBox="0 0 28 28" width="24" height="24" aria-hidden="true">
+      <circle cx="14" cy="14" r="13" fill="none" stroke="#5da3ff" stroke-width="1.5" />
+      <path d="M16 5 L9 16 H14 L12 23 L19 12 H14 Z" fill="#f4b840" />
+    </svg>
+    <span class="brand-text">CircuitQu<i>EE</i>st</span>
   </a>
   <ul class="nav-links">
-    <li><a href="index.html">Home</a></li>
+    <li><a href="./">Home</a></li>
     <li><a href="documentation.html">Docs</a></li>
-    <li><a href="privacy.html" class="active">Privacy</a></li>
-    <li><a href="https://eerefresher.mirarver.com/" target="_blank" rel="noopener">Podcast ↗</a></li>
-    <li><a href="https://github.com/HighviewOne/CircuitQueest" target="_blank" rel="noopener">GitHub ↗</a></li>
+    <li><a href="privacy.html" class="active" aria-current="page">Privacy</a></li>
+    <li class="ext"><a href="https://eerefresher.mirarver.com/">Podcast</a></li>
+    <li class="ext"><a href="https://github.com/HighviewOne/CircuitQueest">GitHub</a></li>
   </ul>
 </nav>
 
 <div class="policy-body">
-  <div style="margin-bottom: 0.5rem;">
-    <span class="badge badge-green">Privacy-first</span>
-  </div>
-  <h1 style="font-size:2rem; margin-bottom:0.4rem;">Privacy Policy</h1>
-  <p style="color:var(--text-muted); margin-bottom:2rem;">Last updated: October 2026</p>
+  <div class="page-eyebrow">§ PRIVACY</div>
+  <h1 class="page-title">Privacy Policy</h1>
+  <p class="page-lede"><span class="badge badge-green">Privacy-first</span><br>Last updated: October 2026</p>
 
   <div class="no-data-banner">
-    <div class="icon">🔒</div>
+    <div class="icon" aria-hidden="true">🔒</div>
     <div>
       <strong>No personal data collected, ever.</strong>
       <p>CircuitQuEEst is a fully offline app. It does not connect to the internet, does not require an account, and does not transmit any data anywhere.</p>
@@ -88,27 +96,27 @@
     CircuitQuEEst ("the App") is an Android application for learning Electrical Engineering fundamentals. This Privacy Policy explains what data the App handles and how it is used.
   </p>
   <p>
-    The short version: <strong style="color:var(--text);">we collect nothing.</strong> All data stays on your device.
+    The short version: <strong>we collect nothing.</strong> All data stays on your device.
   </p>
 
   <h2>Data we collect</h2>
   <p>
-    <strong style="color:var(--text);">None.</strong> The App does not collect, transmit, or share any personal information, usage analytics, crash reports, or identifiers of any kind.
+    <strong>None.</strong> The App does not collect, transmit, or share any personal information, usage analytics, crash reports, or identifiers of any kind.
   </p>
 
   <h2>Data stored locally on your device</h2>
   <p>The App stores the following data locally using Android's Room database. The App itself never sends it anywhere:</p>
   <ul>
-    <li><strong style="color:var(--text);">Topic progress</strong> — which lessons and quizzes you have completed</li>
-    <li><strong style="color:var(--text);">Quiz results</strong> — your best scores for each topic</li>
-    <li><strong style="color:var(--text);">XP total</strong> — your accumulated experience points</li>
-    <li><strong style="color:var(--text);">Questions to review</strong> — which quiz questions you last answered incorrectly, for review mode</li>
+    <li><strong>Topic progress</strong> — which lessons and quizzes you have completed</li>
+    <li><strong>Quiz results</strong> — your best scores for each topic</li>
+    <li><strong>XP total</strong> — your accumulated experience points</li>
+    <li><strong>Questions to review</strong> — which quiz questions you last answered incorrectly, for review mode</li>
   </ul>
   <p>
     This data is stored solely to provide the core functionality of the App (progress tracking and sequential topic unlocking). You can delete it at any time by clearing the App's data in Android Settings → Apps → CircuitQuEEst → Storage → Clear Data.
   </p>
   <p>
-    <strong style="color:var(--text);">Device backup:</strong> if you have Android's own backup turned on (for example Google One / Android Backup), Android may include this data in your device backup so your progress can be restored on a new phone. That backup is managed by Android and your Google account; the developer has no access to it. You can turn it off in Android Settings → Google → Backup.
+    <strong>Device backup:</strong> if you have Android's own backup turned on (for example Google One / Android Backup), Android may include this data in your device backup so your progress can be restored on a new phone. That backup is managed by Android and your Google account; the developer has no access to it. You can turn it off in Android Settings → Google → Backup.
   </p>
 
   <h2>Internet access</h2>
@@ -141,20 +149,16 @@
 
   <hr>
   <p style="font-size:0.85rem;">
-    <strong style="color:var(--text);">Summary:</strong> CircuitQuEEst is an offline-only app. No accounts. No internet. No tracking. Your data stays on your device.
+    <strong>Summary:</strong> CircuitQuEEst is an offline-only app. No accounts. No internet. No tracking. Your data stays on your device.
   </p>
 </div>
 
 <footer>
-  <p>
-    <strong style="color:var(--text);">⚡ CircuitQuEEst</strong> &nbsp;·&nbsp;
-    <a href="index.html">Home</a> &nbsp;·&nbsp;
-    <a href="documentation.html">Docs</a> &nbsp;·&nbsp;
-    <a href="privacy.html">Privacy</a> &nbsp;·&nbsp;
-    <a href="https://github.com/HighviewOne/CircuitQueest" target="_blank" rel="noopener">GitHub</a> &nbsp;·&nbsp;
-    <a href="https://eerefresher.mirarver.com/" target="_blank" rel="noopener">EE Refresher podcast</a> &nbsp;·&nbsp;
-    <a href="mailto:CircuitQuEEst@mirarver.com">CircuitQuEEst@mirarver.com</a>
-  </p>
+  MIT licensed · © 2026 HighviewOne ·
+  <a href="./">Home</a> · <a href="documentation.html">Docs</a> · <a href="privacy.html">Privacy</a> ·
+  <a href="https://github.com/HighviewOne/CircuitQueest">GitHub</a> ·
+  <a href="https://eerefresher.mirarver.com/">EE Refresher podcast</a> ·
+  <a href="mailto:CircuitQuEEst@mirarver.com">CircuitQuEEst@mirarver.com</a>
 </footer>
 
 </body>
