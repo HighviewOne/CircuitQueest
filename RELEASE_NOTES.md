@@ -266,7 +266,7 @@ All documentation is available in the `docs/` directory:
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/CircuitQueest.git
+git clone https://github.com/HighviewOne/CircuitQueest.git
 cd CircuitQueest
 
 # Build APK

@@ -2,20 +2,20 @@
 
 ## Overview
 
-CircuitQueest implements comprehensive testing across all layers with 300+ tests achieving 50%+ code coverage. This guide explains the testing strategy, how to run tests, and how to add new ones.
+CircuitQuEEst has 212 JVM unit tests and 53 instrumented tests (plus 6 store-screenshot tests that run separately). This guide explains the testing strategy, how to run tests, and how to add new ones.
 
 ## Test Pyramid
 
 ```
         ╔═══════════════════════════════════╗
-        ║   UI Tests (40 tests) 13%         ║
+        ║   UI Tests (24 tests)             ║
         ║   Compose Screen Components       ║
         ╠═══════════════════════════════════╣
-        ║   Integration Tests (26 tests) 9% ║
-        ║   End-to-End Workflows            ║
+        ║   Database Tests (29 tests)       ║
+        ║   Room DAOs, Migrations, Import   ║
         ╠═══════════════════════════════════╣
-        ║   Unit Tests (234 tests) 78%      ║
-        ║   Logic, DAO, Repository, Edge    ║
+        ║   Unit Tests (212 tests)          ║
+        ║   Logic, Repository, Edge         ║
         ║   Cases, Content Modules          ║
         ╚═══════════════════════════════════╝
 ```
@@ -125,35 +125,25 @@ class ProgressDaoInstrumentedTest {
 ./gradlew test -t
 ```
 
-## Test Coverage
+## Test Counts
 
-### By Layer
+Coverage isn't measured (no JaCoCo/Kover set up), so this lists test counts only.
 
-| Layer | Tests | Coverage | Status |
-|-------|-------|----------|--------|
-| Business Logic | 32 | 100% | ✅ Complete |
-| Data Layer | 58 | 100% | ✅ Complete |
-| Content | 84 | 100% | ✅ Complete |
-| ViewModel | 14 | 100% | ✅ Complete |
-| UI Screens | 40 | 100% | ✅ Complete |
-| Components | 20 | 100% | ✅ Complete |
-| Navigation | 9 | 100% | ✅ Complete |
-| Edge Cases | 23 | 100% | ✅ Complete |
-| Integration | 26 | 100% | ✅ Complete |
-| **TOTAL** | **300+** | **50%+** | **✅ Complete** |
+| Area | Unit (JVM) | Instrumented |
+|------|-----------:|-------------:|
+| Content modules + TopicsService | 84 | - |
+| Scoring + edge cases | 35 | - |
+| ViewModels | 25 | - |
+| Room DAOs, migrations, legacy import | 22 | 29 |
+| ProgressRepository | 18 | - |
+| Navigation | 13 | - |
+| Quiz flow (integration) | 6 | - |
+| UI helpers (search, numeric parsing, fonts) | 9 | - |
+| Compose components | - | 9 |
+| Screens (Home, Quiz, Result) | - | 15 |
+| **Total** | **212** | **53** |
 
-### By Feature
-
-| Feature | Unit | Instrumented | Total |
-|---------|------|--------------|-------|
-| Scoring | 14 | 8 | 22 |
-| Progress | 16 | 6 | 22 |
-| Quiz Flow | 20 | 12 | 32 |
-| Content | 84 | - | 84 |
-| Database | 17 | 35 | 52 |
-| Navigation | 9 | - | 9 |
-| UI | - | 40 | 40 |
-| Components | - | 20 | 20 |
+`StoreScreenshots` (6 tests) only runs in `screenshots.yml`; `build.yml` excludes it.
 
 ## Adding New Tests
 
@@ -316,21 +306,12 @@ Tests run automatically on:
 ```yaml
 - Run unit tests
 - Run instrumented tests
-- Generate coverage reports
 - Fail if tests don't pass
 ```
 
-## Coverage Goals
+## Coverage
 
-### Current: 50%+
-- All critical paths tested
-- Edge cases covered
-- Error scenarios validated
-
-### Future Target: 70%+
-- UI state changes fully tested
-- Additional edge cases
-- Performance regression tests
+Coverage isn't measured yet. Adding Kover (or JaCoCo) to CI would be the first step before setting a target.
 
 ## Troubleshooting Tests
 

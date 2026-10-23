@@ -2,7 +2,7 @@
 # Build and sign the Android App Bundle (.aab) for Google Play.
 #
 # Play re-signs the app for delivery (Play App Signing); this signs the bundle with the
-# upload key, which is the CircuitQueest release key. See play-store/README.md.
+# upload key, which is the CircuitQuEEst release key. See play-store/README.md.
 #
 # Usage:  scripts/build-play-bundle.sh [output.aab]     (default: CircuitQueest-<version>.aab)
 # Needs ~/.config/circuitqueest/keystore.properties (see scripts/sign-release.sh).

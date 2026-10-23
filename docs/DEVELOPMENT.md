@@ -13,7 +13,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/CircuitQueest.git
+git clone https://github.com/HighviewOne/CircuitQueest.git
 cd CircuitQueest
 
 # Sync Gradle
