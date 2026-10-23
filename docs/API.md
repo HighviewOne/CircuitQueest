@@ -127,7 +127,10 @@ The only class that writes progress. Hilt provides a singleton; inject it, don't
 (tests construct it directly with DAOs from an in-memory database).
 
 ```kotlin
-class ProgressRepository(progressDao: ProgressDao, quizResultDao: QuizResultDao, missedQuestionDao: MissedQuestionDao) {
+class ProgressRepository(
+    progressDao: ProgressDao, quizResultDao: QuizResultDao, missedQuestionDao: MissedQuestionDao,
+    studyDayDao: StudyDayDao, today: () -> Long = Streaks::today
+) {
     fun getAllProgress(): Flow<List<TopicProgress>>
     fun getProgress(topicId: String): Flow<TopicProgress?>
     fun getTotalXp(): Flow<Int>
@@ -141,8 +144,14 @@ class ProgressRepository(progressDao: ProgressDao, quizResultDao: QuizResultDao,
     suspend fun recordAnswer(topicId: String, questionId: String, correct: Boolean) // wrong → queue, right → clear
     suspend fun getMissedQuestions(topicId: String? = null): List<MissedQuestion>  // null = all topics, oldest first
     fun getMissedCount(): Flow<Int>
+
+    // Streaks: lesson completion, every quiz result and every answer also record today's StudyDay
+    fun getStudyDays(): Flow<List<Long>>                           // epoch days, ascending
 }
 ```
+
+`Streaks.compute(days, today)` (`util/Streaks.kt`) turns those days into a `StreakState(current, best,
+studiedToday)`. A streak stays alive through the day after the last study day. Streaks award no XP.
 
 `recordQuizResult` inserts a `QuizResult`, then updates the topic's `TopicProgress`:
 `bestScore = max(best, score)`; `quizCompleted` becomes `true` only on a passing attempt (and never
@@ -159,15 +168,19 @@ Writes are serialized with a `Mutex`, so concurrent updates to the same topic ca
 
 ```kotlin
 @Database(
-    entities = [TopicProgress::class, QuizResult::class, MissedQuestion::class],
-    version = 2,
+    entities = [TopicProgress::class, QuizResult::class, MissedQuestion::class, StudyDay::class],
+    version = 3,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2)]   // v2.5: adds missed_questions
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2),                                      // v2.5: missed_questions
+        AutoMigration(from = 2, to = 3, spec = AppDatabase.BackfillStudyDays::class) // v2.6: study_days
+    ]
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun progressDao(): ProgressDao
     abstract fun quizResultDao(): QuizResultDao
     abstract fun missedQuestionDao(): MissedQuestionDao
+    abstract fun studyDayDao(): StudyDayDao
     companion object { const val DATABASE_NAME = "circuitqueest_db" }
 }
 ```
@@ -208,6 +221,11 @@ data class MissedQuestion(
     val questionId: String,
     val missedAt: Long = System.currentTimeMillis()
 )
+
+// A local day (LocalDate.toEpochDay) with a finished lesson, a quiz result or an answer. The 2→3
+// migration backfills it from quiz_results and each topic's lastAccessedTimestamp.
+@Entity(tableName = "study_days")
+data class StudyDay(@PrimaryKey val epochDay: Long)
 ```
 
 ### DAOs (`data/db/dao/`)
@@ -233,6 +251,11 @@ data class MissedQuestion(
     suspend fun getAll(): List<MissedQuestion>                         // ORDER BY missedAt
     suspend fun getForTopic(topicId: String): List<MissedQuestion>
     fun count(): Flow<Int>
+}
+
+@Dao interface StudyDayDao {
+    @Insert(onConflict = IGNORE) suspend fun insert(day: StudyDay)
+    fun getDays(): Flow<List<Long>>                                   // ORDER BY epochDay
 }
 ```
 

@@ -25,7 +25,7 @@ CircuitQuEEst is an offline-first Android app that teaches electrical engineerin
 
 | Quest map | Lesson | Quiz feedback | Result | Review mode | Blueprint mode |
 |:---:|:---:|:---:|:---:|:---:|:---:|
-| <img src="docs/img/1-quest-map.webp" width="160" alt="Quest map with XP bar, search and the Circuit Fundamentals quests"> | <img src="docs/img/2-lesson.webp" width="160" alt="Lesson screen"> | <img src="docs/img/3-quiz-feedback.webp" width="160" alt="Quiz question answered correctly, with explanation"> | <img src="docs/img/4-result.webp" width="160" alt="Result screen: 85%, +160 XP, pass"> | <img src="docs/img/5-review.webp" width="160" alt="Review mode replaying a missed numeric question"> | <img src="docs/img/6-blueprint.webp" width="160" alt="Quest map in blueprint mode"> |
+| <img src="docs/img/1-quest-map.webp" width="160" alt="Quest map with XP bar, study streak, search and the Circuit Fundamentals quests"> | <img src="docs/img/2-lesson.webp" width="160" alt="Lesson screen"> | <img src="docs/img/3-quiz-feedback.webp" width="160" alt="Quiz question answered correctly, with explanation"> | <img src="docs/img/4-result.webp" width="160" alt="Result screen: 85%, +160 XP, pass"> | <img src="docs/img/5-review.webp" width="160" alt="Review mode replaying a missed numeric question"> | <img src="docs/img/6-blueprint.webp" width="160" alt="Quest map in blueprint mode"> |
 | Categories · search · XP bar | PCB hero · formulas | Instant explanation | Score ring · up-next | Replays missed questions | Alternate palette |
 
 ## Features
@@ -35,6 +35,7 @@ CircuitQuEEst is an offline-first Android app that teaches electrical engineerin
 - **XP system** — +50 XP per lesson, 10 XP per point above your best quiz score, +100 bonus on your first pass
 - **Dual question types** — multiple choice and numeric input with tolerance-aware grading
 - **Review mode** — every missed question goes into a review queue (⟲ chip on the quest map, "Review mistakes" after a quiz); replay until you get them right
+- **Study streaks** — days in a row with a lesson, quiz or review, plus your best run, shown under the XP bar (no XP bonus)
 - **Blueprint mode** — toggleable alternate palette (deep navy + white-28% borders)
 - **Shared-element transitions** — topic cards morph into the lesson hero
 - **Offline-first** — all content and progress in a local Room database; no account needed
