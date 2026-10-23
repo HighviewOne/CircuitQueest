@@ -1,5 +1,5 @@
 name: Feature Request
-description: Suggest a new feature or topic for CircuitQueest
+description: Suggest a new feature or topic for CircuitQuEEst
 title: "[FEATURE] "
 labels: ["enhancement"]
 body:

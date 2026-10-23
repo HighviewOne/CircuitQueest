@@ -2,7 +2,7 @@
 
 ## Welcome! 👋
 
-Thank you for your interest in contributing to CircuitQueest! This guide will help you understand how to contribute effectively.
+Thank you for your interest in contributing to CircuitQuEEst! This guide will help you understand how to contribute effectively.
 
 ## Code of Conduct
 
@@ -16,9 +16,9 @@ Thank you for your interest in contributing to CircuitQueest! This guide will he
 ### Fork & Clone
 ```bash
 # Fork on GitHub, then:
-git clone https://github.com/your-username/CircuitQueest.git
+git clone https://github.com/<your-username>/CircuitQueest.git
 cd CircuitQueest
-git remote add upstream https://github.com/original-repo/CircuitQueest.git
+git remote add upstream https://github.com/HighviewOne/CircuitQueest.git
 ```
 
 ### Create Feature Branch
@@ -285,7 +285,7 @@ Contributors are recognized in:
 - GitHub contributors page
 - Project README (for significant contributions)
 
-Thank you for making CircuitQueest better! 🚀
+Thank you for making CircuitQuEEst better! 🚀
 
 ---
 

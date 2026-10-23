@@ -133,7 +133,7 @@ navController.navigate("lesson/$topicId")
 #### "Database migration failed"
 **Solution:**
 - Check Room schema migration
-- Clear app data: Settings → Apps → CircuitQuest → Storage → Clear
+- Clear app data: Settings → Apps → CircuitQuEEst → Storage → Clear
 - Or: `adb shell pm clear com.circuitqueest.app`
 - Rebuild and reinstall
 
@@ -230,7 +230,7 @@ emulator -avd test_emulator -verbose
 **Solution:**
 - Update permissions in AndroidManifest.xml
 - Request runtime permissions for Android 6+
-- Check app permissions: Settings → Apps → CircuitQuest → Permissions
+- Check app permissions: Settings → Apps → CircuitQuEEst → Permissions
 
 #### Device not recognized by adb
 **Solution:**

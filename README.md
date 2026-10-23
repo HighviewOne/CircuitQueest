@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚡ CircuitQueest
+# ⚡ CircuitQuEEst
 
 **Master Electrical Engineering through gamified quests**
 
@@ -17,7 +17,7 @@
 
 ---
 
-CircuitQueest is an offline-first Android app that teaches electrical engineering through a quest-based progression system. Work through 42 topics — from Ohm's Law to ML Hardware — each with a structured lesson and a 7-question quiz. Earn XP, unlock new topics, and track your progress entirely on-device.
+CircuitQuEEst is an offline-first Android app that teaches electrical engineering through a quest-based progression system. Work through 42 topics — from Ohm's Law to ML Hardware — each with a structured lesson and a 7-question quiz. Earn XP, unlock new topics, and track your progress entirely on-device.
 
 > **Theme:** Cockpit dark aesthetic — Space Grotesk + JetBrains Mono, electric blue/gold palette, PCB trace motifs, IEEE schematic icons, and a toggleable blueprint mode.
 
@@ -155,4 +155,4 @@ For code changes, open a PR against `master`. The build CI must pass.
 
 ## License
 
-[MIT](LICENSE) © 2026 CircuitQueest
+[MIT](LICENSE) © 2026 CircuitQuEEst

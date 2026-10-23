@@ -2,7 +2,7 @@
 
 ## System Design Overview
 
-CircuitQueest uses modern Android architecture principles combining MVVM (Model-View-ViewModel) with Clean Architecture layers for separation of concerns, testability, and maintainability.
+CircuitQuEEst uses modern Android architecture principles combining MVVM (Model-View-ViewModel) with Clean Architecture layers for separation of concerns, testability, and maintainability.
 
 ## Architecture Layers
 
