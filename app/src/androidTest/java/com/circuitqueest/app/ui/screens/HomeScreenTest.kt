@@ -11,6 +11,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -48,14 +49,18 @@ class HomeScreenTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         database = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
         repository = ProgressRepository(
-            database.progressDao(), database.quizResultDao(), database.missedQuestionDao()
+            database.progressDao(), database.quizResultDao(), database.missedQuestionDao(),
+            database.studyDayDao()
         )
         viewModel = HomeViewModel(repository)
     }
 
     @After
     fun tearDown() {
-        database.close()
+        // The ViewModel outlives the test, and its last write (or Room's invalidation
+        // refresh after it) can still be running here. Closing the database then crashes
+        // the instrumentation run, so let the in-memory database be collected instead.
+        composeTestRule.waitForIdle()
     }
 
     /** Mirrors MainActivity: blueprint state hoisted above the theme. */
@@ -71,6 +76,23 @@ class HomeScreenTest {
                     onReview = onReview
                 )
             }
+        }
+    }
+
+    @Test
+    fun streak_hiddenForNewPlayer_shownAfterStudying() {
+        showHome()
+        composeTestRule.onNodeWithContentDescription("Study streak", substring = true).assertDoesNotExist()
+
+        runBlocking { repository.markLessonCompleted(ohmsLaw.id) }
+
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule.onAllNodes(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.ContentDescription,
+                    listOf("Study streak 1 day, best 1. Done for today")
+                )
+            ).fetchSemanticsNodes().isNotEmpty()
         }
     }
 

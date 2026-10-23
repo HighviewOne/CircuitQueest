@@ -28,7 +28,7 @@ class QuizFlowIntegrationTest {
     fun setup() {
         progressDao = mock()
         quizResultDao = mock()
-        repository = ProgressRepository(progressDao, quizResultDao, mock())
+        repository = ProgressRepository(progressDao, quizResultDao, mock(), mock())
     }
 
     @Test

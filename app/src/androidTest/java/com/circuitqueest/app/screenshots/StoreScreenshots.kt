@@ -55,7 +55,8 @@ class StoreScreenshots {
     fun setUp() {
         database = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
         repository = ProgressRepository(
-            database.progressDao(), database.quizResultDao(), database.missedQuestionDao()
+            database.progressDao(), database.quizResultDao(), database.missedQuestionDao(),
+            database.studyDayDao()
         )
         // A player a few quests in: four passed, the fifth lesson read, two questions to review.
         runBlocking {

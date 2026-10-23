@@ -3,9 +3,11 @@ package com.circuitqueest.app.data.repository
 import com.circuitqueest.app.data.db.dao.MissedQuestionDao
 import com.circuitqueest.app.data.db.dao.ProgressDao
 import com.circuitqueest.app.data.db.dao.QuizResultDao
+import com.circuitqueest.app.data.db.dao.StudyDayDao
 import com.circuitqueest.app.data.db.entity.MissedQuestion
 import com.circuitqueest.app.data.db.entity.TopicProgress
 import com.circuitqueest.app.data.db.entity.QuizResult
+import com.circuitqueest.app.data.db.entity.StudyDay
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -19,6 +21,7 @@ class ProgressRepositoryTest {
     private lateinit var progressDao: ProgressDao
     private lateinit var quizResultDao: QuizResultDao
     private lateinit var missedQuestionDao: MissedQuestionDao
+    private lateinit var studyDayDao: StudyDayDao
     private lateinit var repository: ProgressRepository
 
     @Before
@@ -26,7 +29,8 @@ class ProgressRepositoryTest {
         progressDao = mock()
         quizResultDao = mock()
         missedQuestionDao = mock()
-        repository = ProgressRepository(progressDao, quizResultDao, missedQuestionDao)
+        studyDayDao = mock()
+        repository = ProgressRepository(progressDao, quizResultDao, missedQuestionDao, studyDayDao) { TODAY }
     }
 
     @Test
@@ -298,5 +302,29 @@ class ProgressRepositoryTest {
 
         verify(missedQuestionDao).getForTopic("ohms_law")
         verify(missedQuestionDao).getAll()
+    }
+
+    // ── Streaks ─────────────────────────────────────────────────────────────
+
+    @Test
+    fun markLessonCompleted_recordsStudyDay(): Unit = runBlocking {
+        repository.markLessonCompleted("topic1")
+        verify(studyDayDao).insert(StudyDay(TODAY))
+    }
+
+    @Test
+    fun recordQuizResult_recordsStudyDay_evenWhenFailing(): Unit = runBlocking {
+        repository.recordQuizResult("topic1", score = 1, totalQuestions = 7)
+        verify(studyDayDao).insert(StudyDay(TODAY))
+    }
+
+    @Test
+    fun recordAnswer_recordsStudyDay(): Unit = runBlocking {
+        repository.recordAnswer("topic1", "q1", correct = true)
+        verify(studyDayDao).insert(StudyDay(TODAY))
+    }
+
+    private companion object {
+        const val TODAY = 20_000L
     }
 }
