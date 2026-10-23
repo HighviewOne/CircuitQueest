@@ -11,6 +11,8 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.time.Instant
+import java.time.ZoneId
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -61,6 +63,46 @@ class MigrationTest {
 
             db.missedQuestionDao().upsert(MissedQuestion("ohms_law", "ohm_q2"))
             assertEquals(1, db.missedQuestionDao().count().first())
+        } finally {
+            db.close()
+            context.deleteDatabase(dbName)
+        }
+    }
+
+    @Test
+    fun migrate2To3_backfillsStudyDaysFromExistingActivity(): Unit = runBlocking {
+        // Two quiz attempts on one day, one a day later, and a lesson-only topic three days on.
+        val day0 = 1_760_000_000_000L
+        val oneDay = 86_400_000L
+        helper.createDatabase(dbName, 2).apply {
+            listOf(day0, day0 + 60_000L, day0 + oneDay).forEach { ts ->
+                execSQL(
+                    "INSERT INTO quiz_results (topicId, score, totalQuestions, timestamp) " +
+                        "VALUES ('ohms_law', 5, 7, $ts)"
+                )
+            }
+            execSQL(
+                "INSERT INTO topic_progress (topicId, lessonCompleted, quizCompleted, bestScore, " +
+                    "totalQuestions, xpEarned, lastAccessedTimestamp) " +
+                    "VALUES ('series_parallel', 1, 0, 0, 0, 50, ${day0 + 3 * oneDay})"
+            )
+            execSQL(
+                "INSERT INTO topic_progress (topicId, lessonCompleted, quizCompleted, bestScore, " +
+                    "totalQuestions, xpEarned, lastAccessedTimestamp) " +
+                    "VALUES ('kirchhoffs', 0, 0, 0, 0, 0, 0)"
+            )
+            close()
+        }
+
+        helper.runMigrationsAndValidate(dbName, 3, true).close()
+
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val db = Room.databaseBuilder(context, AppDatabase::class.java, dbName).build()
+        try {
+            fun epochDay(ms: Long) = Instant.ofEpochMilli(ms).atZone(ZoneId.systemDefault()).toLocalDate().toEpochDay()
+            val expected = listOf(day0, day0 + oneDay, day0 + 3 * oneDay).map(::epochDay)
+            assertEquals(expected, db.studyDayDao().getDays().first())
+            assertEquals(50, db.progressDao().getProgressOnce("series_parallel")?.xpEarned)
         } finally {
             db.close()
             context.deleteDatabase(dbName)

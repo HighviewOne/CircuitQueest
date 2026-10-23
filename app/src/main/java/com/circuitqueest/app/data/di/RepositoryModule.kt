@@ -29,6 +29,7 @@ object RepositoryModule {
         ProgressRepository(
             progressDao = database.progressDao(),
             quizResultDao = database.quizResultDao(),
-            missedQuestionDao = database.missedQuestionDao()
+            missedQuestionDao = database.missedQuestionDao(),
+            studyDayDao = database.studyDayDao()
         )
 }

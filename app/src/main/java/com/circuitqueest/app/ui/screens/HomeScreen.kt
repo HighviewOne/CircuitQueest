@@ -49,6 +49,7 @@ import com.circuitqueest.app.data.content.Topic
 import com.circuitqueest.app.data.content.TopicCategories
 import com.circuitqueest.app.ui.components.CategoryHeader
 import com.circuitqueest.app.ui.components.TopicCard
+import com.circuitqueest.app.ui.components.StreakRow
 import com.circuitqueest.app.ui.components.XpBar
 import com.circuitqueest.app.ui.icons.SchematicIcons
 import com.circuitqueest.app.ui.theme.CqBlue
@@ -75,6 +76,7 @@ fun HomeScreen(
     val categorizedTopics by viewModel.categorizedTopics.collectAsStateWithLifecycle()
     val totalXp by viewModel.totalXp.collectAsStateWithLifecycle()
     val missedCount by viewModel.missedCount.collectAsStateWithLifecycle()
+    val streak by viewModel.streak.collectAsStateWithLifecycle()
     var searchQuery by rememberSaveable { mutableStateOf("") }
     // Names of expanded categories; saveable so rotation doesn't collapse them.
     val expandedCategories = rememberSaveable(
@@ -173,6 +175,11 @@ fun HomeScreen(
             // ── XP bar ──────────────────────────────────────────────────
             item {
                 XpBar(totalXp = totalXp)
+            }
+
+            // ── Study streak ────────────────────────────────────────────
+            if (streak.best > 0) {
+                item { StreakRow(streak = streak) }
             }
 
             // ── Search field ────────────────────────────────────────────

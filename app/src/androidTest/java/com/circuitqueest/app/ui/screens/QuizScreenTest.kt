@@ -49,7 +49,8 @@ class QuizScreenTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         database = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
         repository = ProgressRepository(
-            database.progressDao(), database.quizResultDao(), database.missedQuestionDao()
+            database.progressDao(), database.quizResultDao(), database.missedQuestionDao(),
+            database.studyDayDao()
         )
     }
 

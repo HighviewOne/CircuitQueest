@@ -51,6 +51,7 @@ class LegacyDatabaseImport(private val legacyFile: File) : RoomDatabase.Callback
                     arrayOf<Any>(r.topicId, r.score, r.totalQuestions, r.timestamp, r.topicId, r.timestamp)
                 )
             }
+            AppDatabase.backfillStudyDays(db)
             db.setTransactionSuccessful()
         } finally {
             db.endTransaction()

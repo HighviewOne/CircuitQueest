@@ -3,10 +3,13 @@ package com.circuitqueest.app.data.repository
 import com.circuitqueest.app.data.db.dao.MissedQuestionDao
 import com.circuitqueest.app.data.db.dao.ProgressDao
 import com.circuitqueest.app.data.db.dao.QuizResultDao
+import com.circuitqueest.app.data.db.dao.StudyDayDao
 import com.circuitqueest.app.data.db.entity.MissedQuestion
 import com.circuitqueest.app.data.db.entity.QuizResult
+import com.circuitqueest.app.data.db.entity.StudyDay
 import com.circuitqueest.app.data.db.entity.TopicProgress
 import com.circuitqueest.app.util.QuizScoring
+import com.circuitqueest.app.util.Streaks
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -14,7 +17,9 @@ import kotlinx.coroutines.sync.withLock
 class ProgressRepository(
     private val progressDao: ProgressDao,
     private val quizResultDao: QuizResultDao,
-    private val missedQuestionDao: MissedQuestionDao
+    private val missedQuestionDao: MissedQuestionDao,
+    private val studyDayDao: StudyDayDao,
+    private val today: () -> Long = Streaks::today
 ) {
     // Progress updates are read-modify-write; serialize them so two writes to the
     // same topic (e.g. finishing a lesson while a quiz save is in flight) can't
@@ -37,6 +42,7 @@ class ProgressRepository(
                 lastAccessedTimestamp = System.currentTimeMillis()
             )
         )
+        recordStudyDay()
     }
 
     suspend fun saveQuizResult(topicId: String, score: Int, totalQuestions: Int) {
@@ -73,6 +79,7 @@ class ProgressRepository(
                     lastAccessedTimestamp = System.currentTimeMillis()
                 )
             )
+            recordStudyDay()
             xpForQuiz
         }
 
@@ -92,6 +99,7 @@ class ProgressRepository(
         } else {
             missedQuestionDao.upsert(MissedQuestion(topicId = topicId, questionId = questionId))
         }
+        recordStudyDay()
     }
 
     /** Missed questions, oldest first; all topics when [topicId] is null. */
@@ -99,4 +107,11 @@ class ProgressRepository(
         if (topicId == null) missedQuestionDao.getAll() else missedQuestionDao.getForTopic(topicId)
 
     fun getMissedCount(): Flow<Int> = missedQuestionDao.count()
+
+    // ── Streaks ─────────────────────────────────────────────────────────────
+
+    private suspend fun recordStudyDay() = studyDayDao.insert(StudyDay(today()))
+
+    /** Every study day, as epoch days in ascending order. */
+    fun getStudyDays(): Flow<List<Long>> = studyDayDao.getDays()
 }

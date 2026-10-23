@@ -7,6 +7,8 @@ import com.circuitqueest.app.data.content.TopicCategories
 import com.circuitqueest.app.data.content.TopicCategory
 import com.circuitqueest.app.data.db.entity.TopicProgress
 import com.circuitqueest.app.data.repository.ProgressRepository
+import com.circuitqueest.app.util.StreakState
+import com.circuitqueest.app.util.Streaks
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -89,6 +91,14 @@ class HomeViewModel @Inject constructor(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = 0
+        )
+
+    val streak: StateFlow<StreakState> = repository.getStudyDays()
+        .map { Streaks.compute(it, Streaks.today()) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = StreakState()
         )
 
     val totalXp: StateFlow<Int> = repository.getTotalXp()
