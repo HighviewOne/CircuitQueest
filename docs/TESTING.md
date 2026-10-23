@@ -2,19 +2,19 @@
 
 ## Overview
 
-CircuitQuEEst has 212 JVM unit tests and 53 instrumented tests (plus 6 store-screenshot tests that run separately). This guide explains the testing strategy, how to run tests, and how to add new ones.
+CircuitQuEEst has 223 JVM unit tests and 55 instrumented tests (plus 6 store-screenshot tests that run separately). This guide explains the testing strategy, how to run tests, and how to add new ones.
 
 ## Test Pyramid
 
 ```
         ╔═══════════════════════════════════╗
-        ║   UI Tests (24 tests)             ║
+        ║   UI Tests (25 tests)             ║
         ║   Compose Screen Components       ║
         ╠═══════════════════════════════════╣
-        ║   Database Tests (29 tests)       ║
+        ║   Database Tests (30 tests)       ║
         ║   Room DAOs, Migrations, Import   ║
         ╠═══════════════════════════════════╣
-        ║   Unit Tests (212 tests)          ║
+        ║   Unit Tests (223 tests)          ║
         ║   Logic, Repository, Edge         ║
         ║   Cases, Content Modules          ║
         ╚═══════════════════════════════════╝
@@ -134,14 +134,15 @@ Coverage isn't measured (no JaCoCo/Kover set up), so this lists test counts only
 | Content modules + TopicsService | 84 | - |
 | Scoring + edge cases | 35 | - |
 | ViewModels | 25 | - |
-| Room DAOs, migrations, legacy import | 22 | 29 |
-| ProgressRepository | 18 | - |
+| Room DAOs, migrations, legacy import | 22 | 30 |
+| ProgressRepository | 21 | - |
+| Streaks | 8 | - |
 | Navigation | 13 | - |
 | Quiz flow (integration) | 6 | - |
 | UI helpers (search, numeric parsing, fonts) | 9 | - |
 | Compose components | - | 9 |
-| Screens (Home, Quiz, Result) | - | 15 |
-| **Total** | **212** | **53** |
+| Screens (Home, Quiz, Result) | - | 16 |
+| **Total** | **223** | **55** |
 
 `StoreScreenshots` (6 tests) only runs in `screenshots.yml`; `build.yml` excludes it.
 

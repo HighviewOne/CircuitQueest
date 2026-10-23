@@ -1,3 +1,24 @@
+# CircuitQuEEst v2.6 — Study Streaks
+
+**Release Date:** October 23, 2026
+**APK size:** ~2 MB (R8-shrunk release build)
+**Requires:** Android 8.0+
+
+> Installs as an update over any earlier version and keeps your progress.
+
+### New
+- **Study streaks.** The quest map now shows how many days in a row you've studied, and your best run, under the XP bar. A day counts once you finish a lesson, submit a quiz (pass or fail) or answer a review question. The line turns gold once today counts; until then it reminds you to study to keep the streak going. A streak only breaks after a whole day with no study. Streaks are just a count: they don't change the XP you earn.
+- **Your past study counts too.** On first launch, v2.6 works out the days you studied from your saved quiz history and recent activity, so your best streak doesn't start from zero.
+
+### Platform
+- Database version 3 (adds study days) via a tested Room auto-migration — existing progress is kept.
+
+### Engineering
+- Fixed a flaky UI test that could close its test database while a save was still running.
+- Docs: CircuitQuEEst spelled consistently; the testing guide now lists the real test counts (223 unit, 55 instrumented) instead of old, inflated claims.
+
+---
+
 # CircuitQuEEst v2.5.1 — Progress Recovery
 
 **Release Date:** October 20, 2026
