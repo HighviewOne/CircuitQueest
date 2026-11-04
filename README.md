@@ -34,7 +34,7 @@ CircuitQuEEst is an offline-first Android app that teaches electrical engineerin
 - **Quest progression** — pass a topic's quiz (60%+) to unlock the next, in the order shown on the quest map; no internet required
 - **XP system** — +50 XP per lesson, 10 XP per point above your best quiz score, +100 bonus on your first pass
 - **Dual question types** — multiple choice and numeric input with tolerance-aware grading
-- **Deeper practice** — each quiz draws 7 questions from a larger pool, in random order with shuffled options; numeric problems get fresh values every attempt, so a re-take tests understanding, not memory (Circuit Fundamentals, Semiconductor Devices, Analog Design, Digital Systems, Signals & Control and Power & Energy so far; more categories to follow)
+- **Deeper practice** — each quiz draws 7 questions from a larger pool, in random order with shuffled options; numeric problems get fresh values every attempt, so a re-take tests understanding, not memory (Circuit Fundamentals, Semiconductor Devices, Analog Design, Digital Systems, Signals & Control, Power & Energy and RF & Communications so far; more categories to follow)
 - **Review mode** — every missed question goes into a review queue (⟲ chip on the quest map, "Review mistakes" after a quiz); replay until you get them right
 - **Study streaks** — days in a row with a lesson, quiz or review, plus your best run, shown under the XP bar (no XP bonus)
 - **Blueprint mode** — toggleable alternate palette (deep navy + white-28% borders)

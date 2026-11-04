@@ -1,6 +1,32 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import com.circuitqueest.app.data.content.QuestionMath.pickTwo
+
 object ElectromagneticsContent {
+    private const val COULOMB_K = 8.99e9
+    private const val C_M_MHZ = 300.0
+    private const val MICRO = 1e-6
+    private const val PER_MICRO = 1e6
+    private const val WIRE_FIELD = 2e-7
+    private val plateVoltages = listOf(10.0, 50.0, 100.0, 500.0, 1000.0)
+    private val plateGapsMm = listOf(0.5, 1.0, 2.0, 5.0)
+    private val coilTurns = listOf(10.0, 50.0, 100.0, 200.0)
+    private val fluxChanges = listOf(0.01, 0.02, 0.05)
+    private val changeTimes = listOf(0.01, 0.1, 0.5)
+    private val waveFrequenciesMhz = listOf(50.0, 100.0, 150.0, 300.0, 900.0)
+    private val wireCurrents = listOf(1.0, 2.0, 5.0, 10.0)
+    private val wireLengths = listOf(0.5, 1.0, 2.0)
+    private val fluxDensities = listOf(0.1, 0.3, 0.5)
+    private val angles = listOf(30.0 to 0.5, 90.0 to 1.0)
+    private val conductorCurrents = listOf(1.0, 5.0, 10.0, 20.0)
+    private val distancesCm = listOf(1.0, 2.0, 5.0, 10.0)
+    private val chargesMicro = listOf(1.0, 2.0, 5.0)
+    private val separationsCm = listOf(5.0, 10.0, 20.0)
+
     val topic = Topic(
         id = "electromagnetics",
         title = "Electromagnetics",
@@ -51,14 +77,6 @@ object ElectromagneticsContent {
         quiz = Quiz(
             title = "Electromagnetics Boss Battle",
             questions = listOf(
-                Question.NumericInput(
-                    id = "em_ni1",
-                    questionText = "A parallel-plate capacitor has 100V across plates separated by 2mm. What is the electric field in V/m?",
-                    correctAnswer = 50000.0,
-                    tolerance = 500.0,
-                    unit = "V/m",
-                    explanation = "E = V/d = 100/0.002 = 50,000 V/m"
-                ),
                 Question.MultipleChoice(
                     id = "em_mc1",
                     questionText = "What does Faraday's law state?",
@@ -70,14 +88,6 @@ object ElectromagneticsContent {
                     ),
                     correctIndex = 2,
                     explanation = "Faraday's law states that a time-varying magnetic flux through a loop induces an electromotive force (EMF)."
-                ),
-                Question.NumericInput(
-                    id = "em_ni2",
-                    questionText = "A coil of 50 turns experiences a flux change of 0.02 Wb in 0.1 seconds. What is the induced EMF in Volts?",
-                    correctAnswer = 10.0,
-                    tolerance = 0.1,
-                    unit = "V",
-                    explanation = "EMF = N \u00D7 \u0394\u03A6/\u0394t = 50 \u00D7 0.02/0.1 = 50 \u00D7 0.2 = 10V"
                 ),
                 Question.MultipleChoice(
                     id = "em_mc2",
@@ -91,14 +101,6 @@ object ElectromagneticsContent {
                     correctIndex = 2,
                     explanation = "Maxwell's equations consist of 4 fundamental laws: Gauss's law (E), Gauss's law (B), Faraday's law, and Amp\u00E8re-Maxwell law."
                 ),
-                Question.NumericInput(
-                    id = "em_ni3",
-                    questionText = "What is the wavelength (in meters) of a 100MHz electromagnetic wave? (Use c = 3\u00D710\u2078 m/s)",
-                    correctAnswer = 3.0,
-                    tolerance = 0.1,
-                    unit = "m",
-                    explanation = "\u03BB = c/f = 3\u00D710\u2078 / 100\u00D710\u2076 = 3m"
-                ),
                 Question.MultipleChoice(
                     id = "em_mc3",
                     questionText = "Lenz's law states that the induced current:",
@@ -111,14 +113,89 @@ object ElectromagneticsContent {
                     correctIndex = 1,
                     explanation = "Lenz's law: the induced current flows in a direction that opposes the change in magnetic flux that caused it (conservation of energy)."
                 ),
-                Question.NumericInput(
-                    id = "em_ni4",
-                    questionText = "A 2m wire carrying 5A is in a 0.3T magnetic field at 90\u00B0. What is the force on the wire in Newtons?",
-                    correctAnswer = 3.0,
-                    tolerance = 0.1,
-                    unit = "N",
-                    explanation = "F = ILB sin(\u03B8) = 5 \u00D7 2 \u00D7 0.3 \u00D7 sin(90\u00B0) = 5 \u00D7 2 \u00D7 0.3 \u00D7 1 = 3N"
+                Question.MultipleChoice(
+                    id = "em_mc4",
+                    questionText = "What is the shape of the magnetic field around a long, straight current-carrying wire?",
+                    options = listOf(
+                        "Straight lines parallel to the wire",
+                        "Concentric circles around the wire",
+                        "Lines radiating out from the wire",
+                        "There is no field"
+                    ),
+                    correctIndex = 1,
+                    explanation = "The field forms concentric circles around the wire, with direction given by the right-hand rule (thumb along the current, fingers curl with B), and strength B = µ₀I/(2πr)."
                 )
+            ),
+            generators = listOf(
+                generator("em_ni1") { r ->
+                    val v = plateVoltages.pick(r)
+                    val dMm = plateGapsMm.pick(r)
+                    val e = v / (dMm / 1000)
+                    Numeric(
+                        text = "A parallel-plate capacitor has ${fmt(v)}V across plates ${fmt(dMm)}mm apart. What is the electric " +
+                            "field between them, in V/m?",
+                        answer = e, unit = "V/m",
+                        explanation = "E = V/d = ${fmt(v)}/${fmt(dMm / 1000, 4)} = ${fmt(e)}V/m"
+                    )
+                },
+                generator("em_ni2") { r ->
+                    val n = coilTurns.pick(r)
+                    val dPhi = fluxChanges.pick(r)
+                    val dt = changeTimes.pick(r)
+                    val emf = n * dPhi / dt
+                    Numeric(
+                        text = "A coil of ${fmt(n)} turns sees its flux change by ${fmt(dPhi)}Wb in ${fmt(dt)}s. What is the " +
+                            "induced EMF in Volts? Round to 2 decimal places.",
+                        answer = emf, unit = "V",
+                        explanation = "EMF = N × ΔΦ/Δt = ${fmt(n)} × ${fmt(dPhi)}/${fmt(dt)} = ${fmt(emf, 2)}V"
+                    )
+                },
+                generator("em_ni3") { r ->
+                    val f = waveFrequenciesMhz.pick(r)
+                    val lambda = C_M_MHZ / f
+                    Numeric(
+                        text = "What is the wavelength of a ${fmt(f)}MHz electromagnetic wave in free space, in metres? " +
+                            "Use c = 3×10⁸m/s and round to 3 decimal places.",
+                        answer = lambda, unit = "m", decimals = 3,
+                        explanation = "λ = c/f = 3×10⁸/(${fmt(f)}×10⁶) = ${fmt(lambda, 3)}m"
+                    )
+                },
+                generator("em_ni4") { r ->
+                    val i = wireCurrents.pick(r)
+                    val l = wireLengths.pick(r)
+                    val b = fluxDensities.pick(r)
+                    val (deg, s) = angles.pick(r)
+                    val f = i * l * b * s
+                    Numeric(
+                        text = "A ${fmt(l)}m wire carrying ${fmt(i)}A crosses a ${fmt(b)}T magnetic field at ${fmt(deg)}°. What is " +
+                            "the force on the wire in Newtons? Round to 3 decimal places.",
+                        answer = f, unit = "N", decimals = 3,
+                        explanation = "F = ILB sin θ = ${fmt(i)} × ${fmt(l)} × ${fmt(b)} × sin ${fmt(deg)}° = ${fmt(f, 3)}N"
+                    )
+                },
+                generator("em_ni5") { r ->
+                    val i = conductorCurrents.pick(r)
+                    val cm = distancesCm.pick(r)
+                    val microTesla = WIRE_FIELD * i / (cm / 100) * PER_MICRO
+                    Numeric(
+                        text = "A long straight wire carries ${fmt(i)}A. What is the magnetic field ${fmt(cm)}cm from it, in µT? " +
+                            "Use B = µ₀I/(2πr) with µ₀ = 4π×10⁻⁷ and round to 2 decimal places.",
+                        answer = microTesla, unit = "µT",
+                        explanation = "B = µ₀I/(2πr) = 2×10⁻⁷ × ${fmt(i)}/${fmt(cm / 100)} = ${fmt(microTesla, 2)}µT"
+                    )
+                },
+                generator("em_ni6") { r ->
+                    val (q1, q2) = chargesMicro.pickTwo(r)
+                    val cm = separationsCm.pick(r)
+                    val rm = cm / 100
+                    val f = COULOMB_K * q1 * MICRO * q2 * MICRO / (rm * rm)
+                    Numeric(
+                        text = "Two point charges of ${fmt(q1)}µC and ${fmt(q2)}µC are ${fmt(cm)}cm apart. What is the force between " +
+                            "them, in Newtons? Use k = 8.99×10⁹ and round to 2 decimal places.",
+                        answer = f, unit = "N",
+                        explanation = "F = kq₁q₂/r² = 8.99×10⁹ × ${fmt(q1)}×10⁻⁶ × ${fmt(q2)}×10⁻⁶/${fmt(rm)}² = ${fmt(f, 2)}N"
+                    )
+                }
             )
         )
     )
