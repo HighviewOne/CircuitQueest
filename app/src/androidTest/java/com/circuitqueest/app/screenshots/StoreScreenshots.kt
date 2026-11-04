@@ -65,8 +65,8 @@ class StoreScreenshots {
                 repository.recordQuizResult(topics[i].id, score, 7)
             }
             repository.markLessonCompleted(topics[4].id)
-            repository.recordAnswer(topics[1].id, topics[1].quiz.questions[2].id, correct = false)
-            repository.recordAnswer(topics[3].id, topics[3].quiz.questions[4].id, correct = false)
+            repository.recordAnswer(topics[1].id, topics[1].quiz.questionIds[2], correct = false)
+            repository.recordAnswer(topics[3].id, topics[3].quiz.questionIds[4], correct = false)
         }
     }
 
@@ -102,9 +102,11 @@ class StoreScreenshots {
 
     @Test
     fun s3_quizCorrectAnswer() {
-        val topic = topics.first { t -> t.quiz.questions.first() is Question.MultipleChoice }
-        val q = topic.quiz.questions.first() as Question.MultipleChoice
-        val vm = QuizViewModel(repository, SavedStateHandle(mapOf("topicId" to topic.id)))
+        // Attempts are drawn at random; use one that opens with a multiple-choice question
+        val vm = generateSequence {
+            QuizViewModel(repository, SavedStateHandle(mapOf("topicId" to topics[0].id)))
+        }.first { it.currentQuestion.value is Question.MultipleChoice }
+        val q = vm.currentQuestion.value as Question.MultipleChoice
         show { QuizScreen(viewModel = vm, onBack = {}, onQuizComplete = { _, _, _, _ -> }) }
         composeTestRule.onAllNodesWithText(q.options[q.correctIndex]).onFirst().performClick()
         composeTestRule.onNodeWithText("Submit Answer").performScrollTo().performClick()

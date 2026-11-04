@@ -1,6 +1,26 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.article
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import com.circuitqueest.app.data.content.QuestionMath.pickThree
+import com.circuitqueest.app.data.content.QuestionMath.pickTwo
+
 object KirchhoffsContent {
+    private val nodeInCurrents = listOf(4.0, 5.0, 6.0, 8.0, 10.0, 12.0)
+    private val nodeOutCurrents = listOf(1.0, 2.0, 3.0)
+    private val loopCurrents = listOf(0.5, 1.0, 1.5, 2.0, 3.0)
+    private val loopResistors = listOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0)
+    private val bigBatteries = listOf(9.0, 12.0, 15.0, 24.0)
+    private val smallBatteries = listOf(3.0, 5.0, 6.0)
+    private val opposingResistors = listOf(2.0, 3.0, 5.0, 6.0, 10.0)
+    private val branchCurrents = listOf(2.0, 3.0, 4.0, 5.0, 6.0)
+    private val kvlSupplies = listOf(12.0, 24.0, 48.0)
+    private val firstDrops = listOf(2.0, 3.0, 4.0, 5.0)
+    private val secondDrops = listOf(1.5, 2.5, 3.5, 4.5)
+
     val topic = Topic(
         id = "kirchhoffs",
         title = "Kirchhoff's Laws",
@@ -60,14 +80,6 @@ object KirchhoffsContent {
                     correctIndex = 1,
                     explanation = "KCL states that the sum of currents entering a node equals the sum of currents leaving that node (conservation of charge)."
                 ),
-                Question.NumericInput(
-                    id = "kl_ni1",
-                    questionText = "At a node, three wires meet. Wire 1 carries 5A into the node, Wire 2 carries 3A out. How much current flows through Wire 3 (in Amps, out of the node)?",
-                    correctAnswer = 2.0,
-                    tolerance = 0.1,
-                    unit = "A",
-                    explanation = "By KCL: I_in = I_out. 5A = 3A + I\u2083, so I\u2083 = 2A (out)."
-                ),
                 Question.MultipleChoice(
                     id = "kl_mc2",
                     questionText = "What does Kirchhoff's Voltage Law (KVL) state?",
@@ -79,22 +91,6 @@ object KirchhoffsContent {
                     ),
                     correctIndex = 2,
                     explanation = "KVL states that the algebraic sum of all voltages around any closed loop in a circuit equals zero (conservation of energy)."
-                ),
-                Question.NumericInput(
-                    id = "kl_ni2",
-                    questionText = "A loop contains a 24V battery and three resistors of 2\u03A9, 4\u03A9, and 6\u03A9 in series. What is the current in Amps?",
-                    correctAnswer = 2.0,
-                    tolerance = 0.1,
-                    unit = "A",
-                    explanation = "By KVL: 24 - 2I - 4I - 6I = 0 \u2192 24 = 12I \u2192 I = 2A"
-                ),
-                Question.NumericInput(
-                    id = "kl_ni3",
-                    questionText = "In a loop, a 10V battery and a 5V battery (opposing) are connected with a 5\u03A9 resistor. What current flows in Amps?",
-                    correctAnswer = 1.0,
-                    tolerance = 0.1,
-                    unit = "A",
-                    explanation = "By KVL: 10 - 5 - 5I = 0 \u2192 5 = 5I \u2192 I = 1A"
                 ),
                 Question.MultipleChoice(
                     id = "kl_mc3",
@@ -108,14 +104,88 @@ object KirchhoffsContent {
                     correctIndex = 2,
                     explanation = "KCL is based on conservation of charge - charge cannot accumulate at a node."
                 ),
-                Question.NumericInput(
-                    id = "kl_ni4",
-                    questionText = "A node has currents of 4A and 6A entering, and 3A leaving through one branch. How much current (in Amps) leaves through the remaining branch?",
-                    correctAnswer = 7.0,
-                    tolerance = 0.1,
-                    unit = "A",
-                    explanation = "By KCL: 4 + 6 = 3 + I\u2084 \u2192 I\u2084 = 7A"
+                Question.MultipleChoice(
+                    id = "kl_mc4",
+                    questionText = "Kirchhoff's Voltage Law (KVL) follows from the conservation of which quantity?",
+                    options = listOf(
+                        "Charge",
+                        "Energy",
+                        "Current",
+                        "Resistance"
+                    ),
+                    correctIndex = 1,
+                    explanation = "KVL follows from conservation of energy: a charge that goes around a closed loop returns to the same potential, so the voltage rises and drops cancel."
+                ),
+                Question.MultipleChoice(
+                    id = "kl_mc5",
+                    questionText = "Going around a loop in the same direction as the current, the voltage across a resistor is a:",
+                    options = listOf(
+                        "Rise of I×R",
+                        "Drop of I×R",
+                        "Drop of I/R",
+                        "Zero"
+                    ),
+                    correctIndex = 1,
+                    explanation = "Current flows from higher to lower potential through a resistor, so following the current you see a drop of I×R (written −IR in the KVL sum)."
                 )
+            ),
+            generators = listOf(
+                generator("kl_ni1") { r ->
+                    val iIn = nodeInCurrents.pick(r)
+                    val iOut = nodeOutCurrents.pick(r)
+                    Numeric(
+                        text = "At a node, three wires meet. Wire 1 carries ${fmt(iIn)}A into the node, Wire 2 carries " +
+                            "${fmt(iOut)}A out. How much current flows through Wire 3 (in Amps, out of the node)?",
+                        answer = iIn - iOut, unit = "A",
+                        explanation = "By KCL: I_in = I_out. ${fmt(iIn)} = ${fmt(iOut)} + I₃, so I₃ = ${fmt(iIn - iOut)}A (out)."
+                    )
+                },
+                generator("kl_ni2") { r ->
+                    val i = loopCurrents.pick(r)
+                    val (a, b, c) = loopResistors.pickThree(r)
+                    val v = i * (a + b + c)
+                    Numeric(
+                        text = "A loop contains ${article(v)} ${fmt(v)}V battery and three resistors of ${fmt(a)}Ω, ${fmt(b)}Ω, and " +
+                            "${fmt(c)}Ω in series. What is the current in Amps?",
+                        answer = i, unit = "A",
+                        explanation = "By KVL: ${fmt(v)} − I(${fmt(a)} + ${fmt(b)} + ${fmt(c)}) = 0 → I = ${fmt(v)}/${fmt(a + b + c)} = ${fmt(i)}A"
+                    )
+                },
+                generator("kl_ni3") { r ->
+                    val v1 = bigBatteries.pick(r)
+                    val v2 = smallBatteries.pick(r)
+                    val res = opposingResistors.pick(r)
+                    val i = (v1 - v2) / res
+                    Numeric(
+                        text = "In a loop, ${article(v1)} ${fmt(v1)}V battery and ${article(v2)} ${fmt(v2)}V battery (opposing) are " +
+                            "connected with ${article(res)} ${fmt(res)}Ω resistor. What current flows, in Amps? Round to 2 decimal places.",
+                        answer = i, unit = "A",
+                        explanation = "By KVL: ${fmt(v1)} − ${fmt(v2)} − ${fmt(res)}I = 0 → I = ${fmt(v1 - v2)}/${fmt(res)} = ${fmt(i, 2)}A"
+                    )
+                },
+                generator("kl_ni4") { r ->
+                    val (a, b) = branchCurrents.pickTwo(r)
+                    val out = nodeOutCurrents.pick(r)
+                    val rest = a + b - out
+                    Numeric(
+                        text = "A node has currents of ${fmt(a)}A and ${fmt(b)}A entering, and ${fmt(out)}A leaving through " +
+                            "one branch. How much current (in Amps) leaves through the remaining branch?",
+                        answer = rest, unit = "A",
+                        explanation = "By KCL: ${fmt(a)} + ${fmt(b)} = ${fmt(out)} + I₄ → I₄ = ${fmt(rest)}A"
+                    )
+                },
+                generator("kl_ni5") { r ->
+                    val vs = kvlSupplies.pick(r)
+                    val va = firstDrops.pick(r)
+                    val vb = secondDrops.pick(r)
+                    val vc = vs - va - vb
+                    Numeric(
+                        text = "A ${fmt(vs)}V source drives three resistors in series. The first drops ${fmt(va)}V and the " +
+                            "second drops ${fmt(vb)}V. What is the voltage across the third resistor, in Volts?",
+                        answer = vc, unit = "V",
+                        explanation = "By KVL the drops add up to the source: V₃ = ${fmt(vs)} − ${fmt(va)} − ${fmt(vb)} = ${fmt(vc)}V"
+                    )
+                }
             )
         )
     )

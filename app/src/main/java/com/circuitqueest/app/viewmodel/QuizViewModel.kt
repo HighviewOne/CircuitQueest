@@ -65,20 +65,23 @@ class QuizViewModel @Inject constructor(
         } else {
             val topic = TopicsService.allTopics.find { it.id == topicId }
             _quizState.value = QuizState(topicId = topicId, quizTitle = topic?.quiz?.title ?: "Quiz")
-            start(topic?.quiz?.questions.orEmpty().map { topicId to it })
+            // A fresh draw from the topic's pool: random order, new numbers, shuffled options
+            start(topic?.quiz?.drawAttempt().orEmpty().map { topicId to it })
         }
     }
 
     private suspend fun loadReviewQuestions(): List<Pair<String, Question>> {
         val byTopic = TopicsService.allTopics.associateBy { it.id }
         val scope = topicId.takeUnless { it == REVIEW_ALL }
-        // Skip entries whose question no longer exists in the content.
+        // Skip entries whose question no longer exists in the content. A missed generated
+        // question comes back with new numbers: the concept is reviewed, not the answer.
         return repository.getMissedQuestions(scope).mapNotNull { missed ->
-            byTopic[missed.topicId]?.quiz?.questions
-                ?.firstOrNull { it.id == missed.questionId }
-                ?.let { missed.topicId to it }
+            byTopic[missed.topicId]?.quiz?.find(missed.questionId)?.let { missed.topicId to it }
         }
     }
+
+    /** The questions drawn for this attempt, in order (lets UI tests know what's coming). */
+    internal val drawnQuestions: List<Question> get() = questions.map { it.second }
 
     private fun start(loaded: List<Pair<String, Question>>) {
         questions = loaded

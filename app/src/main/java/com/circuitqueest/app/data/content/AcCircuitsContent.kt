@@ -1,6 +1,26 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import kotlin.math.PI
+import kotlin.math.sqrt
+
 object AcCircuitsContent {
+    private val peakVoltages = listOf(10.0, 24.0, 100.0, 170.0, 325.0, 340.0)
+    private val reactanceFrequencies = listOf(50.0, 60.0, 1000.0, 10000.0)
+    private val reactanceInductances = listOf(1.0, 10.0, 47.0, 100.0)
+    private val rightTriangles = listOf(3.0 to 4.0, 6.0 to 8.0, 5.0 to 12.0, 8.0 to 15.0)
+    private val triangleScales = listOf(1.0, 2.0, 5.0, 10.0)
+    private val capacitiveReactances = listOf(10.0, 20.0, 40.0)
+    private val resonantInductances = listOf(1.0, 10.0, 100.0)
+    private val resonantCapacitances = listOf(0.1, 1.0, 10.0)
+    private val capacitorFrequencies = listOf(50.0, 60.0, 1000.0)
+    private val capacitorValues = listOf(1.0, 10.0, 100.0)
+    private val periodFrequencies = listOf(50.0, 60.0, 100.0, 400.0, 1000.0)
+    private const val MICRO = 1e-6
+
     val topic = Topic(
         id = "ac_circuits",
         title = "AC Circuits",
@@ -51,14 +71,6 @@ object AcCircuitsContent {
         quiz = Quiz(
             title = "AC Circuits Boss Battle",
             questions = listOf(
-                Question.NumericInput(
-                    id = "ac_ni1",
-                    questionText = "An AC signal has a peak voltage of 170V. What is its RMS voltage? Round to the nearest whole number.",
-                    correctAnswer = 120.0,
-                    tolerance = 1.0,
-                    unit = "V",
-                    explanation = "V_rms = V_peak / \u221A2 = 170 / 1.414 \u2248 120V"
-                ),
                 Question.MultipleChoice(
                     id = "ac_mc1",
                     questionText = "What happens to capacitive reactance as frequency increases?",
@@ -70,14 +82,6 @@ object AcCircuitsContent {
                     ),
                     correctIndex = 1,
                     explanation = "X_C = 1/(2\u03C0fC). As frequency increases, the denominator grows, so reactance decreases."
-                ),
-                Question.NumericInput(
-                    id = "ac_ni2",
-                    questionText = "What is the inductive reactance of a 10mH inductor at 1kHz? Answer in Ohms. Round to the nearest whole number.",
-                    correctAnswer = 63.0,
-                    tolerance = 1.0,
-                    unit = "\u03A9",
-                    explanation = "X_L = 2\u03C0fL = 2\u03C0 \u00D7 1000 \u00D7 0.01 = 62.83 \u2248 63\u03A9"
                 ),
                 Question.MultipleChoice(
                     id = "ac_mc2",
@@ -91,22 +95,6 @@ object AcCircuitsContent {
                     correctIndex = 2,
                     explanation = "At resonance X_L = X_C, so they cancel. Z = \u221A(R\u00B2 + 0\u00B2) = R."
                 ),
-                Question.NumericInput(
-                    id = "ac_ni3",
-                    questionText = "A series circuit has R = 30\u03A9, X_L = 80\u03A9, and X_C = 40\u03A9. What is the impedance in Ohms?",
-                    correctAnswer = 50.0,
-                    tolerance = 0.5,
-                    unit = "\u03A9",
-                    explanation = "Z = \u221A(R\u00B2 + (X_L - X_C)\u00B2) = \u221A(30\u00B2 + 40\u00B2) = \u221A(900 + 1600) = \u221A2500 = 50\u03A9"
-                ),
-                Question.NumericInput(
-                    id = "ac_ni4",
-                    questionText = "Find the resonant frequency (in Hz) of a circuit with L = 1mH and C = 1\u00B5F. Round to the nearest whole number.",
-                    correctAnswer = 5033.0,
-                    tolerance = 20.0,
-                    unit = "Hz",
-                    explanation = "f\u2080 = 1/(2\u03C0\u221A(LC)) = 1/(2\u03C0\u221A(10\u207B\u00B3 \u00D7 10\u207B\u2076)) = 1/(2\u03C0 \u00D7 31.62\u00D710\u207B\u2076) \u2248 5033Hz"
-                ),
                 Question.MultipleChoice(
                     id = "ac_mc3",
                     questionText = "In an AC circuit, an inductor causes the current to:",
@@ -118,7 +106,87 @@ object AcCircuitsContent {
                     ),
                     correctIndex = 1,
                     explanation = "In an inductor, current lags voltage by 90\u00B0. Remember: ELI the ICE man \u2014 in an inductor (L), EMF (E) leads current (I)."
+                ),
+                Question.MultipleChoice(
+                    id = "ac_mc4",
+                    questionText = "In a capacitor, how does the current relate to the voltage?",
+                    options = listOf(
+                        "It lags the voltage by 90°",
+                        "It leads the voltage by 90°",
+                        "It is in phase with the voltage",
+                        "It leads the voltage by 180°"
+                    ),
+                    correctIndex = 1,
+                    explanation = "In a capacitor (C), current (I) leads voltage (E) by 90°: the 'ICE' in 'ELI the ICE man'."
                 )
+            ),
+            generators = listOf(
+                generator("ac_ni1") { r ->
+                    val vp = peakVoltages.pick(r)
+                    val vrms = vp / sqrt(2.0)
+                    Numeric(
+                        text = "An AC signal has a peak voltage of ${fmt(vp)}V. What is its RMS voltage? Round to 1 decimal place.",
+                        answer = vrms, unit = "V", decimals = 1,
+                        explanation = "V_rms = V_peak / √2 = ${fmt(vp)} / 1.414 ≈ ${fmt(vrms, 1)}V"
+                    )
+                },
+                generator("ac_ni2") { r ->
+                    val f = reactanceFrequencies.pick(r)
+                    val l = reactanceInductances.pick(r)
+                    val xl = 2 * PI * f * l / 1000
+                    Numeric(
+                        text = "What is the inductive reactance of a ${fmt(l)}mH inductor at ${fmt(f)}Hz? " +
+                            "Answer in Ohms, rounded to 2 decimal places.",
+                        answer = xl, unit = "Ω",
+                        explanation = "X_L = 2πfL = 2π × ${fmt(f)} × ${fmt(l / 1000, 4)} = ${fmt(xl, 2)}Ω"
+                    )
+                },
+                generator("ac_ni3") { r ->
+                    val (a, b) = rightTriangles.pick(r)
+                    val k = triangleScales.pick(r)
+                    val res = a * k
+                    val xc = capacitiveReactances.pick(r)
+                    val xl = xc + b * k
+                    val z = sqrt(res * res + (xl - xc) * (xl - xc))
+                    Numeric(
+                        text = "A series circuit has R = ${fmt(res)}Ω, X_L = ${fmt(xl)}Ω, and X_C = ${fmt(xc)}Ω. " +
+                            "What is the impedance in Ohms?",
+                        answer = z, unit = "Ω",
+                        explanation = "Z = √(R² + (X_L − X_C)²) = √(${fmt(res)}² + ${fmt(xl - xc)}²) = " +
+                            "√${fmt(res * res + (xl - xc) * (xl - xc))} = ${fmt(z)}Ω"
+                    )
+                },
+                generator("ac_ni4") { r ->
+                    val l = resonantInductances.pick(r)
+                    val c = resonantCapacitances.pick(r)
+                    val f0 = 1 / (2 * PI * sqrt(l / 1000 * c * MICRO))
+                    Numeric(
+                        text = "Find the resonant frequency (in Hz) of a circuit with L = ${fmt(l)}mH and C = ${fmt(c)}µF. " +
+                            "Round to the nearest whole number.",
+                        answer = f0, unit = "Hz", decimals = 0,
+                        explanation = "f₀ = 1/(2π√(LC)) = 1/(2π√(${fmt(l)}×10⁻³ × ${fmt(c)}×10⁻⁶)) ≈ ${fmt(f0, 0)}Hz"
+                    )
+                },
+                generator("ac_ni5") { r ->
+                    val f = capacitorFrequencies.pick(r)
+                    val c = capacitorValues.pick(r)
+                    val xc = 1 / (2 * PI * f * c * MICRO)
+                    Numeric(
+                        text = "What is the capacitive reactance of a ${fmt(c)}µF capacitor at ${fmt(f)}Hz? " +
+                            "Answer in Ohms, rounded to 2 decimal places.",
+                        answer = xc, unit = "Ω",
+                        explanation = "X_C = 1/(2πfC) = 1/(2π × ${fmt(f)} × ${fmt(c)}×10⁻⁶) = ${fmt(xc, 2)}Ω"
+                    )
+                },
+                generator("ac_ni6") { r ->
+                    val f = periodFrequencies.pick(r)
+                    val ms = 1000 / f
+                    Numeric(
+                        text = "What is the period of a ${fmt(f)}Hz AC signal, in milliseconds? Round to 2 decimal places.",
+                        answer = ms, unit = "ms",
+                        explanation = "T = 1/f = 1/${fmt(f)} s = ${fmt(ms, 2)}ms"
+                    )
+                }
             )
         )
     )

@@ -146,7 +146,7 @@ fun LessonScreen(
         bottomBar = {
             StickyCtaBar(
                 lessonCompleted = lessonCompleted,
-                questionCount = currentTopic.quiz.questions.size,
+                questionCount = currentTopic.quiz.attemptSize,
                 bgColor = pal.bg,
                 onComplete = { viewModel.markLessonComplete() },
                 onStartQuiz = { onStartQuiz(currentTopic.id) },
@@ -266,7 +266,7 @@ private fun HeroCard(topic: Topic, parallaxOffset: Float = 0f) {
             Spacer(modifier = Modifier.height(Spacing.s16))
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s8)) {
                 StatPill("~${topic.lesson.sections.size + 1} min")
-                StatPill("${topic.quiz.questions.size} questions")
+                StatPill("${topic.quiz.attemptSize} questions")
                 StatPill("+${QuizScoring.LESSON_XP} XP")
             }
         }

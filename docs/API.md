@@ -40,7 +40,30 @@ data class LessonSection(
     val keyPoint: String? = null   // rendered as a "KEY INSIGHT" callout
 )
 
-data class Quiz(val title: String, val questions: List<Question>)
+// A topic's question pool. Each attempt draws QUESTIONS_PER_ATTEMPT (7) questions from the fixed
+// questions plus the generators, in random order, with multiple-choice options shuffled.
+data class Quiz(
+    val title: String,
+    val questions: List<Question>,                      // fixed questions (multiple choice)
+    val generators: List<QuestionGenerator> = emptyList() // numeric questions with fresh values each draw
+) {
+    val poolSize: Int                         // questions.size + generators.size
+    val attemptSize: Int                      // min(7, poolSize): what the lesson screen shows
+    val questionIds: List<String>             // every id in the pool
+    fun drawAttempt(random: Random = Random.Default): List<Question>
+    fun find(id: String, random: Random = Random.Default): Question?  // for review; regenerates numbers
+}
+
+// id stays the same on every draw, so a missed generated question can be reviewed (with new numbers)
+class QuestionGenerator(val id: String, make: (Random) -> Question)
+
+// Writing a generator (data/content/QuestionMath.kt): pick values from named lists (detekt allows
+// numbers in property declarations), and return Numeric(...). Tolerance is 1% of the answer, or
+// enough to accept rounding to `decimals` places, whichever is larger; say the rounding in the text.
+//   generator("ohm_ni1") { r ->
+//       val i = currents.pick(r); val res = resistances.pick(r); val v = i * res
+//       Numeric(text = "...", answer = i, unit = "A", explanation = "I = V/R = ...")
+//   }
 
 sealed class Question {
     abstract val id: String

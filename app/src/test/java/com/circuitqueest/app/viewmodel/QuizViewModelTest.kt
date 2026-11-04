@@ -2,6 +2,7 @@ package com.circuitqueest.app.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
 import com.circuitqueest.app.data.content.Question
+import com.circuitqueest.app.data.content.Quiz
 import com.circuitqueest.app.data.content.TopicsService
 import com.circuitqueest.app.data.db.entity.MissedQuestion
 import com.circuitqueest.app.data.repository.ProgressRepository
@@ -30,7 +31,8 @@ class QuizViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val topicId = "ohms_law"
-    private val questions = TopicsService.allTopics.first { it.id == topicId }.quiz.questions
+    private val quiz = TopicsService.allTopics.first { it.id == topicId }.quiz
+    private val questions = quiz.questions   // the fixed (multiple-choice) part of the pool
 
     @Before
     fun setup() {
@@ -67,7 +69,7 @@ class QuizViewModelTest {
         whenever(repository.recordQuizResult(any(), any(), any())).thenReturn(0)
         val viewModel = makeViewModel(repository)
 
-        repeat(questions.size - 1) {
+        repeat(quiz.attemptSize - 1) {
             viewModel.answerCurrentCorrectly()
             viewModel.nextQuestion()
         }
@@ -85,14 +87,14 @@ class QuizViewModelTest {
         whenever(repository.recordQuizResult(any(), any(), any())).thenReturn(170)
         val viewModel = makeViewModel(repository)
 
-        repeat(questions.size) {
+        repeat(quiz.attemptSize) {
             viewModel.answerCurrentCorrectly()
             viewModel.nextQuestion()
         }
 
         assertTrue(viewModel.quizComplete.value)
         assertEquals(170, viewModel.quizState.value.xpEarned)
-        assertEquals(questions.sumOf { it.points }, viewModel.quizState.value.score)
+        assertEquals(quiz.attemptSize, viewModel.quizState.value.score)
     }
 
     @Test
@@ -118,7 +120,7 @@ class QuizViewModelTest {
     fun wrongAnswer_inNormalQuiz_isQueuedForReview() = runTest {
         val repository: ProgressRepository = mock()
         val viewModel = makeViewModel(repository)
-        val first = questions.first()
+        val first = viewModel.currentQuestion.value!!
 
         when (first) {
             is Question.MultipleChoice -> viewModel.answerMultipleChoice((first.correctIndex + 1) % first.options.size)
@@ -176,6 +178,37 @@ class QuizViewModelTest {
         assertTrue(viewModel.quizComplete.value)
         assertEquals(0, viewModel.quizState.value.xpEarned)
         verify(repository, never()).recordQuizResult(any(), any(), any())
+    }
+
+    @Test
+    fun normalQuiz_drawsSevenDistinctQuestionsFromThePool() = runTest {
+        val repository: ProgressRepository = mock()
+        whenever(repository.recordQuizResult(any(), any(), any())).thenReturn(0)
+        val viewModel = makeViewModel(repository)
+        val seen = mutableListOf<String>()
+        repeat(quiz.attemptSize) {
+            seen += viewModel.currentQuestion.value!!.id
+            viewModel.answerCurrentCorrectly()
+            viewModel.nextQuestion()
+        }
+
+        assertEquals(Quiz.QUESTIONS_PER_ATTEMPT, viewModel.quizState.value.totalQuestions)
+        assertEquals(seen.size, seen.toSet().size)
+        assertTrue(quiz.questionIds.containsAll(seen))
+    }
+
+    @Test
+    fun reviewMode_missedGeneratedQuestion_returnsWithItsIdAndFreshNumbers() = runTest {
+        val repository: ProgressRepository = mock()
+        whenever(repository.getMissedQuestions(null)).thenReturn(listOf(MissedQuestion(topicId, "ohm_ni1")))
+
+        val viewModel = makeReviewViewModel(repository)
+
+        val q = viewModel.currentQuestion.value
+        assertTrue(q is Question.NumericInput)
+        assertEquals("ohm_ni1", q.id)
+        viewModel.answerCurrentCorrectly()
+        verify(repository).recordAnswer(eq(topicId), eq("ohm_ni1"), eq(true))
     }
 
     @Test

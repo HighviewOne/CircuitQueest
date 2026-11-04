@@ -1,6 +1,21 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import com.circuitqueest.app.data.content.QuestionMath.pickTwo
+
 object TheveninNortonContent {
+    private val theveninVoltages = listOf(6.0, 9.0, 10.0, 12.0, 15.0, 20.0, 24.0)
+    private val theveninResistances = listOf(2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0)
+    private val matchingResistances = listOf(4.7, 10.0, 22.0, 47.0, 50.0, 75.0, 100.0)
+    private val nortonCurrents = listOf(0.5, 1.0, 2.0, 3.0, 4.0)
+    private val nortonResistances = listOf(2.0, 4.0, 5.0, 8.0, 10.0, 12.0)
+    private val dividerSupplies = listOf(9.0, 12.0, 15.0, 24.0)
+    private val dividerResistances = listOf(1.0, 2.0, 3.0, 4.0, 6.0, 12.0)
+    private val loadResistances = listOf(2.0, 4.0, 6.0, 10.0, 20.0)
+
     val topic = Topic(
         id = "thevenin_norton",
         title = "Th\u00E9venin & Norton",
@@ -61,14 +76,6 @@ object TheveninNortonContent {
                     correctIndex = 0,
                     explanation = "Th\u00E9venin's equivalent is a voltage source (V_th) in series with a resistance (R_th)."
                 ),
-                Question.NumericInput(
-                    id = "tn_ni1",
-                    questionText = "A circuit has V_th = 10V and R_th = 5\u03A9. What is the Norton current (I_N) in Amps?",
-                    correctAnswer = 2.0,
-                    tolerance = 0.1,
-                    unit = "A",
-                    explanation = "I_N = V_th / R_th = 10 / 5 = 2A"
-                ),
                 Question.MultipleChoice(
                     id = "tn_mc2",
                     questionText = "To find R_th, you turn off all independent sources. How do you turn off a voltage source?",
@@ -80,22 +87,6 @@ object TheveninNortonContent {
                     ),
                     correctIndex = 2,
                     explanation = "An ideal voltage source turned off has 0V across it, which behaves as a short circuit (wire)."
-                ),
-                Question.NumericInput(
-                    id = "tn_ni2",
-                    questionText = "A Th\u00E9venin circuit has V_th = 20V and R_th = 10\u03A9. What load resistance (in \u03A9) maximizes power transfer?",
-                    correctAnswer = 10.0,
-                    tolerance = 0.1,
-                    unit = "\u03A9",
-                    explanation = "Maximum power transfer occurs when R_load = R_th = 10\u03A9."
-                ),
-                Question.NumericInput(
-                    id = "tn_ni3",
-                    questionText = "A Th\u00E9venin circuit has V_th = 12V and R_th = 6\u03A9. What is the maximum power (in Watts) that can be delivered to a load?",
-                    correctAnswer = 6.0,
-                    tolerance = 0.1,
-                    unit = "W",
-                    explanation = "P_max = V_th\u00B2 / (4 \u00D7 R_th) = 144 / 24 = 6W"
                 ),
                 Question.MultipleChoice(
                     id = "tn_mc3",
@@ -109,14 +100,99 @@ object TheveninNortonContent {
                     correctIndex = 1,
                     explanation = "Norton's equivalent is a current source (I_N) in parallel with a resistance (R_N)."
                 ),
-                Question.NumericInput(
-                    id = "tn_ni4",
-                    questionText = "A Norton circuit has I_N = 3A and R_N = 8\u03A9. What is the Th\u00E9venin voltage (V_th) in Volts?",
-                    correctAnswer = 24.0,
-                    tolerance = 0.1,
-                    unit = "V",
-                    explanation = "V_th = I_N \u00D7 R_N = 3 \u00D7 8 = 24V"
+                Question.MultipleChoice(
+                    id = "tn_mc4",
+                    questionText = "When finding R_th, how do you turn off an independent current source?",
+                    options = listOf(
+                        "Replace it with a short circuit",
+                        "Replace it with an open circuit",
+                        "Leave it as it is",
+                        "Replace it with a 1Ω resistor"
+                    ),
+                    correctIndex = 1,
+                    explanation = "A current source turned off delivers 0A, which is an open circuit. (A voltage source turned off becomes a short circuit.)"
                 )
+            ),
+            generators = listOf(
+                generator("tn_ni1") { r ->
+                    val v = theveninVoltages.pick(r)
+                    val res = theveninResistances.pick(r)
+                    val i = v / res
+                    Numeric(
+                        text = "A circuit has V_th = ${fmt(v)}V and R_th = ${fmt(res)}Ω. What is the Norton current (I_N) " +
+                            "in Amps? Round to 2 decimal places.",
+                        answer = i, unit = "A",
+                        explanation = "I_N = V_th / R_th = ${fmt(v)} / ${fmt(res)} = ${fmt(i, 2)}A"
+                    )
+                },
+                generator("tn_ni2") { r ->
+                    val v = theveninVoltages.pick(r)
+                    val res = matchingResistances.pick(r)
+                    Numeric(
+                        text = "A Thévenin circuit has V_th = ${fmt(v)}V and R_th = ${fmt(res)}Ω. What load resistance " +
+                            "(in Ω) maximizes power transfer?",
+                        answer = res, unit = "Ω", decimals = 1,
+                        explanation = "Maximum power transfer occurs when R_load = R_th = ${fmt(res)}Ω. The source voltage doesn't matter."
+                    )
+                },
+                generator("tn_ni3") { r ->
+                    val v = theveninVoltages.pick(r)
+                    val res = theveninResistances.pick(r)
+                    val p = (v / 2) * (v / 2) / res
+                    Numeric(
+                        text = "A Thévenin circuit has V_th = ${fmt(v)}V and R_th = ${fmt(res)}Ω. What is the maximum power " +
+                            "(in Watts) that can be delivered to a load? Round to 2 decimal places.",
+                        answer = p, unit = "W",
+                        explanation = "With R_load = R_th the load gets half of V_th: P_max = V_th²/(4R_th) = " +
+                            "${fmt(v * v)}/(4 × ${fmt(res)}) = ${fmt(p, 2)}W"
+                    )
+                },
+                generator("tn_ni4") { r ->
+                    val i = nortonCurrents.pick(r)
+                    val res = nortonResistances.pick(r)
+                    Numeric(
+                        text = "A Norton circuit has I_N = ${fmt(i)}A and R_N = ${fmt(res)}Ω. What is the Thévenin voltage " +
+                            "(V_th) in Volts?",
+                        answer = i * res, unit = "V",
+                        explanation = "V_th = I_N × R_N = ${fmt(i)} × ${fmt(res)} = ${fmt(i * res)}V"
+                    )
+                },
+                generator("tn_ni5") { r ->
+                    val vs = dividerSupplies.pick(r)
+                    val (r1, r2) = dividerResistances.pickTwo(r)
+                    val vth = vs * r2 / (r1 + r2)
+                    Numeric(
+                        text = "A ${fmt(vs)}V source feeds R₁ = ${fmt(r1)}kΩ in series with R₂ = ${fmt(r2)}kΩ, and the output " +
+                            "is taken across R₂. What is the Thévenin voltage at the output, in Volts? Round to 2 decimal places.",
+                        answer = vth, unit = "V",
+                        explanation = "V_th is the open-circuit output, a voltage divider: ${fmt(vs)} × ${fmt(r2)}/${fmt(r1 + r2)} = " +
+                            "${fmt(vth, 2)}V"
+                    )
+                },
+                generator("tn_ni6") { r ->
+                    val vs = dividerSupplies.pick(r)
+                    val (r1, r2) = dividerResistances.pickTwo(r)
+                    val rth = r1 * r2 / (r1 + r2)
+                    Numeric(
+                        text = "A ${fmt(vs)}V source feeds R₁ = ${fmt(r1)}kΩ in series with R₂ = ${fmt(r2)}kΩ, and the output " +
+                            "is taken across R₂. What is the Thévenin resistance at the output, in kΩ? Round to 2 decimal places.",
+                        answer = rth, unit = "kΩ",
+                        explanation = "Turn the source off (a short): R₁ and R₂ are then in parallel, so R_th = " +
+                            "(${fmt(r1)}×${fmt(r2)})/(${fmt(r1)}+${fmt(r2)}) = ${fmt(rth, 2)}kΩ"
+                    )
+                },
+                generator("tn_ni7") { r ->
+                    val v = theveninVoltages.pick(r)
+                    val res = theveninResistances.pick(r)
+                    val load = loadResistances.pick(r)
+                    val i = v / (res + load)
+                    Numeric(
+                        text = "A Thévenin source of V_th = ${fmt(v)}V and R_th = ${fmt(res)}Ω drives a ${fmt(load)}Ω load. " +
+                            "What current flows through the load, in Amps? Round to 2 decimal places.",
+                        answer = i, unit = "A",
+                        explanation = "I = V_th/(R_th + R_load) = ${fmt(v)}/(${fmt(res)} + ${fmt(load)}) = ${fmt(i, 2)}A"
+                    )
+                }
             )
         )
     )

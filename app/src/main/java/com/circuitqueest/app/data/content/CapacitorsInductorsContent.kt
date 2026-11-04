@@ -1,6 +1,23 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import com.circuitqueest.app.data.content.QuestionMath.pickThree
+import com.circuitqueest.app.data.content.QuestionMath.pickTwo
+
 object CapacitorsInductorsContent {
+    private val capacitances = listOf(1.0, 2.2, 4.7, 10.0, 22.0, 47.0, 100.0)
+    private val chargeVoltages = listOf(3.3, 5.0, 9.0, 12.0)
+    private val rcResistances = listOf(1.0, 2.2, 4.7, 10.0)
+    private val rcCapacitances = listOf(1.0, 10.0, 47.0, 100.0)
+    private val seriesCapacitances = listOf(1.0, 2.0, 3.0, 4.0, 6.0, 10.0, 12.0)
+    private val energyCapacitances = listOf(10.0, 20.0, 47.0, 100.0)
+    private val energyVoltages = listOf(5.0, 10.0, 12.0)
+    private val inductances = listOf(1.0, 10.0, 47.0, 100.0)
+    private val inductorCurrents = listOf(0.5, 1.0, 2.0)
+
     val topic = Topic(
         id = "capacitors_inductors",
         title = "Capacitors & Inductors",
@@ -63,22 +80,6 @@ object CapacitorsInductorsContent {
                     correctIndex = 0,
                     explanation = "In parallel, capacitances add directly: C_total = C\u2081 + C\u2082 + ... (opposite to resistors)."
                 ),
-                Question.NumericInput(
-                    id = "ci_ni1",
-                    questionText = "A 10\u00B5F capacitor is charged to 5V. How much charge does it store in microcoulombs (\u00B5C)?",
-                    correctAnswer = 50.0,
-                    tolerance = 0.5,
-                    unit = "\u00B5C",
-                    explanation = "Q = C \u00D7 V = 10\u00B5F \u00D7 5V = 50\u00B5C"
-                ),
-                Question.NumericInput(
-                    id = "ci_ni2",
-                    questionText = "What is the time constant (in milliseconds) of a 1k\u03A9 resistor in series with a 100\u00B5F capacitor?",
-                    correctAnswer = 100.0,
-                    tolerance = 1.0,
-                    unit = "ms",
-                    explanation = "\u03C4 = R \u00D7 C = 1000 \u00D7 100\u00D710\u207B\u2076 = 0.1s = 100ms"
-                ),
                 Question.MultipleChoice(
                     id = "ci_mc2",
                     questionText = "What does an inductor resist?",
@@ -91,22 +92,6 @@ object CapacitorsInductorsContent {
                     correctIndex = 2,
                     explanation = "An inductor opposes changes in current through it (V = L \u00D7 dI/dt). It passes steady-state DC freely."
                 ),
-                Question.NumericInput(
-                    id = "ci_ni3",
-                    questionText = "Two capacitors of 6\u00B5F and 3\u00B5F are connected in series. What is the total capacitance in \u00B5F?",
-                    correctAnswer = 2.0,
-                    tolerance = 0.1,
-                    unit = "\u00B5F",
-                    explanation = "C_total = (C\u2081 \u00D7 C\u2082)/(C\u2081 + C\u2082) = (6 \u00D7 3)/(6 + 3) = 18/9 = 2\u00B5F"
-                ),
-                Question.NumericInput(
-                    id = "ci_ni4",
-                    questionText = "What is the energy stored in a 20\u00B5F capacitor charged to 10V? Answer in millijoules (mJ).",
-                    correctAnswer = 1.0,
-                    tolerance = 0.05,
-                    unit = "mJ",
-                    explanation = "E = \u00BDCV\u00B2 = \u00BD \u00D7 20\u00D710\u207B\u2076 \u00D7 10\u00B2 = \u00BD \u00D7 20\u00D710\u207B\u2076 \u00D7 100 = 0.001J = 1mJ"
-                ),
                 Question.MultipleChoice(
                     id = "ci_mc3",
                     questionText = "What is the time constant of an RL circuit?",
@@ -118,7 +103,85 @@ object CapacitorsInductorsContent {
                     ),
                     correctIndex = 1,
                     explanation = "The RL time constant is \u03C4 = L/R. Unlike RC circuits where \u03C4 = RC, here the inductance is divided by resistance."
+                ),
+                Question.MultipleChoice(
+                    id = "ci_mc4",
+                    questionText = "An RC circuit charges from 0V. After one time constant (t = τ), the capacitor voltage is about what fraction of the supply?",
+                    options = listOf(
+                        "37%",
+                        "50%",
+                        "63%",
+                        "100%"
+                    ),
+                    correctIndex = 2,
+                    explanation = "V = V_s(1 − e^(−t/τ)). At t = τ that's 1 − e⁻¹ ≈ 0.632, about 63%. It's essentially full (over 99%) after 5τ."
                 )
+            ),
+            generators = listOf(
+                generator("ci_ni1") { r ->
+                    val c = capacitances.pick(r)
+                    val v = chargeVoltages.pick(r)
+                    val q = c * v
+                    Numeric(
+                        text = "A ${fmt(c)}µF capacitor is charged to ${fmt(v)}V. How much charge does it store in " +
+                            "microcoulombs (µC)? Round to 2 decimal places.",
+                        answer = q, unit = "µC",
+                        explanation = "Q = C × V = ${fmt(c)}µF × ${fmt(v)}V = ${fmt(q, 2)}µC"
+                    )
+                },
+                generator("ci_ni2") { r ->
+                    val res = rcResistances.pick(r)
+                    val c = rcCapacitances.pick(r)
+                    val tau = res * c
+                    Numeric(
+                        text = "What is the time constant (in milliseconds) of a ${fmt(res)}kΩ resistor in series with a " +
+                            "${fmt(c)}µF capacitor? Round to 2 decimal places.",
+                        answer = tau, unit = "ms",
+                        explanation = "τ = R × C = ${fmt(res)}kΩ × ${fmt(c)}µF = ${fmt(tau, 2)}ms (kΩ × µF gives ms)"
+                    )
+                },
+                generator("ci_ni3") { r ->
+                    val (a, b) = seriesCapacitances.pickTwo(r)
+                    val total = a * b / (a + b)
+                    Numeric(
+                        text = "Two capacitors of ${fmt(a)}µF and ${fmt(b)}µF are connected in series. " +
+                            "What is the total capacitance in µF? Round to 2 decimal places.",
+                        answer = total, unit = "µF",
+                        explanation = "In series, C_total = (C₁ × C₂)/(C₁ + C₂) = (${fmt(a)} × ${fmt(b)})/(${fmt(a)} + ${fmt(b)}) = " +
+                            "${fmt(total, 2)}µF"
+                    )
+                },
+                generator("ci_ni4") { r ->
+                    val c = energyCapacitances.pick(r)
+                    val v = energyVoltages.pick(r)
+                    val mj = c * v * v / 2 / 1000
+                    Numeric(
+                        text = "What is the energy stored in a ${fmt(c)}µF capacitor charged to ${fmt(v)}V? " +
+                            "Answer in millijoules (mJ), rounded to 3 decimal places.",
+                        answer = mj, unit = "mJ", decimals = 3,
+                        explanation = "E = ½CV² = ½ × ${fmt(c)}×10⁻⁶ × ${fmt(v)}² = ${fmt(mj, 3)}mJ"
+                    )
+                },
+                generator("ci_ni5") { r ->
+                    val (a, b, c) = capacitances.pickThree(r)
+                    Numeric(
+                        text = "Three capacitors of ${fmt(a)}µF, ${fmt(b)}µF, and ${fmt(c)}µF are connected in parallel. " +
+                            "What is the total capacitance in µF?",
+                        answer = a + b + c, unit = "µF",
+                        explanation = "In parallel, capacitances add: ${fmt(a)} + ${fmt(b)} + ${fmt(c)} = ${fmt(a + b + c)}µF"
+                    )
+                },
+                generator("ci_ni6") { r ->
+                    val l = inductances.pick(r)
+                    val i = inductorCurrents.pick(r)
+                    val mj = l * i * i / 2
+                    Numeric(
+                        text = "A ${fmt(l)}mH inductor carries ${fmt(i)}A. How much energy does it store, in millijoules (mJ)? " +
+                            "Round to 3 decimal places.",
+                        answer = mj, unit = "mJ", decimals = 3,
+                        explanation = "E = ½LI² = ½ × ${fmt(l)}mH × ${fmt(i)}² = ${fmt(mj, 3)}mJ"
+                    )
+                }
             )
         )
     )

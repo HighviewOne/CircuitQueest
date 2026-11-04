@@ -1,6 +1,23 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.article
+import com.circuitqueest.app.data.content.QuestionMath.articleCap
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+
 object OhmsLawContent {
+    private val currents = listOf(0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0)
+    private val resistances = listOf(2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 15.0, 20.0)
+    private val limitResistances = listOf(5.0, 8.0, 10.0, 12.0, 20.0, 24.0, 40.0, 50.0, 100.0)
+    private val limitCurrents = listOf(0.25, 0.5, 0.75, 1.0, 1.5, 2.0)
+    private val powerCurrents = listOf(0.5, 1.0, 1.5, 2.0, 3.0)
+    private val supplies = listOf(12.0, 24.0, 120.0, 230.0)
+    private val deviceCurrents = listOf(0.25, 0.5, 1.0, 2.0, 2.5)
+    private val sourceVoltages = listOf(5.0, 6.0, 9.0, 12.0, 24.0)
+    private val loadResistances = listOf(3.0, 4.0, 6.0, 8.0, 12.0, 18.0)
+
     val topic = Topic(
         id = "ohms_law",
         title = "Ohm's Law",
@@ -54,14 +71,6 @@ object OhmsLawContent {
                     correctIndex = 0,
                     explanation = "Ohm's Law states that Voltage equals Current times Resistance: V = I \u00D7 R"
                 ),
-                Question.NumericInput(
-                    id = "ohm_ni1",
-                    questionText = "A 12V battery is connected to a 4\u03A9 resistor. What is the current in Amps?",
-                    correctAnswer = 3.0,
-                    tolerance = 0.1,
-                    unit = "A",
-                    explanation = "I = V/R = 12/4 = 3A"
-                ),
                 Question.MultipleChoice(
                     id = "ohm_mc2",
                     questionText = "If the resistance in a circuit doubles while voltage stays the same, what happens to the current?",
@@ -73,22 +82,6 @@ object OhmsLawContent {
                     ),
                     correctIndex = 1,
                     explanation = "From I = V/R, doubling R while V stays constant means I is halved."
-                ),
-                Question.NumericInput(
-                    id = "ohm_ni2",
-                    questionText = "What resistance is needed to limit current to 0.5A from a 10V source? Answer in Ohms.",
-                    correctAnswer = 20.0,
-                    tolerance = 0.1,
-                    unit = "\u03A9",
-                    explanation = "R = V/I = 10/0.5 = 20\u03A9"
-                ),
-                Question.NumericInput(
-                    id = "ohm_ni3",
-                    questionText = "A 5\u03A9 resistor carries 2A of current. What is the power dissipated in Watts?",
-                    correctAnswer = 20.0,
-                    tolerance = 0.1,
-                    unit = "W",
-                    explanation = "P = I\u00B2 \u00D7 R = 2\u00B2 \u00D7 5 = 4 \u00D7 5 = 20W"
                 ),
                 Question.MultipleChoice(
                     id = "ohm_mc3",
@@ -102,14 +95,84 @@ object OhmsLawContent {
                     correctIndex = 2,
                     explanation = "Resistance is measured in Ohms (\u03A9), named after Georg Simon Ohm."
                 ),
-                Question.NumericInput(
-                    id = "ohm_ni4",
-                    questionText = "A device rated at 60W operates on a 120V supply. What current does it draw in Amps?",
-                    correctAnswer = 0.5,
-                    tolerance = 0.05,
-                    unit = "A",
-                    explanation = "I = P/V = 60/120 = 0.5A"
+                Question.MultipleChoice(
+                    id = "ohm_mc4",
+                    questionText = "If both the voltage across a resistor and its resistance double, what happens to the current?",
+                    options = listOf(
+                        "It doubles",
+                        "It halves",
+                        "It stays the same",
+                        "It quadruples"
+                    ),
+                    correctIndex = 2,
+                    explanation = "I = V/R. Doubling both gives 2V/2R = V/R, so the current is unchanged."
+                ),
+                Question.MultipleChoice(
+                    id = "ohm_mc5",
+                    questionText = "The current through a fixed resistor doubles. What happens to the power it dissipates?",
+                    options = listOf(
+                        "It doubles",
+                        "It quadruples",
+                        "It halves",
+                        "It stays the same"
+                    ),
+                    correctIndex = 1,
+                    explanation = "P = I²R. Doubling I multiplies the power by 2² = 4."
                 )
+            ),
+            generators = listOf(
+                generator("ohm_ni1") { r ->
+                    val i = currents.pick(r)
+                    val res = resistances.pick(r)
+                    val v = i * res
+                    Numeric(
+                        text = "${articleCap(v)} ${fmt(v)}V source is connected to ${article(res)} ${fmt(res)}Ω resistor. " +
+                            "What is the current in Amps?",
+                        answer = i, unit = "A",
+                        explanation = "I = V/R = ${fmt(v)}/${fmt(res)} = ${fmt(i)}A"
+                    )
+                },
+                generator("ohm_ni2") { r ->
+                    val res = limitResistances.pick(r)
+                    val i = limitCurrents.pick(r)
+                    val v = res * i
+                    Numeric(
+                        text = "What resistance limits the current to ${fmt(i)}A from ${article(v)} ${fmt(v)}V source? Answer in Ohms.",
+                        answer = res, unit = "Ω",
+                        explanation = "R = V/I = ${fmt(v)}/${fmt(i)} = ${fmt(res)}Ω"
+                    )
+                },
+                generator("ohm_ni3") { r ->
+                    val i = powerCurrents.pick(r)
+                    val res = resistances.pick(r)
+                    val p = i * i * res
+                    Numeric(
+                        text = "${articleCap(res)} ${fmt(res)}Ω resistor carries ${fmt(i)}A of current. What is the power dissipated in Watts?",
+                        answer = p, unit = "W",
+                        explanation = "P = I² × R = ${fmt(i)}² × ${fmt(res)} = ${fmt(p)}W"
+                    )
+                },
+                generator("ohm_ni4") { r ->
+                    val v = supplies.pick(r)
+                    val i = deviceCurrents.pick(r)
+                    val p = v * i
+                    Numeric(
+                        text = "A device rated at ${fmt(p)}W operates on a ${fmt(v)}V supply. What current does it draw in Amps?",
+                        answer = i, unit = "A",
+                        explanation = "I = P/V = ${fmt(p)}/${fmt(v)} = ${fmt(i)}A"
+                    )
+                },
+                generator("ohm_ni5") { r ->
+                    val v = sourceVoltages.pick(r)
+                    val res = loadResistances.pick(r)
+                    val p = v * v / res
+                    Numeric(
+                        text = "${articleCap(v)} ${fmt(v)}V source drives ${article(res)} ${fmt(res)}Ω resistor. What power does it dissipate, " +
+                            "in Watts? Round to 2 decimal places.",
+                        answer = p, unit = "W",
+                        explanation = "P = V²/R = ${fmt(v)}²/${fmt(res)} = ${fmt(v * v)}/${fmt(res)} = ${fmt(p, 2)}W"
+                    )
+                }
             )
         )
     )
