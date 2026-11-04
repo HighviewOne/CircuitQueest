@@ -1,6 +1,23 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+
 object MlHardwareContent {
+    private val parameterBillions = listOf(1.0, 7.0, 13.0, 70.0)
+    private val precisions = listOf("FP32" to 4.0, "FP16" to 2.0, "INT8" to 1.0, "INT4" to 0.5)
+    private val coreCounts = listOf(5000.0, 10_000.0, 16_384.0)
+    private val coreClocks = listOf(1.0, 1.5, 2.0)
+    private val npuTops = listOf(10.0, 20.0, 40.0, 100.0)
+    private val npuWatts = listOf(2.0, 5.0, 8.0, 15.0)
+    private val memoryBandwidths = listOf(100.0, 400.0, 1000.0, 3000.0)
+    private val modelSizes = listOf(7.0, 14.0, 70.0, 140.0)
+    private val layerInputs = listOf(128, 512, 1024, 4096)
+    private val layerOutputs = listOf(128, 256, 1000)
+    private val formatBits = listOf("FP32" to 32, "FP16" to 16, "INT8" to 8, "INT4" to 4)
+
     val topic = Topic(
         id = "ml_hardware",
         title = "Machine Learning Hardware",
@@ -74,14 +91,6 @@ object MlHardwareContent {
                     correctIndex = 1,
                     explanation = "In a systolic array, data flows through a grid of processing elements, being reused at each step. This minimizes expensive memory accesses and maximizes compute per byte."
                 ),
-                Question.NumericInput(
-                    id = "mlhw_ni1",
-                    questionText = "A model has 7 billion parameters stored in FP16 (2 bytes each). How many GB of memory does it require?",
-                    correctAnswer = 14.0,
-                    tolerance = 0.5,
-                    unit = "GB",
-                    explanation = "Memory = 7\u00D710\u2079 \u00D7 2 bytes = 14\u00D710\u2079 bytes = 14 GB"
-                ),
                 Question.MultipleChoice(
                     id = "mlhw_mc3",
                     questionText = "INT8 quantization reduces model size compared to FP32 by:",
@@ -93,14 +102,6 @@ object MlHardwareContent {
                     ),
                     correctIndex = 1,
                     explanation = "FP32 uses 4 bytes per value, INT8 uses 1 byte. The model is 4\u00D7 smaller (32/8 = 4)."
-                ),
-                Question.NumericInput(
-                    id = "mlhw_ni2",
-                    questionText = "A GPU has 10,000 cores running at 1.5 GHz, each performing 2 FP16 operations per cycle. What is the peak throughput in TFLOPS?",
-                    correctAnswer = 30.0,
-                    tolerance = 0.5,
-                    unit = "TFLOPS",
-                    explanation = "TFLOPS = 10000 \u00D7 1.5\u00D710\u2079 \u00D7 2 / 10\u00B9\u00B2 = 30 TFLOPS"
                 ),
                 Question.MultipleChoice(
                     id = "mlhw_mc4",
@@ -114,14 +115,87 @@ object MlHardwareContent {
                     correctIndex = 2,
                     explanation = "Large language models must load billions of parameters from memory for each token. Memory bandwidth (not compute) is typically the limiting factor, which is why HBM is critical."
                 ),
-                Question.NumericInput(
-                    id = "mlhw_ni3",
-                    questionText = "An edge NPU delivers 20 TOPS at 8W. What is its efficiency in TOPS/watt?",
-                    correctAnswer = 2.5,
-                    tolerance = 0.1,
-                    unit = "TOPS/W",
-                    explanation = "Efficiency = 20 TOPS / 8 W = 2.5 TOPS/watt"
+                Question.MultipleChoice(
+                    id = "mlhw_mc5",
+                    questionText = "Why is INT8 inference usually faster and more energy-efficient than FP32?",
+                    options = listOf(
+                        "INT8 is more accurate",
+                        "Integer multipliers are smaller, and each value moves a quarter of the data",
+                        "It runs at a higher clock speed",
+                        "It needs no memory"
+                    ),
+                    correctIndex = 1,
+                    explanation = "An 8-bit integer multiplier is far smaller and cheaper in energy than a 32-bit float unit, and each value is 1 byte instead of 4, so memory traffic (often the bottleneck) drops 4×."
                 )
+            ),
+            generators = listOf(
+                generator("mlhw_ni1") { r ->
+                    val b = parameterBillions.pick(r)
+                    val (format, bytes) = precisions.pick(r)
+                    val gb = b * bytes
+                    val byteWord = if (bytes == 1.0) "byte" else "bytes"
+                    Numeric(
+                        text = "A model has ${fmt(b)} billion parameters stored in $format (${fmt(bytes)} $byteWord each). " +
+                            "How many GB of memory do the weights need?",
+                        answer = gb, unit = "GB",
+                        explanation = "Memory = ${fmt(b)}×10⁹ × ${fmt(bytes)} $byteWord = ${fmt(gb)}GB"
+                    )
+                },
+                generator("mlhw_ni2") { r ->
+                    val cores = coreCounts.pick(r)
+                    val ghz = coreClocks.pick(r)
+                    val tflops = cores * ghz * 2 / 1000
+                    Numeric(
+                        text = "A GPU has ${fmt(cores)} cores at ${fmt(ghz)}GHz, each doing one fused multiply-add (2 operations) " +
+                            "per cycle. What is its peak throughput in TFLOPS? Round to 2 decimal places.",
+                        answer = tflops, unit = "TFLOPS",
+                        explanation = "${fmt(cores)} × ${fmt(ghz)}×10⁹ × 2 = ${fmt(tflops, 2)}×10¹² FLOPS = ${fmt(tflops, 2)}TFLOPS"
+                    )
+                },
+                generator("mlhw_ni3") { r ->
+                    val tops = npuTops.pick(r)
+                    val w = npuWatts.pick(r)
+                    val eff = tops / w
+                    Numeric(
+                        text = "An NPU delivers ${fmt(tops)} TOPS at ${fmt(w)}W. What is its efficiency in TOPS/W? " +
+                            "Round to 2 decimal places.",
+                        answer = eff, unit = "TOPS/W",
+                        explanation = "Efficiency = ${fmt(tops)} TOPS/${fmt(w)}W = ${fmt(eff, 2)}TOPS/W"
+                    )
+                },
+                generator("mlhw_ni4") { r ->
+                    val bw = memoryBandwidths.pick(r)
+                    val size = modelSizes.pick(r)
+                    val tps = bw / size
+                    Numeric(
+                        text = "A language model's weights take ${fmt(size)}GB and the accelerator has ${fmt(bw)}GB/s of memory " +
+                            "bandwidth. If each generated token must read all the weights once, roughly how many tokens per " +
+                            "second can it produce? Round to 2 decimal places.",
+                        answer = tps, unit = "tokens/s",
+                        explanation = "Memory-bound: tokens/s ≈ bandwidth/model size = ${fmt(bw)}/${fmt(size)} = ${fmt(tps, 2)}tokens/s"
+                    )
+                },
+                generator("mlhw_ni5") { r ->
+                    val inputs = layerInputs.pick(r)
+                    val outputs = layerOutputs.pick(r)
+                    val macs = inputs.toLong() * outputs
+                    Numeric(
+                        text = "A fully connected layer has $inputs inputs and $outputs outputs. How many multiply-accumulate " +
+                            "operations (MACs) does one forward pass take (ignore the bias)?",
+                        answer = macs.toDouble(), unit = "MACs", exact = true,
+                        explanation = "Each of the $outputs outputs is a dot product over $inputs inputs: $inputs × $outputs = $macs MACs"
+                    )
+                },
+                generator("mlhw_ni6") { r ->
+                    val (from, fromBits) = formatBits.take(2).pick(r)
+                    val (to, toBits) = formatBits.drop(2).pick(r)
+                    val ratio = fromBits / toBits
+                    Numeric(
+                        text = "A model is quantized from $from to $to. How many times smaller do its weights become?",
+                        answer = ratio.toDouble(), unit = "×", exact = true,
+                        explanation = "$from uses $fromBits bits per value and $to uses $toBits: $fromBits/$toBits = $ratio×"
+                    )
+                }
             )
         )
     )

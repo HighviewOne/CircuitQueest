@@ -1,6 +1,36 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+
 object DigitalLogicContent {
+    private const val HEX_BASE = 16
+    private val inputCounts = listOf(2, 3, 4, 5, 6)
+    private val baseRules = mapOf(
+        "AND" to "only if both inputs are 1", "OR" to "if either input is 1", "XOR" to "if the inputs differ"
+    )
+    private val gateNames = listOf("AND", "OR", "XOR", "NAND", "NOR", "XNOR")
+    private val nandBuilds = listOf(
+        Triple("NOT", 1, "Tie both inputs of one NAND together: NAND(A, A) = NOT A. 1 gate"),
+        Triple("AND", 2, "A NAND followed by a NAND wired as an inverter: 2 gates"),
+        Triple("OR", 3, "Invert each input (2 NANDs), then NAND them: NAND(NOT A, NOT B) = A OR B by De Morgan. 3 gates"),
+        Triple("NOR", 4, "Build OR from 3 NANDs, then invert it with one more: 4 gates"),
+        Triple("XOR", 4, "The classic circuit: N = NAND(A, B), then NAND(A, N) and NAND(B, N) feed a final NAND. 4 gates"),
+        Triple("XNOR", 5, "Build XOR from 4 NANDs, then invert it with one more: 5 gates")
+    )
+    private val functionInputs = listOf(1, 2, 3)
+    private val byteValues = (1..255).toList()
+
+    /** "an AND", "an OR", "an XOR", "an XNOR", but "a NAND", "a NOR". */
+    private fun articleFor(gate: String) = if (gate.first() in "AOX") "an" else "a"
+
+    private fun evaluate(gate: String, a: Int, b: Int): Int = when (gate.removePrefix("N").ifEmpty { gate }) {
+        "AND" -> a and b
+        "OR" -> a or b
+        else -> a xor b
+    }.let { if (gate.startsWith("N") || gate == "XNOR") 1 - it else it }
+
     val topic = Topic(
         id = "digital_logic",
         title = "Digital Logic Gates",
@@ -85,14 +115,6 @@ object DigitalLogicContent {
                     correctIndex = 1,
                     explanation = "XOR outputs 1 only when inputs are different. When both are 1, they're the same, so output is 0."
                 ),
-                Question.NumericInput(
-                    id = "dl_ni1",
-                    questionText = "How many rows does a truth table have for a 3-input logic gate?",
-                    correctAnswer = 8.0,
-                    tolerance = 0.1,
-                    unit = "rows",
-                    explanation = "A truth table with N inputs has 2^N rows. 2^3 = 8 rows."
-                ),
                 Question.MultipleChoice(
                     id = "dl_mc4",
                     questionText = "By De Morgan's law, NOT(A AND B) is equivalent to:",
@@ -105,22 +127,89 @@ object DigitalLogicContent {
                     correctIndex = 1,
                     explanation = "De Morgan's law: (A \u00B7 B)\u0304 = A\u0304 + B\u0304. Break the bar, change the operator (AND \u2192 OR)."
                 ),
-                Question.NumericInput(
-                    id = "dl_ni2",
-                    questionText = "A NOR gate has inputs A=0 and B=0. What is the output?",
-                    correctAnswer = 1.0,
-                    tolerance = 0.1,
-                    unit = "",
-                    explanation = "NOR is NOT-OR. OR(0,0) = 0, then NOT(0) = 1. Output is 1."
-                ),
-                Question.NumericInput(
-                    id = "dl_ni3",
-                    questionText = "How many 2-input NAND gates are needed to build a NOT gate?",
-                    correctAnswer = 1.0,
-                    tolerance = 0.1,
-                    unit = "gates",
-                    explanation = "Connect both inputs of a NAND gate together: NAND(A,A) = NOT(A). Only 1 gate needed."
+                Question.MultipleChoice(
+                    id = "dl_mc5",
+                    questionText = "In a half adder, which gate produces the SUM bit?",
+                    options = listOf(
+                        "AND",
+                        "OR",
+                        "XOR",
+                        "NAND"
+                    ),
+                    correctIndex = 2,
+                    explanation = "Sum = A XOR B (1 when exactly one input is 1), and Carry = A AND B. Together they add two 1-bit numbers."
                 )
+            ),
+            generators = listOf(
+                generator("dl_ni1") { r ->
+                    val n = inputCounts.pick(r)
+                    val rows = 1 shl n
+                    Numeric(
+                        text = "How many rows does a truth table have for a $n-input logic function?",
+                        answer = rows.toDouble(), unit = "rows", exact = true,
+                        explanation = "Each input doubles the combinations: 2^N rows, so 2^$n = $rows rows"
+                    )
+                },
+                generator("dl_ni2") { r ->
+                    val gate = gateNames.pick(r)
+                    val a = r.nextInt(2)
+                    val b = r.nextInt(2)
+                    val out = evaluate(gate, a, b)
+                    val base = if (gate == "XNOR") "XOR" else gate.removePrefix("N").ifEmpty { gate }
+                    val inverted = base != gate
+                    val baseOut = if (inverted) 1 - out else out
+                    Numeric(
+                        text = "${articleFor(gate).replaceFirstChar { it.uppercase() }} $gate gate has inputs A = $a and " +
+                            "B = $b. What is its output (0 or 1)?",
+                        answer = out.toDouble(), unit = "", exact = true,
+                        explanation = if (inverted) {
+                            "$gate is the inverse of $base, which outputs 1 ${baseRules.getValue(base)}. " +
+                                "$base gives $baseOut, so $gate gives $out"
+                        } else {
+                            "$gate outputs 1 ${baseRules.getValue(base)}. With A = $a and B = $b the output is $out"
+                        }
+                    )
+                },
+                generator("dl_ni3") { r ->
+                    val (target, count, how) = nandBuilds.pick(r)
+                    Numeric(
+                        text = "What is the fewest 2-input NAND gates needed to build ${articleFor(target)} $target gate?",
+                        answer = count.toDouble(), unit = "", exact = true,
+                        explanation = how
+                    )
+                },
+                generator("dl_ni4") { r ->
+                    val v = byteValues.pick(r)
+                    val bits = Integer.toBinaryString(v).padStart(Byte.SIZE_BITS, '0')
+                    val parts = bits.mapIndexedNotNull { i, c -> if (c == '1') 1 shl (bits.length - 1 - i) else null }
+                    Numeric(
+                        text = "What is the binary number $bits in decimal?",
+                        answer = v.toDouble(), unit = "", exact = true,
+                        explanation = "Add the place values of the 1 bits: ${parts.joinToString(" + ")} = $v"
+                    )
+                },
+                generator("dl_ni5") { r ->
+                    val n = functionInputs.pick(r)
+                    val rows = 1 shl n
+                    val count = 1 shl rows
+                    Numeric(
+                        text = "How many different Boolean functions of $n input${if (n > 1) "s" else ""} are there?",
+                        answer = count.toDouble(), unit = "functions", exact = true,
+                        explanation = "The truth table has 2^$n = $rows rows, and each row's output can be 0 or 1: " +
+                            "2^$rows = $count functions"
+                    )
+                },
+                generator("dl_ni6") { r ->
+                    val v = byteValues.pick(r)
+                    val hex = "%02X".format(v)
+                    val hi = v / HEX_BASE
+                    val lo = v % HEX_BASE
+                    Numeric(
+                        text = "What is the hexadecimal number 0x$hex in decimal?",
+                        answer = v.toDouble(), unit = "", exact = true,
+                        explanation = "0x$hex = ${hex[0]} × 16 + ${hex[1]}, that is $hi × 16 + $lo = $v"
+                    )
+                }
             )
         )
     )
