@@ -1,6 +1,25 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import kotlin.math.sqrt
+
 object TransformersContent {
+    private val primaryTurns = listOf(100.0, 200.0, 400.0, 500.0, 1000.0)
+    private val secondaryTurns = listOf(25.0, 50.0, 150.0, 2000.0)
+    private val mainsVoltages = listOf(120.0, 230.0, 240.0)
+    private val lowVoltages = listOf(6.0, 12.0, 24.0)
+    private val loadCurrents = listOf(0.5, 1.0, 2.0, 5.0)
+    private val impedancePairs = listOf(300.0 to 75.0, 200.0 to 50.0, 450.0 to 50.0, 800.0 to 8.0, 1250.0 to 50.0)
+    private val inputPowers = listOf(500.0, 1000.0, 2000.0, 5000.0)
+    private val efficiencies = listOf(90.0, 95.0, 97.0, 98.0)
+    private val designPrimaryTurns = listOf(400.0, 500.0, 1000.0, 1200.0)
+    private val designPrimaryVoltages = listOf(120.0, 240.0)
+    private val windingCurrents = listOf(2.0, 5.0, 10.0)
+    private val windingResistances = listOf(0.1, 0.2, 0.5)
+
     val topic = Topic(
         id = "transformers",
         title = "Transformers",
@@ -49,14 +68,6 @@ object TransformersContent {
         quiz = Quiz(
             title = "Transformers Boss Battle",
             questions = listOf(
-                Question.NumericInput(
-                    id = "xfmr_ni1",
-                    questionText = "A transformer has 200 primary turns and 50 secondary turns. If the primary voltage is 120V, what is the secondary voltage in Volts?",
-                    correctAnswer = 30.0,
-                    tolerance = 0.5,
-                    unit = "V",
-                    explanation = "V_s = V_p \u00D7 (N_s/N_p) = 120 \u00D7 (50/200) = 120 \u00D7 0.25 = 30V"
-                ),
                 Question.MultipleChoice(
                     id = "xfmr_mc1",
                     questionText = "A step-up transformer:",
@@ -68,14 +79,6 @@ object TransformersContent {
                     ),
                     correctIndex = 1,
                     explanation = "A step-up transformer increases voltage but decreases current to conserve power (P_in = P_out)."
-                ),
-                Question.NumericInput(
-                    id = "xfmr_ni2",
-                    questionText = "A transformer steps 240V down to 12V and delivers 2A to the load. What is the primary current in Amps?",
-                    correctAnswer = 0.1,
-                    tolerance = 0.01,
-                    unit = "A",
-                    explanation = "P = V_s \u00D7 I_s = 12 \u00D7 2 = 24W. I_p = P/V_p = 24/240 = 0.1A"
                 ),
                 Question.MultipleChoice(
                     id = "xfmr_mc2",
@@ -89,22 +92,6 @@ object TransformersContent {
                     correctIndex = 1,
                     explanation = "Transformers work by electromagnetic induction, which requires a changing magnetic field. DC creates a constant field that induces no voltage."
                 ),
-                Question.NumericInput(
-                    id = "xfmr_ni3",
-                    questionText = "What turns ratio is needed to match a 75\u03A9 source to a 300\u03A9 load? Express as N_p:N_s (give N_s if N_p = 1).",
-                    correctAnswer = 2.0,
-                    tolerance = 0.1,
-                    unit = "",
-                    explanation = "Z_p/Z_s = (N_p/N_s)\u00B2. 75/300 = (N_p/N_s)\u00B2 = 1/4. N_p/N_s = 1/2, so N_s = 2 (turns ratio 1:2)."
-                ),
-                Question.NumericInput(
-                    id = "xfmr_ni4",
-                    questionText = "A transformer delivers 950W to a load from a 1000W input. What is its efficiency in percent?",
-                    correctAnswer = 95.0,
-                    tolerance = 0.5,
-                    unit = "%",
-                    explanation = "\u03B7 = P_out/P_in \u00D7 100 = 950/1000 \u00D7 100 = 95%"
-                ),
                 Question.MultipleChoice(
                     id = "xfmr_mc3",
                     questionText = "Laminated transformer cores are used to reduce:",
@@ -116,7 +103,91 @@ object TransformersContent {
                     ),
                     correctIndex = 2,
                     explanation = "Laminated cores break up the conductive path, reducing eddy currents (circulating currents induced in the core by the changing magnetic field)."
+                ),
+                Question.MultipleChoice(
+                    id = "xfmr_mc4",
+                    questionText = "A transformer's rating is given in kVA rather than kW because:",
+                    options = listOf(
+                        "kVA is the same as kW",
+                        "Its heating depends on voltage and current, whatever the load's power factor",
+                        "Transformers only supply resistive loads",
+                        "kW is not an SI unit"
+                    ),
+                    correctIndex = 1,
+                    explanation = "Winding losses depend on current and core losses on voltage, so the limit is apparent power V × I (kVA), whatever the power factor of the load."
                 )
+            ),
+            generators = listOf(
+                generator("xfmr_ni1") { r ->
+                    val np = primaryTurns.pick(r)
+                    val ns = secondaryTurns.pick(r)
+                    val vp = mainsVoltages.pick(r)
+                    val vs = vp * ns / np
+                    Numeric(
+                        text = "A transformer has ${fmt(np)} primary turns and ${fmt(ns)} secondary turns. If the primary voltage is " +
+                            "${fmt(vp)}V, what is the secondary voltage in Volts? Round to 2 decimal places.",
+                        answer = vs, unit = "V",
+                        explanation = "V_s = V_p × (N_s/N_p) = ${fmt(vp)} × (${fmt(ns)}/${fmt(np)}) = ${fmt(vs, 2)}V"
+                    )
+                },
+                generator("xfmr_ni2") { r ->
+                    val vp = mainsVoltages.pick(r)
+                    val vs = lowVoltages.pick(r)
+                    val isec = loadCurrents.pick(r)
+                    val ip = vs * isec / vp
+                    Numeric(
+                        text = "An ideal transformer steps ${fmt(vp)}V down to ${fmt(vs)}V and delivers ${fmt(isec)}A to the load. " +
+                            "What is the primary current in Amps? Round to 3 decimal places.",
+                        answer = ip, unit = "A", decimals = 3,
+                        explanation = "P = V_s × I_s = ${fmt(vs)} × ${fmt(isec)} = ${fmt(vs * isec)}W, and P is the same on both " +
+                            "sides: I_p = ${fmt(vs * isec)}/${fmt(vp)} = ${fmt(ip, 3)}A"
+                    )
+                },
+                generator("xfmr_ni3") { r ->
+                    val (zp, zs) = impedancePairs.pick(r)
+                    val n = sqrt(zp / zs)
+                    Numeric(
+                        text = "A transformer must make a ${fmt(zs)}Ω load look like ${fmt(zp)}Ω at its primary. What turns ratio " +
+                            "N_p/N_s is needed?",
+                        answer = n, unit = "",
+                        explanation = "Impedance transforms with the square of the turns ratio: Z_p/Z_s = (N_p/N_s)², so " +
+                            "N_p/N_s = √(${fmt(zp)}/${fmt(zs)}) = ${fmt(n, 2)}"
+                    )
+                },
+                generator("xfmr_ni4") { r ->
+                    val pin = inputPowers.pick(r)
+                    val eff = efficiencies.pick(r)
+                    val pout = pin * eff / 100
+                    Numeric(
+                        text = "A transformer delivers ${fmt(pout)}W to a load from a ${fmt(pin)}W input. What is its efficiency " +
+                            "in percent?",
+                        answer = eff, unit = "%",
+                        explanation = "η = P_out/P_in × 100 = ${fmt(pout)}/${fmt(pin)} × 100 = ${fmt(eff)}%"
+                    )
+                },
+                generator("xfmr_ni5") { r ->
+                    val np = designPrimaryTurns.pick(r)
+                    val vp = designPrimaryVoltages.pick(r)
+                    val vs = lowVoltages.pick(r)
+                    val ns = np * vs / vp
+                    Numeric(
+                        text = "A transformer's primary has ${fmt(np)} turns on ${fmt(vp)}V. How many secondary turns give " +
+                            "${fmt(vs)}V? Round to the nearest whole number.",
+                        answer = ns, unit = "turns", decimals = 0,
+                        explanation = "N_s = N_p × V_s/V_p = ${fmt(np)} × ${fmt(vs)}/${fmt(vp)} = ${fmt(ns, 1)} turns"
+                    )
+                },
+                generator("xfmr_ni6") { r ->
+                    val i = windingCurrents.pick(r)
+                    val res = windingResistances.pick(r)
+                    val p = i * i * res
+                    Numeric(
+                        text = "A transformer winding has ${fmt(res)}Ω resistance and carries ${fmt(i)}A. What is its copper (I²R) " +
+                            "loss, in Watts? Round to 2 decimal places.",
+                        answer = p, unit = "W",
+                        explanation = "P_cu = I²R = ${fmt(i)}² × ${fmt(res)} = ${fmt(p, 2)}W"
+                    )
+                }
             )
         )
     )

@@ -1,6 +1,25 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.articleCap
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+
 object BatteryStorageContent {
+    private const val FULL_CELL = 4.2
+    private const val NOMINAL_CELL = 3.7
+    private val packVoltages = listOf(3.7, 7.4, 11.1, 12.0)
+    private val capacitiesMah = listOf(2000.0, 3000.0, 5000.0, 10_000.0)
+    private val cRateCapacities = listOf(1000.0, 2000.0, 2500.0, 5000.0)
+    private val cRates = listOf(0.5, 1.0, 2.0, 5.0)
+    private val seriesCells = listOf(2.0, 3.0, 4.0, 6.0, 12.0)
+    private val runtimeCapacities = listOf(1000.0, 2000.0, 5000.0, 10_000.0)
+    private val loadCurrents = listOf(100.0, 250.0, 500.0, 1000.0)
+    private val dischargeRates = listOf(0.5, 1.0, 2.0, 4.0, 5.0)
+    private val supercapFarads = listOf(1.0, 10.0, 100.0)
+    private val supercapVoltages = listOf(2.7, 5.0)
+
     val topic = Topic(
         id = "battery_storage",
         title = "Battery & Energy Storage",
@@ -49,14 +68,6 @@ object BatteryStorageContent {
         quiz = Quiz(
             title = "Battery & Energy Storage Boss Battle",
             questions = listOf(
-                Question.NumericInput(
-                    id = "bat_ni1",
-                    questionText = "A 3.7V, 5000mAh Li-ion battery stores how many watt-hours of energy?",
-                    correctAnswer = 18.5,
-                    tolerance = 0.1,
-                    unit = "Wh",
-                    explanation = "Energy = V \u00D7 Ah = 3.7 \u00D7 5.0 = 18.5 Wh"
-                ),
                 Question.MultipleChoice(
                     id = "bat_mc1",
                     questionText = "What is the maximum safe charge voltage for a single Li-ion cell?",
@@ -68,14 +79,6 @@ object BatteryStorageContent {
                     ),
                     correctIndex = 2,
                     explanation = "Li-ion cells must never be charged above 4.2V. Exceeding this causes dangerous lithium plating and potential thermal runaway."
-                ),
-                Question.NumericInput(
-                    id = "bat_ni2",
-                    questionText = "A 2000mAh battery is discharged at 2C. What is the discharge current in milliamps?",
-                    correctAnswer = 4000.0,
-                    tolerance = 50.0,
-                    unit = "mA",
-                    explanation = "I = C-rate \u00D7 Capacity = 2 \u00D7 2000mAh = 4000mA. The battery will be depleted in about 30 minutes."
                 ),
                 Question.MultipleChoice(
                     id = "bat_mc2",
@@ -101,22 +104,85 @@ object BatteryStorageContent {
                     correctIndex = 1,
                     explanation = "Supercapacitors deliver much higher power (fast charge/discharge) and survive 500,000+ cycles, far exceeding battery cycle life."
                 ),
-                Question.NumericInput(
-                    id = "bat_ni3",
-                    questionText = "A battery pack has 3 Li-ion cells in series. What is the fully charged pack voltage in Volts?",
-                    correctAnswer = 12.6,
-                    tolerance = 0.1,
-                    unit = "V",
-                    explanation = "Each cell is 4.2V when full. 3 \u00D7 4.2V = 12.6V."
-                ),
-                Question.NumericInput(
-                    id = "bat_ni4",
-                    questionText = "A 10000mAh battery powers a device drawing 500mA. How many hours will it last (ideal)?",
-                    correctAnswer = 20.0,
-                    tolerance = 0.5,
-                    unit = "hours",
-                    explanation = "Time = Capacity / Current = 10000mAh / 500mA = 20 hours."
+                Question.MultipleChoice(
+                    id = "bat_mc4",
+                    questionText = "Which lithium chemistry is prized for long cycle life and thermal stability, at the cost of lower energy density?",
+                    options = listOf(
+                        "LiCoO₂ (LCO)",
+                        "LiFePO₄ (LFP)",
+                        "NMC",
+                        "Lead-acid"
+                    ),
+                    correctIndex = 1,
+                    explanation = "LFP (lithium iron phosphate) cells run at about 3.2V nominal, last thousands of cycles and resist thermal runaway, so they're common in stationary storage and many EVs, though they store less energy per kg than NMC."
                 )
+            ),
+            generators = listOf(
+                generator("bat_ni1") { r ->
+                    val v = packVoltages.pick(r)
+                    val mah = capacitiesMah.pick(r)
+                    val wh = v * mah / 1000
+                    Numeric(
+                        text = "${articleCap(v)} ${fmt(v)}V, ${fmt(mah)}mAh battery stores how many watt-hours? Round to 2 decimal places.",
+                        answer = wh, unit = "Wh",
+                        explanation = "Energy = V × Ah = ${fmt(v)} × ${fmt(mah / 1000)} = ${fmt(wh, 2)}Wh"
+                    )
+                },
+                generator("bat_ni2") { r ->
+                    val cap = cRateCapacities.pick(r)
+                    val c = cRates.pick(r)
+                    Numeric(
+                        text = "${articleCap(cap)} ${fmt(cap)}mAh battery is discharged at ${fmt(c)}C. What is the discharge current, " +
+                            "in mA?",
+                        answer = c * cap, unit = "mA",
+                        explanation = "I = C-rate × capacity = ${fmt(c)} × ${fmt(cap)} = ${fmt(c * cap)}mA"
+                    )
+                },
+                generator("bat_ni3") { r ->
+                    val n = seriesCells.pick(r)
+                    val full = r.nextBoolean()
+                    val vcell = if (full) FULL_CELL else NOMINAL_CELL
+                    val state = if (full) "fully charged" else "nominal"
+                    Numeric(
+                        text = "A pack has ${fmt(n)} Li-ion cells in series. What is its $state voltage, " +
+                            "in Volts? Round to 1 decimal place.",
+                        answer = n * vcell, unit = "V", decimals = 1,
+                        explanation = "A Li-ion cell is ${fmt(NOMINAL_CELL)}V nominal and ${fmt(FULL_CELL)}V when full: " +
+                            "${fmt(n)} × ${fmt(vcell)} = ${fmt(n * vcell, 1)}V"
+                    )
+                },
+                generator("bat_ni4") { r ->
+                    val cap = runtimeCapacities.pick(r)
+                    val i = loadCurrents.pick(r)
+                    val h = cap / i
+                    Numeric(
+                        text = "${articleCap(cap)} ${fmt(cap)}mAh battery powers a device drawing ${fmt(i)}mA. Ideally, how many hours " +
+                            "will it last? Round to 2 decimal places.",
+                        answer = h, unit = "hours",
+                        explanation = "Time = capacity/current = ${fmt(cap)}/${fmt(i)} = ${fmt(h, 2)} hours"
+                    )
+                },
+                generator("bat_ni5") { r ->
+                    val c = dischargeRates.pick(r)
+                    val min = 60 / c
+                    Numeric(
+                        text = "A battery is discharged at a constant ${fmt(c)}C. Ideally, how many minutes does a full discharge " +
+                            "take? Round to 1 decimal place.",
+                        answer = min, unit = "minutes", decimals = 1,
+                        explanation = "1C empties the battery in 1 hour, so ${fmt(c)}C takes 60/${fmt(c)} = ${fmt(min, 1)} minutes"
+                    )
+                },
+                generator("bat_ni6") { r ->
+                    val f = supercapFarads.pick(r)
+                    val v = supercapVoltages.pick(r)
+                    val j = f * v * v / 2
+                    Numeric(
+                        text = "${articleCap(f)} ${fmt(f)}F supercapacitor is charged to ${fmt(v)}V. How much energy does it store, " +
+                            "in joules? Round to 2 decimal places.",
+                        answer = j, unit = "J",
+                        explanation = "E = ½CV² = ½ × ${fmt(f)} × ${fmt(v)}² = ${fmt(j, 2)}J"
+                    )
+                }
             )
         )
     )
