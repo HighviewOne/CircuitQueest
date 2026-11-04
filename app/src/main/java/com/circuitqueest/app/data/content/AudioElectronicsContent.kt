@@ -1,6 +1,28 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.article
+import com.circuitqueest.app.data.content.QuestionMath.articleCap
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import kotlin.math.log10
+
 object AudioElectronicsContent {
+    private const val DB_PER_BIT = 6.02
+    private const val DB_OFFSET = 1.76
+    private val bitDepths = listOf(8, 12, 16, 20, 24)
+    private val headphoneImpedances = listOf(16.0, 32.0, 64.0, 300.0)
+    private val headphoneVoltages = listOf(0.1, 0.5, 1.0, 2.0)
+    private val amplifierClasses = listOf(
+        "A" to listOf(20.0, 25.0), "AB" to listOf(50.0, 60.0, 70.0), "D" to listOf(85.0, 90.0)
+    )
+    private val supplyPowers = listOf(20.0, 50.0, 100.0)
+    private val powerRatios = listOf(2.0, 4.0, 10.0, 100.0)
+    private val speakerPeaks = listOf(5.0, 10.0, 20.0, 28.0)
+    private val speakerImpedances = listOf(4.0, 8.0)
+    private val sampleRates = listOf(44.1, 48.0, 96.0, 192.0)
+
     val topic = Topic(
         id = "audio_electronics",
         title = "Audio Electronics",
@@ -73,14 +95,6 @@ object AudioElectronicsContent {
                     correctIndex = 1,
                     explanation = "Class B amplifiers have a dead zone at the zero crossing where neither transistor conducts, creating crossover distortion. Class AB adds bias to eliminate this."
                 ),
-                Question.NumericInput(
-                    id = "ae_ni1",
-                    questionText = "What is the theoretical dynamic range of a 16-bit audio DAC in dB? Round to one decimal.",
-                    correctAnswer = 98.1,
-                    tolerance = 0.5,
-                    unit = "dB",
-                    explanation = "DNR = 6.02\u00D7N + 1.76 = 6.02\u00D716 + 1.76 = 96.32 + 1.76 = 98.1 dB"
-                ),
                 Question.MultipleChoice(
                     id = "ae_mc3",
                     questionText = "In a multi-way speaker system, the crossover network:",
@@ -93,22 +107,6 @@ object AudioElectronicsContent {
                     correctIndex = 1,
                     explanation = "The crossover network uses filters to split the audio signal, sending low frequencies to the woofer, mids to the midrange, and highs to the tweeter."
                 ),
-                Question.NumericInput(
-                    id = "ae_ni2",
-                    questionText = "A 32\u03A9 headphone is driven at 1V RMS. What power in mW does it receive? Round to one decimal.",
-                    correctAnswer = 31.3,
-                    tolerance = 0.5,
-                    unit = "mW",
-                    explanation = "P = V\u00B2/R = 1\u00B2/32 = 0.03125 W = 31.25 mW \u2248 31.3 mW"
-                ),
-                Question.NumericInput(
-                    id = "ae_ni3",
-                    questionText = "A Class A amplifier draws 50W from the supply and delivers 10W to the speaker. What is its efficiency in percent?",
-                    correctAnswer = 20.0,
-                    tolerance = 0.5,
-                    unit = "%",
-                    explanation = "\u03B7 = P_out/P_supply \u00D7 100 = 10/50 \u00D7 100 = 20%"
-                ),
                 Question.MultipleChoice(
                     id = "ae_mc4",
                     questionText = "Delta-sigma (\u0394\u03A3) DACs achieve high resolution by:",
@@ -120,7 +118,84 @@ object AudioElectronicsContent {
                     ),
                     correctIndex = 1,
                     explanation = "Delta-sigma DACs oversample the signal at many times the Nyquist rate and use noise shaping to push quantization noise out of the audio band, achieving very high effective resolution."
+                ),
+                Question.MultipleChoice(
+                    id = "ae_mc5",
+                    questionText = "Why does an audio DAC need a reconstruction (anti-imaging) filter on its output?",
+                    options = listOf(
+                        "To boost the bass",
+                        "To remove copies (images) of the signal around multiples of the sample rate",
+                        "To convert the signal to digital",
+                        "To add dither"
+                    ),
+                    correctIndex = 1,
+                    explanation = "A DAC outputs a stepped signal containing images of the audio around fs, 2fs, … A low-pass reconstruction filter removes them, leaving the smooth audio below fs/2."
                 )
+            ),
+            generators = listOf(
+                generator("ae_ni1") { r ->
+                    val n = bitDepths.pick(r)
+                    val dnr = DB_PER_BIT * n + DB_OFFSET
+                    Numeric(
+                        text = "What is the theoretical dynamic range of ${article(n.toDouble())} $n-bit DAC, in dB? " +
+                            "Round to 1 decimal place.",
+                        answer = dnr, unit = "dB", decimals = 1,
+                        explanation = "DNR = 6.02 × N + 1.76 = 6.02 × $n + 1.76 = ${fmt(dnr, 1)}dB"
+                    )
+                },
+                generator("ae_ni2") { r ->
+                    val z = headphoneImpedances.pick(r)
+                    val v = headphoneVoltages.pick(r)
+                    val mw = v * v / z * 1000
+                    Numeric(
+                        text = "${articleCap(z)} ${fmt(z)}Ω headphone is driven at ${fmt(v)}V RMS. What power does it receive, " +
+                            "in mW? Round to 2 decimal places.",
+                        answer = mw, unit = "mW",
+                        explanation = "P = V²/R = ${fmt(v)}²/${fmt(z)} = ${fmt(mw, 2)}mW"
+                    )
+                },
+                generator("ae_ni3") { r ->
+                    val (cls, efficiencies) = amplifierClasses.pick(r)
+                    val eff = efficiencies.pick(r)
+                    val psup = supplyPowers.pick(r)
+                    val pout = psup * eff / 100
+                    Numeric(
+                        text = "A Class $cls amplifier draws ${fmt(psup)}W from the " +
+                            "supply and delivers ${fmt(pout)}W to the speaker. What is its efficiency in percent?",
+                        answer = eff, unit = "%",
+                        explanation = "η = P_out/P_supply × 100 = ${fmt(pout)}/${fmt(psup)} × 100 = ${fmt(eff)}%"
+                    )
+                },
+                generator("ae_ni4") { r ->
+                    val ratio = powerRatios.pick(r)
+                    val db = 10 * log10(ratio)
+                    Numeric(
+                        text = "An amplifier's output power is increased ${fmt(ratio)}-fold. How many dB is that? " +
+                            "Round to 2 decimal places.",
+                        answer = db, unit = "dB",
+                        explanation = "Doubling the power adds only about 3dB. Here: 10·log₁₀(${fmt(ratio)}) = ${fmt(db, 2)}dB"
+                    )
+                },
+                generator("ae_ni5") { r ->
+                    val vp = speakerPeaks.pick(r)
+                    val z = speakerImpedances.pick(r)
+                    val p = vp * vp / (2 * z)
+                    Numeric(
+                        text = "An amplifier drives a ${fmt(vp)}V-peak sine wave into ${article(z)} ${fmt(z)}Ω speaker. " +
+                            "What is the average (RMS) power, in Watts? Round to 2 decimal places.",
+                        answer = p, unit = "W",
+                        explanation = "V_rms = V_p/√2, so P = V_p²/(2R) = ${fmt(vp)}²/(2 × ${fmt(z)}) = ${fmt(p, 2)}W"
+                    )
+                },
+                generator("ae_ni6") { r ->
+                    val fs = sampleRates.pick(r)
+                    Numeric(
+                        text = "Audio is sampled at ${fmt(fs)}kHz. What is the highest frequency it can represent, in kHz? " +
+                            "Round to 2 decimal places.",
+                        answer = fs / 2, unit = "kHz",
+                        explanation = "The Nyquist limit is half the sample rate: ${fmt(fs)}/2 = ${fmt(fs / 2, 2)}kHz"
+                    )
+                }
             )
         )
     )
