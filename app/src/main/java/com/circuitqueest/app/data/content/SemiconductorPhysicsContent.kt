@@ -1,6 +1,23 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import com.circuitqueest.app.data.content.QuestionMath.pow10
+import kotlin.math.pow
+
 object SemiconductorPhysicsContent {
+    private const val N_I_EXPONENT = 10
+    private const val BOLTZMANN = 1.38e-23
+    private const val CHARGE = 1.6e-19
+    private const val ELECTRON_MOBILITY = 1350.0
+    private const val PHOTON_NM_EV = 1240.0
+    private val dopingExponents = listOf(15, 16, 17, 18)
+    private val temperatures = listOf(250.0, 300.0, 350.0, 400.0)
+    private val conductivityExponents = listOf(14, 15, 16, 17)
+    private val bandGaps = listOf("silicon" to 1.12, "germanium" to 0.67, "GaAs" to 1.42, "GaN" to 3.4)
+
     val topic = Topic(
         id = "semiconductor_physics",
         title = "Semiconductor Physics",
@@ -86,14 +103,6 @@ object SemiconductorPhysicsContent {
                     correctIndex = 1,
                     explanation = "P-type silicon has acceptor impurities that create holes. Holes are the majority carriers; electrons are minority carriers."
                 ),
-                Question.NumericInput(
-                    id = "sp_ni1",
-                    questionText = "If an N-type semiconductor has n = 10\u00B9\u2077/cm\u00B3 and n_i = 10\u00B9\u2070/cm\u00B3, what is the hole concentration p (in /cm\u00B3)? Express as a power of 10.",
-                    correctAnswer = 1000.0,
-                    tolerance = 50.0,
-                    unit = "/cm\u00B3",
-                    explanation = "n \u00D7 p = n_i\u00B2. p = n_i\u00B2/n = (10\u00B9\u2070)\u00B2/10\u00B9\u2077 = 10\u00B2\u2070/10\u00B9\u2077 = 10\u00B3 = 1000/cm\u00B3"
-                ),
                 Question.MultipleChoice(
                     id = "sp_mc4",
                     questionText = "What are the two mechanisms of carrier transport in semiconductors?",
@@ -106,22 +115,71 @@ object SemiconductorPhysicsContent {
                     correctIndex = 1,
                     explanation = "Carriers move by drift (due to electric field) and diffusion (due to concentration gradients)."
                 ),
-                Question.NumericInput(
-                    id = "sp_ni2",
-                    questionText = "The thermal voltage kT/q at room temperature (300K) is approximately how many millivolts?",
-                    correctAnswer = 26.0,
-                    tolerance = 0.5,
-                    unit = "mV",
-                    explanation = "kT/q = (1.38\u00D710\u207B\u00B2\u00B3 \u00D7 300) / 1.6\u00D710\u207B\u00B9\u2079 \u2248 0.026V = 26mV"
-                ),
-                Question.NumericInput(
-                    id = "sp_ni3",
-                    questionText = "An intrinsic semiconductor has n_i = 1.5\u00D710\u00B9\u2070/cm\u00B3. What is n_i\u00B2 expressed as 10^x? Give x.",
-                    correctAnswer = 20.0,
-                    tolerance = 0.2,
-                    unit = "",
-                    explanation = "n_i\u00B2 = (1.5\u00D710\u00B9\u2070)\u00B2 = 2.25\u00D710\u00B2\u2070 \u2248 10\u00B2\u2070. So x \u2248 20."
+                Question.MultipleChoice(
+                    id = "sp_mc5",
+                    questionText = "As an intrinsic semiconductor gets hotter, its conductivity:",
+                    options = listOf(
+                        "Decreases, like a metal's",
+                        "Increases, because more carriers are freed",
+                        "Stays the same",
+                        "Drops to zero"
+                    ),
+                    correctIndex = 1,
+                    explanation = "Heat excites more electrons across the band gap, creating electron-hole pairs, so conductivity rises with temperature (the opposite of a metal)."
                 )
+            ),
+            generators = listOf(
+                generator("sp_ni1") { r ->
+                    val k = dopingExponents.pick(r)
+                    val x = 2 * N_I_EXPONENT - k
+                    Numeric(
+                        text = "N-type silicon has n = ${pow10(k)}/cm³ and n_i = ${pow10(N_I_EXPONENT)}/cm³. Its hole " +
+                            "concentration is p = 10^x /cm³. What is x?",
+                        answer = x.toDouble(), unit = "", decimals = 0,
+                        explanation = "n × p = n_i², so p = n_i²/n = ${pow10(2 * N_I_EXPONENT)}/${pow10(k)} = ${pow10(x)}/cm³. x = $x"
+                    )
+                },
+                generator("sp_ni2") { r ->
+                    val t = temperatures.pick(r)
+                    val mv = BOLTZMANN * t / CHARGE * 1000
+                    Numeric(
+                        text = "What is the thermal voltage kT/q at ${fmt(t)}K, in millivolts? Use k = 1.38×10⁻²³ J/K and " +
+                            "q = 1.6×10⁻¹⁹ C. Round to 2 decimal places.",
+                        answer = mv, unit = "mV",
+                        explanation = "At room temperature (300K) kT/q is about 26mV. At ${fmt(t)}K: " +
+                            "kT/q = (1.38×10⁻²³ × ${fmt(t)})/1.6×10⁻¹⁹ = ${fmt(mv, 2)}mV"
+                    )
+                },
+                generator("sp_ni3") { r ->
+                    val k = dopingExponents.pick(r)
+                    val x = 2 * N_I_EXPONENT - k
+                    Numeric(
+                        text = "P-type silicon is doped with N_A = ${pow10(k)}/cm³ (n_i = ${pow10(N_I_EXPONENT)}/cm³). Its " +
+                            "minority electron concentration is n = 10^x /cm³. What is x?",
+                        answer = x.toDouble(), unit = "", decimals = 0,
+                        explanation = "p ≈ N_A, and n = n_i²/p = ${pow10(2 * N_I_EXPONENT)}/${pow10(k)} = ${pow10(x)}/cm³. x = $x"
+                    )
+                },
+                generator("sp_ni4") { r ->
+                    val k = conductivityExponents.pick(r)
+                    val sigma = CHARGE * 10.0.pow(k) * ELECTRON_MOBILITY
+                    Numeric(
+                        text = "N-type silicon has n = ${pow10(k)}/cm³ and electron mobility µ_n = 1350 cm²/V·s. What is its " +
+                            "conductivity σ = q·n·µ_n, in S/cm? Round to 3 decimal places.",
+                        answer = sigma, unit = "S/cm", decimals = 3,
+                        explanation = "σ = 1.6×10⁻¹⁹ × ${pow10(k)} × 1350 = ${fmt(sigma, 3)}S/cm"
+                    )
+                },
+                generator("sp_ni5") { r ->
+                    val (material, eg) = bandGaps.pick(r)
+                    val nm = PHOTON_NM_EV / eg
+                    Numeric(
+                        text = "The band gap of $material is ${fmt(eg)}eV. What is the longest wavelength of light it can absorb, " +
+                            "in nanometres? Use λ(nm) ≈ 1240/E_g(eV) and round to the nearest whole number.",
+                        answer = nm, unit = "nm", decimals = 0,
+                        explanation = "λ = 1240/${fmt(eg)} ≈ ${fmt(nm, 0)}nm. Longer wavelengths don't carry enough photon energy."
+                    )
+                }
             )
         )
     )

@@ -1,6 +1,26 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import kotlin.math.sqrt
+
 object MosfetsContent {
+    private const val GIGA = 1e9
+    private const val NANO = 1e-9
+    private val onResistances = listOf(0.005, 0.01, 0.02, 0.05, 0.1)
+    private val drainCurrents = listOf(2.0, 5.0, 10.0, 20.0)
+    private val thresholds = listOf(0.7, 1.0, 1.5, 2.0)
+    private val gateVoltages = listOf(2.5, 3.3, 5.0, 10.0)
+    private val drainVoltages = listOf(0.5, 1.0, 2.0, 5.0, 10.0)
+    private val activities = listOf(0.1, 0.2)
+    private val switchedCapacitances = listOf(1.0, 2.0, 5.0)
+    private val coreVoltages = listOf(0.8, 1.0, 1.2)
+    private val clockGigahertz = listOf(1.0, 2.0, 3.0)
+    private val transconductances = listOf(2.0, 4.0, 10.0)
+    private val powerBudgets = listOf(1.0, 2.0, 5.0)
+
     val topic = Topic(
         id = "mosfets",
         title = "MOSFETs",
@@ -84,14 +104,6 @@ object MosfetsContent {
                     correctIndex = 2,
                     explanation = "Input HIGH turns NMOS ON (pulling output to GND) and PMOS OFF. The output is LOW."
                 ),
-                Question.NumericInput(
-                    id = "mos_ni1",
-                    questionText = "A MOSFET has R_DS(on) = 0.05\u03A9 and carries 10A. How much power is dissipated in Watts?",
-                    correctAnswer = 5.0,
-                    tolerance = 0.1,
-                    unit = "W",
-                    explanation = "P = I\u00B2 \u00D7 R_DS(on) = 10\u00B2 \u00D7 0.05 = 100 \u00D7 0.05 = 5W"
-                ),
                 Question.MultipleChoice(
                     id = "mos_mc4",
                     questionText = "Why does CMOS logic consume almost zero static power?",
@@ -104,22 +116,96 @@ object MosfetsContent {
                     correctIndex = 1,
                     explanation = "In CMOS, either the NMOS or PMOS is ON, never both simultaneously, so no DC current flows from supply to ground."
                 ),
-                Question.NumericInput(
-                    id = "mos_ni2",
-                    questionText = "A MOSFET has V_th = 1.5V. If V_GS = 3V and V_DS = 1V, what is V_GS \u2212 V_th?",
-                    correctAnswer = 1.5,
-                    tolerance = 0.1,
-                    unit = "V",
-                    explanation = "V_GS \u2212 V_th = 3 \u2212 1.5 = 1.5V. Since V_DS (1V) < 1.5V, the MOSFET is in the triode region."
+                Question.MultipleChoice(
+                    id = "mos_mc5",
+                    questionText = "In which region does a MOSFET behave like a low-value resistor, as a closed switch?",
+                    options = listOf(
+                        "Cutoff",
+                        "Triode (linear)",
+                        "Saturation",
+                        "Breakdown"
+                    ),
+                    correctIndex = 1,
+                    explanation = "With a large V_GS and small V_DS the MOSFET is in the triode region and acts like a resistor, R_DS(on). This is how it's used as a power switch."
                 ),
-                Question.NumericInput(
-                    id = "mos_ni3",
-                    questionText = "A CMOS chip has 2 billion transistors switching at 3GHz. If each transition dissipates 0.5 femtojoules (fJ), what is the dynamic power in Watts?",
-                    correctAnswer = 3.0,
-                    tolerance = 0.1,
-                    unit = "W",
-                    explanation = "P = N \u00D7 f \u00D7 E = 2\u00D710\u2079 \u00D7 3\u00D710\u2079 \u00D7 0.5\u00D710\u207B\u00B9\u2075 = 3W (simplified; real chips don't switch all transistors every cycle)."
+                Question.MultipleChoice(
+                    id = "mos_mc6",
+                    questionText = "Why does a MOSFET's gate draw essentially no DC current?",
+                    options = listOf(
+                        "The gate is insulated from the channel by a thin oxide layer",
+                        "The gate is connected to ground internally",
+                        "The drain absorbs the gate current",
+                        "Gate current flows only in saturation"
+                    ),
+                    correctIndex = 0,
+                    explanation = "The gate forms a capacitor with the channel across a thin oxide insulator, so no DC current flows. Current flows only briefly to charge or discharge that capacitance when switching."
                 )
+            ),
+            generators = listOf(
+                generator("mos_ni1") { r ->
+                    val rds = onResistances.pick(r)
+                    val i = drainCurrents.pick(r)
+                    val p = i * i * rds
+                    Numeric(
+                        text = "A MOSFET has R_DS(on) = ${fmt(rds)}Ω and carries ${fmt(i)}A. How much power is dissipated, " +
+                            "in Watts? Round to 3 decimal places.",
+                        answer = p, unit = "W", decimals = 3,
+                        explanation = "P = I² × R_DS(on) = ${fmt(i)}² × ${fmt(rds)} = ${fmt(p, 3)}W"
+                    )
+                },
+                generator("mos_ni2") { r ->
+                    val vth = thresholds.pick(r)
+                    val vgs = gateVoltages.pick(r)
+                    val vds = drainVoltages.pick(r)
+                    val vov = vgs - vth
+                    val region = if (vds < vov) "V_DS < V_GS − V_th, so it's in the triode region"
+                    else "V_DS ≥ V_GS − V_th, so it's in saturation"
+                    Numeric(
+                        text = "A MOSFET has V_th = ${fmt(vth)}V. If V_GS = ${fmt(vgs)}V and V_DS = ${fmt(vds)}V, " +
+                            "what is the overdrive voltage V_GS − V_th, in Volts?",
+                        answer = vov, unit = "V",
+                        explanation = "V_GS − V_th = ${fmt(vgs)} − ${fmt(vth)} = ${fmt(vov)}V. ($region.)"
+                    )
+                },
+                generator("mos_ni3") { r ->
+                    val alpha = activities.pick(r)
+                    val cNf = switchedCapacitances.pick(r)
+                    val v = coreVoltages.pick(r)
+                    val fGhz = clockGigahertz.pick(r)
+                    val p = alpha * cNf * NANO * v * v * fGhz * GIGA
+                    Numeric(
+                        text = "A CMOS chip switches ${fmt(cNf)}nF of total capacitance with activity factor α = ${fmt(alpha)}, " +
+                            "at V_DD = ${fmt(v)}V and ${fmt(fGhz)}GHz. What is the dynamic power, in Watts? " +
+                            "Round to 3 decimal places.",
+                        answer = p, unit = "W", decimals = 3,
+                        explanation = "P = αCV²f = ${fmt(alpha)} × ${fmt(cNf)}×10⁻⁹ × ${fmt(v)}² × ${fmt(fGhz)}×10⁹ = ${fmt(p, 3)}W. " +
+                            "Halving V_DD would cut it to a quarter."
+                    )
+                },
+                generator("mos_ni4") { r ->
+                    val k = transconductances.pick(r)
+                    val vth = thresholds.pick(r)
+                    val vgs = gateVoltages.pick(r)
+                    val vov = vgs - vth
+                    val id = k * vov * vov / 2
+                    Numeric(
+                        text = "An NMOS in saturation has k = ${fmt(k)}mA/V² (I_D = ½k(V_GS − V_th)²), V_th = ${fmt(vth)}V and " +
+                            "V_GS = ${fmt(vgs)}V. What is the drain current, in mA? Round to 2 decimal places.",
+                        answer = id, unit = "mA",
+                        explanation = "I_D = ½k(V_GS − V_th)² = ½ × ${fmt(k)} × (${fmt(vgs)} − ${fmt(vth)})² = ${fmt(id, 2)}mA"
+                    )
+                },
+                generator("mos_ni5") { r ->
+                    val pMax = powerBudgets.pick(r)
+                    val rds = onResistances.pick(r)
+                    val i = sqrt(pMax / rds)
+                    Numeric(
+                        text = "A MOSFET with R_DS(on) = ${fmt(rds)}Ω may dissipate at most ${fmt(pMax)}W. What is the largest " +
+                            "current it can carry, in Amps? Round to 2 decimal places.",
+                        answer = i, unit = "A",
+                        explanation = "From P = I²R: I = √(P/R) = √(${fmt(pMax)}/${fmt(rds)}) = ${fmt(i, 2)}A"
+                    )
+                }
             )
         )
     )
