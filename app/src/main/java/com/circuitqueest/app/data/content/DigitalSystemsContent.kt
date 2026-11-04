@@ -1,6 +1,22 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.article
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+
 object DigitalSystemsContent {
+    private const val BYTES_PER_KB = 1024
+    private val counterBits = listOf(3, 4, 6, 8, 10, 12)
+    private val stateCounts = listOf(5, 10, 12, 24, 60, 100, 1000)
+    private val addressBits = listOf(8, 10, 12, 16)
+    private val memoryAddressBits = listOf(10, 12, 16)
+    private val dataWidths = listOf(8, 16, 32)
+    private val clockFrequencies = listOf(50.0, 100.0, 250.0, 400.0)
+    private val dividerInputs = listOf(1.0, 10.0, 16.0)
+    private val dividerBits = listOf(4, 8, 10)
+
     val topic = Topic(
         id = "digital_systems",
         title = "Digital Systems",
@@ -72,22 +88,6 @@ object DigitalSystemsContent {
                     correctIndex = 2,
                     explanation = "A standard D flip-flop captures the D input and transfers it to Q on the rising (positive) edge of the clock signal."
                 ),
-                Question.NumericInput(
-                    id = "ds_ni1",
-                    questionText = "A 4-bit binary counter can count from 0 to what maximum value?",
-                    correctAnswer = 15.0,
-                    tolerance = 0.1,
-                    unit = "",
-                    explanation = "Max count = 2^N \u2212 1 = 2\u2074 \u2212 1 = 16 \u2212 1 = 15"
-                ),
-                Question.NumericInput(
-                    id = "ds_ni2",
-                    questionText = "How many D flip-flops are needed to build a 16-bit register?",
-                    correctAnswer = 16.0,
-                    tolerance = 0.1,
-                    unit = "flip-flops",
-                    explanation = "One D flip-flop stores one bit. A 16-bit register needs 16 flip-flops."
-                ),
                 Question.MultipleChoice(
                     id = "ds_mc3",
                     questionText = "In a Moore state machine, the outputs depend on:",
@@ -100,14 +100,6 @@ object DigitalSystemsContent {
                     correctIndex = 0,
                     explanation = "In a Moore machine, outputs depend only on the current state. In a Mealy machine, outputs depend on both state and inputs."
                 ),
-                Question.NumericInput(
-                    id = "ds_ni3",
-                    questionText = "How many memory locations can a 10-bit address bus access?",
-                    correctAnswer = 1024.0,
-                    tolerance = 1.0,
-                    unit = "locations",
-                    explanation = "Address space = 2^N = 2\u00B9\u2070 = 1024 locations (1K)."
-                ),
                 Question.MultipleChoice(
                     id = "ds_mc4",
                     questionText = "Which type of RAM uses capacitors and needs periodic refreshing?",
@@ -119,7 +111,83 @@ object DigitalSystemsContent {
                     ),
                     correctIndex = 1,
                     explanation = "DRAM stores bits as charge on tiny capacitors. Since charge leaks, it must be refreshed thousands of times per second."
+                ),
+                Question.MultipleChoice(
+                    id = "ds_mc5",
+                    questionText = "What is the setup time of a flip-flop?",
+                    options = listOf(
+                        "How long the output takes to change after the clock edge",
+                        "The minimum time the data input must be stable before the clock edge",
+                        "How long the clock stays high",
+                        "The time to power up the flip-flop"
+                    ),
+                    correctIndex = 1,
+                    explanation = "Data must settle at least t_setup before the active clock edge (and stay for t_hold after). Violating it can leave the flip-flop metastable."
                 )
+            ),
+            generators = listOf(
+                generator("ds_ni1") { r ->
+                    val n = counterBits.pick(r)
+                    val max = (1 shl n) - 1
+                    Numeric(
+                        text = "${article(n.toDouble()).replaceFirstChar { it.uppercase() }} $n-bit binary counter counts from 0 up " +
+                            "to what maximum value?",
+                        answer = max.toDouble(), unit = "", exact = true,
+                        explanation = "Max count = 2^N − 1 = 2^$n − 1 = $max"
+                    )
+                },
+                generator("ds_ni2") { r ->
+                    val m = stateCounts.pick(r)
+                    val n = Int.SIZE_BITS - Integer.numberOfLeadingZeros(m - 1)
+                    Numeric(
+                        text = "A counter must step through $m distinct states. What is the fewest flip-flops it needs?",
+                        answer = n.toDouble(), unit = "flip-flops", exact = true,
+                        explanation = "n flip-flops give 2^n states. 2^${n - 1} = ${1 shl (n - 1)} is too few and " +
+                            "2^$n = ${1 shl n} ≥ $m, so it needs $n flip-flops"
+                    )
+                },
+                generator("ds_ni3") { r ->
+                    val n = addressBits.pick(r)
+                    val locations = 1 shl n
+                    Numeric(
+                        text = "How many memory locations can ${article(n.toDouble())} $n-bit address bus access?",
+                        answer = locations.toDouble(), unit = "locations", exact = true,
+                        explanation = "Address space = 2^N = 2^$n = $locations locations"
+                    )
+                },
+                generator("ds_ni4") { r ->
+                    val n = memoryAddressBits.pick(r)
+                    val w = dataWidths.pick(r)
+                    val kb = (1 shl n) * w / Byte.SIZE_BITS / BYTES_PER_KB
+                    Numeric(
+                        text = "A memory has ${article(n.toDouble())} $n-bit address and ${article(w.toDouble())} $w-bit data " +
+                            "word. What is its capacity in KB (1KB = 1024 bytes)?",
+                        answer = kb.toDouble(), unit = "KB", exact = true,
+                        explanation = "2^$n = ${1 shl n} words × $w bits = ${(1 shl n) * w / Byte.SIZE_BITS} bytes = $kb KB"
+                    )
+                },
+                generator("ds_ni5") { r ->
+                    val f = clockFrequencies.pick(r)
+                    val ns = 1000 / f
+                    Numeric(
+                        text = "What is the clock period of ${article(f)} ${fmt(f)}MHz clock, in nanoseconds? Round to 2 decimal places.",
+                        answer = ns, unit = "ns",
+                        explanation = "T = 1/f = 1/(${fmt(f)}×10⁶) s = ${fmt(ns, 2)}ns"
+                    )
+                },
+                generator("ds_ni6") { r ->
+                    val fMhz = dividerInputs.pick(r)
+                    val n = dividerBits.pick(r)
+                    val khz = fMhz * 1000 / (1 shl n)
+                    Numeric(
+                        text = "${article(fMhz).replaceFirstChar { it.uppercase() }} ${fmt(fMhz)}MHz clock drives ${article(n.toDouble())} " +
+                            "$n-bit ripple counter. What is the frequency of its most significant bit, in kHz? " +
+                            "Round to 3 decimal places.",
+                        answer = khz, unit = "kHz", decimals = 3,
+                        explanation = "Each stage divides by 2, so the MSB runs at f/2^$n = ${fmt(fMhz * 1000)}kHz/${1 shl n} = " +
+                            "${fmt(khz, 3)}kHz"
+                    )
+                }
             )
         )
     )

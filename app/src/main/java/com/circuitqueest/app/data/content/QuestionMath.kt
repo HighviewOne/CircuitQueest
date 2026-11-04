@@ -59,6 +59,7 @@ object QuestionMath {
     /**
      * A numeric question. The tolerance accepts anything within 1% of the exact answer, or
      * anything that rounds correctly to [decimals] places if the question asks for rounding.
+     * With [exact] (counts like rows, gates or addresses) only the exact value is accepted.
      */
     fun numeric(
         id: String,
@@ -66,14 +67,16 @@ object QuestionMath {
         answer: Double,
         unit: String,
         explanation: String,
-        decimals: Int = 2
+        decimals: Int = 2,
+        exact: Boolean = false
     ): Question.NumericInput {
         val roundingSlack = HALF * 10.0.pow(-decimals) + EPSILON
+        val relative = if (exact) 0.0 else abs(answer) * RELATIVE_TOLERANCE
         return Question.NumericInput(
             id = id,
             questionText = text,
             correctAnswer = answer,
-            tolerance = maxOf(abs(answer) * RELATIVE_TOLERANCE, roundingSlack),
+            tolerance = maxOf(relative, roundingSlack),
             unit = unit,
             explanation = explanation
         )
@@ -85,13 +88,14 @@ object QuestionMath {
         val answer: Double,
         val unit: String,
         val explanation: String,
-        val decimals: Int = 2
+        val decimals: Int = 2,
+        val exact: Boolean = false
     )
 
     /** A generator for a numeric question with this [id] (kept on every draw, for review). */
     fun generator(id: String, make: (Random) -> Numeric): QuestionGenerator =
         QuestionGenerator(id) { random ->
             val q = make(random)
-            numeric(id, q.text, q.answer, q.unit, q.explanation, q.decimals)
+            numeric(id, q.text, q.answer, q.unit, q.explanation, q.decimals, q.exact)
         }
 }

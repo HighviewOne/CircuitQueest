@@ -14,7 +14,7 @@ class QuizPoolTest {
     private val topics = TopicsService.allTopics
     /** Categories converted to deeper practice so far. */
     private val deepened = TopicCategories.categories
-        .filter { it.name in setOf("Circuit Fundamentals", "Semiconductor Devices", "Analog Design") }
+        .filter { it.name in setOf("Circuit Fundamentals", "Semiconductor Devices", "Analog Design", "Digital Systems") }
         .flatMap { it.topicIds }.map { id -> topics.first { it.id == id } }
 
     /** Every question a generator can produce, over many draws. */
@@ -31,7 +31,7 @@ class QuizPoolTest {
 
     @Test
     fun deepenedCategories_haveDeeperPools_withGeneratedNumbers() {
-        assertEquals(14, deepened.size)
+        assertEquals(18, deepened.size)
         for (topic in deepened) {
             assertTrue(topic.quiz.poolSize >= 10, "${topic.id} pool should be at least 10")
             assertTrue(topic.quiz.generators.size >= 5, "${topic.id} should have generated numeric questions")
@@ -68,13 +68,14 @@ class QuizPoolTest {
         for (topic in topics) for (gen in topic.quiz.generators) for (q in samples(gen)) {
             q as Question.NumericInput
             assertEquals(gen.id, q.id)
-            assertTrue(q.correctAnswer.isFinite() && q.correctAnswer > 0, "${q.id}: ${q.correctAnswer}")
+            assertTrue(q.correctAnswer.isFinite() && q.correctAnswer >= 0, "${q.id}: ${q.correctAnswer}")
             assertTrue(q.tolerance > 0 && q.tolerance <= abs(q.correctAnswer) * 0.05 + 0.51, "${q.id} tolerance")
             for (text in listOf(q.questionText, q.explanation)) {
-                assertFalse(Regex("NaN|Infinity|E-?\\d").containsMatchIn(text), "${q.id}: $text")
+                assertFalse(Regex("NaN|Infinity|\\d[Ee][-+]?\\d").containsMatchIn(text), "${q.id}: $text")
             }
             assertTrue(QuizScoring.checkAnswer(q, q.correctAnswer))
-            assertFalse(QuizScoring.checkAnswer(q, q.correctAnswer * 2), "${q.id} accepts double the answer")
+            val wrong = if (q.correctAnswer == 0.0) 1.0 else q.correctAnswer * 2
+            assertFalse(QuizScoring.checkAnswer(q, wrong), "${q.id} accepts $wrong for ${q.correctAnswer}")
         }
     }
 
@@ -97,7 +98,7 @@ class QuizPoolTest {
         // The worked answer at the end of each explanation must match what's graded
         for (topic in topics) for (gen in topic.quiz.generators) for (q in samples(gen, 100)) {
             q as Question.NumericInput
-            val withUnit = Regex("""(\d+(?:\.\d+)?)${Regex.escape(q.unit)}(?![A-Za-zΩ])""")
+            val withUnit = Regex("""(\d+(?:\.\d+)?)\s?${Regex.escape(q.unit)}(?![A-Za-zΩ])""")
             val shown = withUnit.findAll(q.explanation).lastOrNull()?.groupValues?.get(1)?.toDoubleOrNull()
             assertNotNull(shown, "${q.id}: no final value in '${q.explanation}'")
             assertTrue(QuizScoring.checkAnswer(q, shown), "${q.id}: explanation shows $shown, answer ${q.correctAnswer}")
