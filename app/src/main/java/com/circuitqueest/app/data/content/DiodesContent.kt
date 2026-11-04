@@ -1,6 +1,26 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.article
+import com.circuitqueest.app.data.content.QuestionMath.articleCap
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import kotlin.math.PI
+
 object DiodesContent {
+    private const val SILICON_DROP = 0.7
+    private val diodeSupplies = listOf(5.0, 9.0, 12.0, 15.0, 24.0)
+    private val seriesResistors = listOf(220.0, 330.0, 470.0, 680.0, 1000.0)
+    private val zenerVoltages = listOf(3.3, 5.1, 6.2, 9.1)
+    private val zenerInputs = listOf(12.0, 15.0, 24.0)
+    private val zenerResistors = listOf(470.0, 1000.0, 2200.0)
+    private val leds = listOf("red" to 2.0, "yellow" to 2.1, "blue" to 3.2, "white" to 3.2)
+    private val ledCurrents = listOf(10.0, 15.0, 20.0)
+    private val ledSupplies = listOf(5.0, 9.0, 12.0)
+    private val rectifierPeaks = listOf(5.0, 10.0, 12.0, 17.0, 24.0, 170.0)
+    private val diodeCurrents = listOf(0.1, 0.5, 1.0, 2.0, 3.0)
+
     val topic = Topic(
         id = "diodes_rectifiers",
         title = "Diodes & Rectifiers",
@@ -62,14 +82,6 @@ object DiodesContent {
                     correctIndex = 1,
                     explanation = "A silicon diode has a forward voltage drop of approximately 0.7V. Germanium diodes have about 0.3V."
                 ),
-                Question.NumericInput(
-                    id = "dr_ni1",
-                    questionText = "A 5V source drives a silicon diode in series with a 430\u03A9 resistor. What is the current through the circuit in milliamps (mA)?",
-                    correctAnswer = 10.0,
-                    tolerance = 0.2,
-                    unit = "mA",
-                    explanation = "I = (V_source \u2212 V_diode) / R = (5 \u2212 0.7) / 430 = 4.3/430 = 0.01A = 10mA"
-                ),
                 Question.MultipleChoice(
                     id = "dr_mc2",
                     questionText = "How many diodes does a full-wave bridge rectifier use?",
@@ -81,14 +93,6 @@ object DiodesContent {
                     ),
                     correctIndex = 2,
                     explanation = "A bridge rectifier uses 4 diodes arranged in a diamond configuration to rectify both halves of the AC cycle."
-                ),
-                Question.NumericInput(
-                    id = "dr_ni2",
-                    questionText = "A Zener diode has V_Z = 5.1V. If the input is 12V with a 1k\u03A9 series resistor, what current flows through the resistor in milliamps?",
-                    correctAnswer = 6.9,
-                    tolerance = 0.1,
-                    unit = "mA",
-                    explanation = "I = (V_in \u2212 V_Z) / R = (12 \u2212 5.1) / 1000 = 6.9mA"
                 ),
                 Question.MultipleChoice(
                     id = "dr_mc3",
@@ -102,22 +106,100 @@ object DiodesContent {
                     correctIndex = 2,
                     explanation = "In reverse bias, the depletion region widens and the diode blocks current flow (ideally zero current)."
                 ),
-                Question.NumericInput(
-                    id = "dr_ni3",
-                    questionText = "What resistor value (in \u03A9) is needed to run a red LED (V_LED = 2V, I = 20mA) from a 9V supply?",
-                    correctAnswer = 350.0,
-                    tolerance = 5.0,
-                    unit = "\u03A9",
-                    explanation = "R = (V_supply \u2212 V_LED) / I_LED = (9 \u2212 2) / 0.02 = 7/0.02 = 350\u03A9"
+                Question.MultipleChoice(
+                    id = "dr_mc4",
+                    questionText = "Which LED colour needs the highest forward voltage?",
+                    options = listOf(
+                        "Infrared",
+                        "Red",
+                        "Yellow",
+                        "Blue"
+                    ),
+                    correctIndex = 3,
+                    explanation = "Shorter wavelengths carry more photon energy, so they need a wider band gap and a higher forward voltage: blue is about 3V or more, red about 2V, infrared about 1.2–1.5V."
                 ),
-                Question.NumericInput(
-                    id = "dr_ni4",
-                    questionText = "A half-wave rectifier receives an AC signal with V_peak = 10V. What is the average DC output voltage? Round to one decimal place.",
-                    correctAnswer = 3.2,
-                    tolerance = 0.1,
-                    unit = "V",
-                    explanation = "V_dc(avg) = V_peak / \u03C0 = 10 / 3.14 \u2248 3.2V"
+                Question.MultipleChoice(
+                    id = "dr_mc5",
+                    questionText = "What is a Zener diode operated in reverse breakdown mainly used for?",
+                    options = listOf(
+                        "Rectifying AC to DC",
+                        "Holding a nearly constant voltage (regulation)",
+                        "Emitting light",
+                        "Amplifying signals"
+                    ),
+                    correctIndex = 1,
+                    explanation = "In reverse breakdown a Zener keeps an almost constant voltage V_Z across itself over a wide range of currents, so it's used as a simple voltage regulator or reference."
                 )
+            ),
+            generators = listOf(
+                generator("dr_ni1") { r ->
+                    val vs = diodeSupplies.pick(r)
+                    val res = seriesResistors.pick(r)
+                    val ma = (vs - SILICON_DROP) / res * 1000
+                    Numeric(
+                        text = "${articleCap(vs)} ${fmt(vs)}V source drives a silicon diode in series with " +
+                            "${article(res)} ${fmt(res)}Ω resistor. What is the current in milliamps (mA)? " +
+                            "Round to 2 decimal places.",
+                        answer = ma, unit = "mA",
+                        explanation = "I = (V_source − V_diode)/R = (${fmt(vs)} − 0.7)/${fmt(res)} = ${fmt(ma, 2)}mA"
+                    )
+                },
+                generator("dr_ni2") { r ->
+                    val vz = zenerVoltages.pick(r)
+                    val vin = zenerInputs.pick(r)
+                    val res = zenerResistors.pick(r)
+                    val ma = (vin - vz) / res * 1000
+                    Numeric(
+                        text = "A Zener diode has V_Z = ${fmt(vz)}V. With ${article(vin)} ${fmt(vin)}V input and " +
+                            "${article(res)} ${fmt(res)}Ω series resistor, what current flows through the resistor, in mA? " +
+                            "Round to 2 decimal places.",
+                        answer = ma, unit = "mA",
+                        explanation = "The resistor drops V_in − V_Z: I = (${fmt(vin)} − ${fmt(vz)})/${fmt(res)} = ${fmt(ma, 2)}mA"
+                    )
+                },
+                generator("dr_ni3") { r ->
+                    val (colour, vf) = leds.pick(r)
+                    val ma = ledCurrents.pick(r)
+                    val vs = ledSupplies.pick(r)
+                    val res = (vs - vf) / (ma / 1000)
+                    Numeric(
+                        text = "What resistor value (in Ω) runs a $colour LED (V_LED = ${fmt(vf)}V) at ${fmt(ma)}mA from " +
+                            "${article(vs)} ${fmt(vs)}V supply? Round to the nearest whole number.",
+                        answer = res, unit = "Ω", decimals = 0,
+                        explanation = "R = (V_supply − V_LED)/I = (${fmt(vs)} − ${fmt(vf)})/${fmt(ma / 1000)} = ${fmt(res, 0)}Ω"
+                    )
+                },
+                generator("dr_ni4") { r ->
+                    val vp = rectifierPeaks.pick(r)
+                    val avg = vp / PI
+                    Numeric(
+                        text = "A half-wave rectifier receives an AC signal with V_peak = ${fmt(vp)}V. Ignoring the diode " +
+                            "drop, what is the average DC output voltage? Round to 1 decimal place.",
+                        answer = avg, unit = "V", decimals = 1,
+                        explanation = "Half-wave: V_avg = V_peak/π = ${fmt(vp)}/3.1416 ≈ ${fmt(avg, 1)}V"
+                    )
+                },
+                generator("dr_ni5") { r ->
+                    val vp = rectifierPeaks.pick(r)
+                    val avg = 2 * vp / PI
+                    Numeric(
+                        text = "A full-wave rectifier receives an AC signal with V_peak = ${fmt(vp)}V. Ignoring the diode " +
+                            "drops, what is the average DC output voltage? Round to 1 decimal place.",
+                        answer = avg, unit = "V", decimals = 1,
+                        explanation = "Full-wave uses both halves of the cycle: V_avg = 2V_peak/π = 2 × ${fmt(vp)}/3.1416 ≈ " +
+                            "${fmt(avg, 1)}V, twice the half-wave value."
+                    )
+                },
+                generator("dr_ni6") { r ->
+                    val i = diodeCurrents.pick(r)
+                    val p = SILICON_DROP * i
+                    Numeric(
+                        text = "A silicon diode (0.7V forward drop) carries ${fmt(i)}A. How much power does it dissipate, " +
+                            "in Watts? Round to 2 decimal places.",
+                        answer = p, unit = "W",
+                        explanation = "P = V_F × I = 0.7 × ${fmt(i)} = ${fmt(p, 2)}W"
+                    )
+                }
             )
         )
     )

@@ -12,8 +12,10 @@ import kotlin.test.assertTrue
 class QuizPoolTest {
 
     private val topics = TopicsService.allTopics
-    private val fundamentals = TopicCategories.categories.first { it.name == "Circuit Fundamentals" }.topicIds
-        .map { id -> topics.first { it.id == id } }
+    /** Categories converted to deeper practice so far. */
+    private val deepened = TopicCategories.categories
+        .filter { it.name in setOf("Circuit Fundamentals", "Semiconductor Devices") }
+        .flatMap { it.topicIds }.map { id -> topics.first { it.id == id } }
 
     /** Every question a generator can produce, over many draws. */
     private fun samples(gen: QuestionGenerator, n: Int = 300) = (0 until n).map { gen.generate(Random(it)) }
@@ -28,8 +30,9 @@ class QuizPoolTest {
     }
 
     @Test
-    fun circuitFundamentals_haveDeeperPools_withGeneratedNumbers() {
-        for (topic in fundamentals) {
+    fun deepenedCategories_haveDeeperPools_withGeneratedNumbers() {
+        assertEquals(10, deepened.size)
+        for (topic in deepened) {
             assertTrue(topic.quiz.poolSize >= 10, "${topic.id} pool should be at least 10")
             assertTrue(topic.quiz.generators.size >= 5, "${topic.id} should have generated numeric questions")
             assertTrue(topic.quiz.questions.none { it is Question.NumericInput }, "${topic.id} numerics are generated")
@@ -92,7 +95,7 @@ class QuizPoolTest {
     @Test
     fun explanations_showTheSameAnswerAsTheGrader() {
         // The worked answer at the end of each explanation must match what's graded
-        for (topic in fundamentals) for (gen in topic.quiz.generators) for (q in samples(gen, 100)) {
+        for (topic in topics) for (gen in topic.quiz.generators) for (q in samples(gen, 100)) {
             q as Question.NumericInput
             val withUnit = Regex("""(\d+(?:\.\d+)?)${Regex.escape(q.unit)}(?![A-Za-zΩ])""")
             val shown = withUnit.findAll(q.explanation).lastOrNull()?.groupValues?.get(1)?.toDoubleOrNull()
@@ -105,6 +108,13 @@ class QuizPoolTest {
     fun article_matchesHowTheNumberIsSaid() {
         for (v in listOf(8.0, 8.2, 11.0, 18.0, 80.0, 800.0, 11000.0)) assertEquals("an", QuestionMath.article(v), "$v")
         for (v in listOf(1.0, 4.7, 10.0, 12.0, 110.0, 180.0)) assertEquals("a", QuestionMath.article(v), "$v")
+    }
+
+    @Test
+    fun pow10_writesSuperscripts() {
+        assertEquals("10¹⁷", QuestionMath.pow10(17))
+        assertEquals("10⁻⁶", QuestionMath.pow10(-6))
+        assertEquals("10²⁰", QuestionMath.pow10(20))
     }
 
     @Test

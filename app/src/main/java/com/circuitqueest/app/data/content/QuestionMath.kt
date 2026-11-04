@@ -42,6 +42,12 @@ object QuestionMath {
         return if (s.startsWith("8") || Regex("^1[18](\\.|$|000)").containsMatchIn(s)) "an" else "a"
     }
 
+    private const val SUPERSCRIPTS = "⁰¹²³⁴⁵⁶⁷⁸⁹"
+
+    /** A power of ten for display: pow10(17) = "10¹⁷", pow10(-6) = "10⁻⁶". */
+    fun pow10(exponent: Int): String =
+        "10" + (if (exponent < 0) "⁻" else "") + abs(exponent).toString().map { SUPERSCRIPTS[it - '0'] }.joinToString("")
+
     /** [article] for the start of a sentence. */
     fun articleCap(value: Double): String = article(value).replaceFirstChar { it.uppercase() }
 
