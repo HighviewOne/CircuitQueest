@@ -37,12 +37,11 @@ class QuizScreenTest {
     private lateinit var database: AppDatabase
     private lateinit var repository: ProgressRepository
 
-    // A topic whose first two questions are multiple choice, so the same
-    // composable is reused across the transition.
-    private val topic = TopicsService.allTopics.first { topic ->
-        topic.quiz.questions.take(2).all { it is Question.MultipleChoice }
-    }
-    private val firstQuestion = topic.quiz.questions[0] as Question.MultipleChoice
+    private val topic = TopicsService.allTopics.first()
+    // A fixed multiple-choice question from the pool, for the review test
+    private val firstQuestion = topic.quiz.questions.filterIsInstance<Question.MultipleChoice>().first()
+    // The first question actually drawn for the quiz under test
+    private lateinit var shownFirst: Question.MultipleChoice
 
     @Before
     fun setUp() {
@@ -62,15 +61,27 @@ class QuizScreenTest {
         composeTestRule.waitForIdle()
     }
 
+    // Each attempt is drawn at random. Draw until the first two questions are multiple
+    // choice, so the same composable is reused across the transition.
+    private fun newQuizViewModel(): QuizViewModel {
+        while (true) {
+            val vm = QuizViewModel(repository, SavedStateHandle(mapOf("topicId" to topic.id)))
+            if (vm.drawnQuestions.take(2).all { it is Question.MultipleChoice }) {
+                shownFirst = vm.drawnQuestions.first() as Question.MultipleChoice
+                return vm
+            }
+        }
+    }
+
     private fun showQuiz(onBack: () -> Unit = {}) {
-        val viewModel = QuizViewModel(repository, SavedStateHandle(mapOf("topicId" to topic.id)))
+        val viewModel = newQuizViewModel()
         composeTestRule.setContent {
             QuizScreen(viewModel = viewModel, onBack = onBack, onQuizComplete = { _, _, _, _ -> })
         }
     }
 
     private fun answerFirstQuestion() {
-        composeTestRule.onAllNodesWithText(firstQuestion.options[0]).onFirst().performClick()
+        composeTestRule.onAllNodesWithText(shownFirst.options[0]).onFirst().performClick()
         composeTestRule.onNodeWithText("Submit Answer").performScrollTo().assertIsEnabled()
             .performClick()
     }
@@ -82,7 +93,7 @@ class QuizScreenTest {
 
         composeTestRule.onNodeWithText("Next  →").performClick()
 
-        composeTestRule.onNodeWithText("Question 2 of ${topic.quiz.questions.size}")
+        composeTestRule.onNodeWithText("Question 2 of ${topic.quiz.attemptSize}")
             .assertIsDisplayed()
         composeTestRule.onNodeWithText("Submit Answer").performScrollTo().assertIsNotEnabled()
     }
