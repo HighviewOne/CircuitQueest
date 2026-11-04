@@ -1,6 +1,25 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import kotlin.math.PI
+import kotlin.math.exp
+import kotlin.math.sqrt
+
 object ControlSystemsContent {
+    private val setpoints = listOf(50.0, 100.0, 150.0, 200.0)
+    private val offsets = listOf(2.0, 5.0, 8.0, 10.0, 15.0)
+    private val finalValues = listOf(5.0, 10.0, 12.0, 24.0)
+    private val overshootFractions = listOf(0.05, 0.1, 0.2, 0.25, 0.4)
+    private val forwardGains = listOf(5.0, 10.0, 20.0, 50.0, 100.0)
+    private val feedbackGains = listOf(1.0, 0.5, 0.1)
+    private val loopGains = listOf(4.0, 9.0, 19.0, 99.0)
+    private val proportionalGains = listOf(0.5, 2.0, 5.0, 10.0)
+    private val errors = listOf(1.0, 2.5, 4.0)
+    private val dampingRatios = listOf(0.2, 0.3, 0.4, 0.5, 0.6, 0.7)
+
     val topic = Topic(
         id = "control_systems",
         title = "Control Systems",
@@ -84,22 +103,6 @@ object ControlSystemsContent {
                     correctIndex = 2,
                     explanation = "Poles in the left half-plane (negative real part) correspond to decaying exponentials, meaning the system returns to equilibrium."
                 ),
-                Question.NumericInput(
-                    id = "cs_ni1",
-                    questionText = "A system has a setpoint of 100\u00B0C and the measured temperature is 95\u00B0C. What is the error signal?",
-                    correctAnswer = 5.0,
-                    tolerance = 0.1,
-                    unit = "\u00B0C",
-                    explanation = "error = setpoint \u2212 output = 100 \u2212 95 = 5\u00B0C"
-                ),
-                Question.NumericInput(
-                    id = "cs_ni2",
-                    questionText = "A step response has a final value of 10V and peaks at 12V. What is the percent overshoot?",
-                    correctAnswer = 20.0,
-                    tolerance = 0.5,
-                    unit = "%",
-                    explanation = "Overshoot = (peak \u2212 final)/final \u00D7 100 = (12 \u2212 10)/10 \u00D7 100 = 20%"
-                ),
                 Question.MultipleChoice(
                     id = "cs_mc4",
                     questionText = "The derivative (D) term in a PID controller helps to:",
@@ -112,14 +115,84 @@ object ControlSystemsContent {
                     correctIndex = 2,
                     explanation = "The D term responds to the rate of change of error, providing a damping effect that reduces overshoot and oscillations."
                 ),
-                Question.NumericInput(
-                    id = "cs_ni3",
-                    questionText = "A forward-path gain is G = 20 and feedback gain H = 1. What is the closed-loop gain T = G/(1+GH)?",
-                    correctAnswer = 0.95,
-                    tolerance = 0.01,
-                    unit = "",
-                    explanation = "T = G/(1+GH) = 20/(1 + 20\u00D71) = 20/21 \u2248 0.952"
+                Question.MultipleChoice(
+                    id = "cs_mc5",
+                    questionText = "Raising the proportional gain K_p of a feedback loop typically:",
+                    options = listOf(
+                        "Removes all overshoot",
+                        "Reduces steady-state error but increases overshoot and can destabilise",
+                        "Has no effect on the response",
+                        "Slows the response down"
+                    ),
+                    correctIndex = 1,
+                    explanation = "More K_p reacts harder to error: faster response and smaller steady-state error, but more overshoot and less stability margin. That trade-off is why I and D terms exist."
                 )
+            ),
+            generators = listOf(
+                generator("cs_ni1") { r ->
+                    val sp = setpoints.pick(r)
+                    val off = offsets.pick(r)
+                    val pv = sp - off
+                    Numeric(
+                        text = "A temperature controller has a setpoint of ${fmt(sp)}°C and the measured temperature is ${fmt(pv)}°C. " +
+                            "What is the error signal, in °C?",
+                        answer = off, unit = "°C",
+                        explanation = "error = setpoint − measured = ${fmt(sp)} − ${fmt(pv)} = ${fmt(off)}°C"
+                    )
+                },
+                generator("cs_ni2") { r ->
+                    val fv = finalValues.pick(r)
+                    val p = overshootFractions.pick(r)
+                    val peak = fv * (1 + p)
+                    val os = p * 100
+                    Numeric(
+                        text = "A step response settles at ${fmt(fv)}V and peaks at ${fmt(peak)}V. What is the percent overshoot?",
+                        answer = os, unit = "%",
+                        explanation = "Overshoot = (peak − final)/final × 100 = (${fmt(peak)} − ${fmt(fv)})/${fmt(fv)} × 100 = ${fmt(os)}%"
+                    )
+                },
+                generator("cs_ni3") { r ->
+                    val g = forwardGains.pick(r)
+                    val h = feedbackGains.pick(r)
+                    val t = g / (1 + g * h)
+                    Numeric(
+                        text = "A loop has forward gain G = ${fmt(g)} and feedback gain H = ${fmt(h)}. What is the closed-loop gain " +
+                            "T = G/(1 + GH)? Round to 3 decimal places.",
+                        answer = t, unit = "", decimals = 3,
+                        explanation = "T = ${fmt(g)}/(1 + ${fmt(g)} × ${fmt(h)}) = ${fmt(g)}/${fmt(1 + g * h)} = ${fmt(t, 3)}"
+                    )
+                },
+                generator("cs_ni4") { r ->
+                    val k = loopGains.pick(r)
+                    val ess = 100 / (1 + k)
+                    Numeric(
+                        text = "A unity-feedback system with no integrator has a DC loop gain of ${fmt(k)}. What is its " +
+                            "steady-state error for a step input, as a percentage of the step?",
+                        answer = ess, unit = "%",
+                        explanation = "e_ss = 1/(1 + K) = 1/(1 + ${fmt(k)}) = ${fmt(ess)}%. An integral term would drive it to zero."
+                    )
+                },
+                generator("cs_ni5") { r ->
+                    val kp = proportionalGains.pick(r)
+                    val e = errors.pick(r)
+                    Numeric(
+                        text = "A P-controller has K_p = ${fmt(kp)} and the current error is ${fmt(e)}. What control output does it " +
+                            "produce?",
+                        answer = kp * e, unit = "",
+                        explanation = "u = K_p × e = ${fmt(kp)} × ${fmt(e)} = ${fmt(kp * e)}"
+                    )
+                },
+                generator("cs_ni6") { r ->
+                    val zeta = dampingRatios.pick(r)
+                    val os = exp(-PI * zeta / sqrt(1 - zeta * zeta)) * 100
+                    Numeric(
+                        text = "A second-order system has damping ratio ζ = ${fmt(zeta)}. What is its percent overshoot to a step? " +
+                            "Use %OS = e^(−πζ/√(1 − ζ²)) × 100 and round to 1 decimal place.",
+                        answer = os, unit = "%", decimals = 1,
+                        explanation = "%OS = e^(−π × ${fmt(zeta)}/√(1 − ${fmt(zeta)}²)) × 100 = ${fmt(os, 1)}%. Less damping means more " +
+                            "overshoot."
+                    )
+                }
             )
         )
     )

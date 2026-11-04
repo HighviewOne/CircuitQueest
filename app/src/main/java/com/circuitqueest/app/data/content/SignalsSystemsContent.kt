@@ -1,6 +1,25 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import kotlin.math.PI
+import kotlin.math.log10
+
 object SignalsSystemsContent {
+    private const val DB_AMPLITUDE = 20
+    private const val DB_PER_POLE = 20
+    private const val MICRO = 1e-6
+    private val fundamentals = listOf(50.0, 60.0, 100.0, 440.0, 1000.0)
+    private val harmonics = listOf(2 to "2nd", 3 to "3rd", 4 to "4th", 5 to "5th", 7 to "7th")
+    private val poleResistors = listOf(1.0, 2.2, 4.7, 10.0)
+    private val poleCapacitors = listOf(0.1, 1.0, 10.0)
+    private val rollOffs = listOf(20, 40, 60, 80)
+    private val poleLocations = listOf(10.0, 50.0, 100.0, 200.0, 1000.0)
+    private val gainRatios = listOf(2.0, 4.0, 5.0, 10.0, 100.0, 1000.0)
+    private val signalFrequencies = listOf(50.0, 60.0, 1000.0)
+
     val topic = Topic(
         id = "signals_systems",
         title = "Signals & Systems",
@@ -73,14 +92,6 @@ object SignalsSystemsContent {
                     correctIndex = 1,
                     explanation = "A capacitor's impedance in the Laplace domain is Z(s) = 1/(sC). This replaces the integral operation with simple algebra."
                 ),
-                Question.NumericInput(
-                    id = "ss_ni1",
-                    questionText = "A square wave has a fundamental frequency of 1kHz. What is the frequency of its 3rd harmonic in kHz?",
-                    correctAnswer = 3.0,
-                    tolerance = 0.1,
-                    unit = "kHz",
-                    explanation = "The nth harmonic is n times the fundamental. 3rd harmonic = 3 \u00D7 1kHz = 3kHz."
-                ),
                 Question.MultipleChoice(
                     id = "ss_mc3",
                     questionText = "What does a pole in a transfer function indicate?",
@@ -93,22 +104,6 @@ object SignalsSystemsContent {
                     correctIndex = 1,
                     explanation = "Poles are values of s where the transfer function goes to infinity. They correspond to the system's natural frequencies and determine its transient response."
                 ),
-                Question.NumericInput(
-                    id = "ss_ni2",
-                    questionText = "An RC low-pass filter has R = 1k\u03A9 and C = 1\u00B5F. What is the pole frequency in Hz? Round to the nearest whole number.",
-                    correctAnswer = 159.0,
-                    tolerance = 2.0,
-                    unit = "Hz",
-                    explanation = "The pole is at f = 1/(2\u03C0RC) = 1/(2\u03C0 \u00D7 1000 \u00D7 10\u207B\u2076) = 1/(6.283 \u00D7 10\u207B\u00B3) \u2248 159Hz"
-                ),
-                Question.NumericInput(
-                    id = "ss_ni3",
-                    questionText = "A Bode plot shows \u221240dB/decade roll-off. How many poles does this correspond to?",
-                    correctAnswer = 2.0,
-                    tolerance = 0.1,
-                    unit = "poles",
-                    explanation = "Each pole contributes \u221220dB/decade of roll-off. \u221240dB/decade means 2 poles."
-                ),
                 Question.MultipleChoice(
                     id = "ss_mc4",
                     questionText = "The Laplace variable s = \u03C3 + j\u03C9. What does the real part \u03C3 represent?",
@@ -120,7 +115,81 @@ object SignalsSystemsContent {
                     ),
                     correctIndex = 2,
                     explanation = "The real part \u03C3 represents exponential growth (\u03C3 > 0) or decay (\u03C3 < 0). The imaginary part j\u03C9 represents oscillation."
+                ),
+                Question.MultipleChoice(
+                    id = "ss_mc5",
+                    questionText = "What is a zero of a transfer function H(s)?",
+                    options = listOf(
+                        "A value of s where H(s) becomes infinite",
+                        "A value of s where H(s) = 0",
+                        "The DC gain",
+                        "A pole on the imaginary axis"
+                    ),
+                    correctIndex = 1,
+                    explanation = "Zeros are the roots of the numerator, where H(s) = 0; poles are the roots of the denominator, where H(s) blows up. Zeros shape the response but don't decide stability."
                 )
+            ),
+            generators = listOf(
+                generator("ss_ni1") { r ->
+                    val f0 = fundamentals.pick(r)
+                    val (n, nth) = harmonics.pick(r)
+                    Numeric(
+                        text = "A periodic signal has a fundamental frequency of ${fmt(f0)}Hz. What is the frequency of its $nth " +
+                            "harmonic, in Hz?",
+                        answer = n * f0, unit = "Hz",
+                        explanation = "The nth harmonic is n times the fundamental: $n × ${fmt(f0)} = ${fmt(n * f0)}Hz"
+                    )
+                },
+                generator("ss_ni2") { r ->
+                    val res = poleResistors.pick(r)
+                    val c = poleCapacitors.pick(r)
+                    val f = 1 / (2 * PI * res * 1000 * c * MICRO)
+                    Numeric(
+                        text = "An RC low-pass filter has R = ${fmt(res)}kΩ and C = ${fmt(c)}µF. What is its pole frequency in Hz? " +
+                            "Round to the nearest whole number.",
+                        answer = f, unit = "Hz", decimals = 0,
+                        explanation = "The pole is at f = 1/(2πRC) = 1/(2π × ${fmt(res)}×10³ × ${fmt(c)}×10⁻⁶) ≈ ${fmt(f, 0)}Hz"
+                    )
+                },
+                generator("ss_ni3") { r ->
+                    val slope = rollOffs.pick(r)
+                    val poles = slope / DB_PER_POLE
+                    Numeric(
+                        text = "A Bode magnitude plot rolls off at −${slope}dB/decade at high frequency. How many poles (net of " +
+                            "zeros) does this correspond to?",
+                        answer = poles.toDouble(), unit = "poles", exact = true,
+                        explanation = "Each pole adds −20dB/decade: $slope/20 = $poles poles"
+                    )
+                },
+                generator("ss_ni4") { r ->
+                    val a = poleLocations.pick(r)
+                    val ms = 1000 / a
+                    Numeric(
+                        text = "A first-order system has H(s) = ${fmt(a)}/(s + ${fmt(a)}). What is its time constant, in " +
+                            "milliseconds? Round to 2 decimal places.",
+                        answer = ms, unit = "ms",
+                        explanation = "The pole is at s = −${fmt(a)}, so τ = 1/${fmt(a)} s = ${fmt(ms, 2)}ms"
+                    )
+                },
+                generator("ss_ni5") { r ->
+                    val ratio = gainRatios.pick(r)
+                    val db = DB_AMPLITUDE * log10(ratio)
+                    Numeric(
+                        text = "A system amplifies a signal's amplitude by a factor of ${fmt(ratio)}. What is that gain in dB? " +
+                            "Round to 2 decimal places.",
+                        answer = db, unit = "dB",
+                        explanation = "For amplitude (voltage) ratios, gain = 20·log₁₀(${fmt(ratio)}) = ${fmt(db, 2)}dB"
+                    )
+                },
+                generator("ss_ni6") { r ->
+                    val f = signalFrequencies.pick(r)
+                    val w = 2 * PI * f
+                    Numeric(
+                        text = "What is the angular frequency ω of a ${fmt(f)}Hz signal, in rad/s? Round to 2 decimal places.",
+                        answer = w, unit = "rad/s",
+                        explanation = "ω = 2πf = 2π × ${fmt(f)} = ${fmt(w, 2)}rad/s"
+                    )
+                }
             )
         )
     )
