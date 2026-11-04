@@ -1,6 +1,25 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.article
+import com.circuitqueest.app.data.content.QuestionMath.articleCap
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+
 object DspContent {
+    private const val DB_PER_BIT = 6.02
+    private const val DB_OFFSET = 1.76
+    private val maxFrequencies = listOf(4.0, 8.0, 20.0, 22.05)
+    private val adcBits = listOf(8, 10, 12, 14, 16)
+    private val sampleRates = listOf(8000.0, 44_100.0, 48_000.0, 96_000.0)
+    private val fftSizes = listOf(256, 512, 1024, 4096)
+    private val levelBits = listOf(6, 8, 10, 12, 16)
+    private val aliasRates = listOf(1000.0, 8000.0, 10_000.0)
+    private val aliasFractions = listOf(0.6, 0.7, 0.8, 0.9)
+    private val referenceVoltages = listOf(3.3, 5.0)
+    private val lsbBits = listOf(8, 10, 12)
+
     val topic = Topic(
         id = "dsp",
         title = "Digital Signal Processing",
@@ -50,14 +69,6 @@ object DspContent {
         quiz = Quiz(
             title = "Digital Signal Processing Boss Battle",
             questions = listOf(
-                Question.NumericInput(
-                    id = "dsp_ni1",
-                    questionText = "A signal contains frequencies up to 8 kHz. What is the minimum sample rate in kHz to avoid aliasing?",
-                    correctAnswer = 16.0,
-                    tolerance = 0.1,
-                    unit = "kHz",
-                    explanation = "Nyquist: f_s \u2265 2 \u00D7 f_max = 2 \u00D7 8 kHz = 16 kHz minimum."
-                ),
                 Question.MultipleChoice(
                     id = "dsp_mc1",
                     questionText = "What happens if you sample a signal below the Nyquist rate?",
@@ -69,14 +80,6 @@ object DspContent {
                     ),
                     correctIndex = 1,
                     explanation = "Sampling below 2\u00D7f_max causes aliasing: frequencies above f_s/2 fold back into the baseband as false lower frequencies that cannot be removed."
-                ),
-                Question.NumericInput(
-                    id = "dsp_ni2",
-                    questionText = "What is the SQNR (in dB) of an ideal 12-bit ADC? Round to one decimal.",
-                    correctAnswer = 74.0,
-                    tolerance = 0.5,
-                    unit = "dB",
-                    explanation = "SQNR = 6.02\u00D7N + 1.76 = 6.02\u00D712 + 1.76 = 72.24 + 1.76 = 74.0 dB"
                 ),
                 Question.MultipleChoice(
                     id = "dsp_mc2",
@@ -102,22 +105,81 @@ object DspContent {
                     correctIndex = 1,
                     explanation = "FIR filters have no feedback (no poles), so they're always stable. With symmetric coefficients, they achieve exactly linear phase."
                 ),
-                Question.NumericInput(
-                    id = "dsp_ni3",
-                    questionText = "A 1024-point FFT is computed on a signal sampled at 48 kHz. What is the frequency resolution in Hz? Round to one decimal.",
-                    correctAnswer = 46.9,
-                    tolerance = 0.5,
-                    unit = "Hz",
-                    explanation = "Frequency resolution = f_s / N = 48000 / 1024 = 46.875 Hz \u2248 46.9 Hz"
-                ),
-                Question.NumericInput(
-                    id = "dsp_ni4",
-                    questionText = "How many quantization levels does a 10-bit ADC have?",
-                    correctAnswer = 1024.0,
-                    tolerance = 1.0,
-                    unit = "levels",
-                    explanation = "Levels = 2^N = 2^10 = 1024 levels."
+                Question.MultipleChoice(
+                    id = "dsp_mc4",
+                    questionText = "Why is a window function (e.g. Hann) applied to a signal before taking its FFT?",
+                    options = listOf(
+                        "To increase the sample rate",
+                        "To reduce spectral leakage from cutting the signal off abruptly",
+                        "To remove DC offset",
+                        "To make the FFT faster"
+                    ),
+                    correctIndex = 1,
+                    explanation = "The FFT assumes the block repeats forever. If the block doesn't contain whole cycles, the ends jump and energy 'leaks' into neighbouring bins. Tapering the ends with a window reduces that leakage."
                 )
+            ),
+            generators = listOf(
+                generator("dsp_ni1") { r ->
+                    val fmax = maxFrequencies.pick(r)
+                    Numeric(
+                        text = "A signal contains frequencies up to ${fmt(fmax)}kHz. What is the minimum sample rate to avoid " +
+                            "aliasing, in kHz? Round to 2 decimal places.",
+                        answer = 2 * fmax, unit = "kHz",
+                        explanation = "Nyquist: f_s ≥ 2 × f_max = 2 × ${fmt(fmax)} = ${fmt(2 * fmax, 2)}kHz"
+                    )
+                },
+                generator("dsp_ni2") { r ->
+                    val n = adcBits.pick(r)
+                    val sqnr = DB_PER_BIT * n + DB_OFFSET
+                    Numeric(
+                        text = "What is the SQNR of an ideal $n-bit ADC, in dB? Round to 1 decimal place.",
+                        answer = sqnr, unit = "dB", decimals = 1,
+                        explanation = "SQNR = 6.02 × N + 1.76 = 6.02 × $n + 1.76 = ${fmt(sqnr, 1)}dB"
+                    )
+                },
+                generator("dsp_ni3") { r ->
+                    val fs = sampleRates.pick(r)
+                    val n = fftSizes.pick(r)
+                    val res = fs / n
+                    Numeric(
+                        text = "A $n-point FFT is computed on a signal sampled at ${fmt(fs)}Hz. What is the frequency resolution, " +
+                            "in Hz? Round to 2 decimal places.",
+                        answer = res, unit = "Hz",
+                        explanation = "Bin spacing = f_s/N = ${fmt(fs)}/$n = ${fmt(res, 2)}Hz"
+                    )
+                },
+                generator("dsp_ni4") { r ->
+                    val n = levelBits.pick(r)
+                    val levels = 1 shl n
+                    Numeric(
+                        text = "How many quantization levels does ${article(n.toDouble())} $n-bit ADC have?",
+                        answer = levels.toDouble(), unit = "levels", exact = true,
+                        explanation = "Levels = 2^N = 2^$n = $levels levels"
+                    )
+                },
+                generator("dsp_ni5") { r ->
+                    val fs = aliasRates.pick(r)
+                    val f = fs * aliasFractions.pick(r)
+                    val alias = fs - f
+                    Numeric(
+                        text = "${articleCap(f)} ${fmt(f)}Hz tone is sampled at ${fmt(fs)}Hz with no anti-aliasing filter. At what frequency " +
+                            "does it appear in the sampled signal, in Hz?",
+                        answer = alias, unit = "Hz",
+                        explanation = "${fmt(f)}Hz is above f_s/2 = ${fmt(fs / 2)}Hz, so it folds back to f_s − f = " +
+                            "${fmt(fs)} − ${fmt(f)} = ${fmt(alias)}Hz"
+                    )
+                },
+                generator("dsp_ni6") { r ->
+                    val vref = referenceVoltages.pick(r)
+                    val n = lsbBits.pick(r)
+                    val mv = vref / (1 shl n) * 1000
+                    Numeric(
+                        text = "${articleCap(n.toDouble())} $n-bit ADC has a ${fmt(vref)}V reference. What voltage does one LSB " +
+                            "step represent, in mV? Round to 3 decimal places.",
+                        answer = mv, unit = "mV", decimals = 3,
+                        explanation = "LSB = V_ref/2^N = ${fmt(vref)}/${1 shl n} = ${fmt(mv, 3)}mV"
+                    )
+                }
             )
         )
     )
