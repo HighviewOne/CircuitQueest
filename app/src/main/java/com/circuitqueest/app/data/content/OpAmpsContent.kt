@@ -1,6 +1,29 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.article
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import com.circuitqueest.app.data.content.QuestionMath.pickTwo
+
 object OpAmpsContent {
+    private const val MAX_OUTPUT = 12.0
+    private val feedbackResistors = listOf(10.0, 22.0, 33.0, 47.0, 100.0)
+    private val inputResistors = listOf(1.0, 2.2, 4.7, 10.0)
+    private val smallInputs = listOf(0.05, 0.1, 0.2, 0.5, 1.0)
+    private val nonInvFeedback = listOf(10.0, 15.0, 22.0, 47.0, 100.0)
+    private val nonInvInput = listOf(1.0, 2.2, 4.7, 5.0, 10.0)
+    private val invertingGains = listOf(2.0, 5.0, 8.0, 10.0, 20.0, 50.0)
+    private val gainInputResistors = listOf(1.0, 2.0, 4.7, 10.0)
+    private val nonInvGains = listOf(2.0, 3.0, 4.0, 6.0, 10.0)
+    private val nonInvInputs = listOf(0.1, 0.25, 0.5, 1.0, 2.0)
+    private val summingInputs = listOf(0.2, 0.5, 1.0, 1.5, 2.0)
+    private val summingRatios = listOf(1.0, 2.0)
+    private val diffRatios = listOf(1.0, 2.0, 5.0, 10.0)
+    private val diffBases = listOf(0.5, 1.0, 1.5)
+    private val diffSteps = listOf(0.1, 0.2, 0.5)
+
     val topic = Topic(
         id = "op_amps",
         title = "Op-Amps",
@@ -61,22 +84,6 @@ object OpAmpsContent {
                     correctIndex = 2,
                     explanation = "An ideal op-amp has infinite open-loop gain, not unity gain. Unity gain only applies to a voltage follower configuration."
                 ),
-                Question.NumericInput(
-                    id = "oa_ni1",
-                    questionText = "An inverting amplifier has R_f = 47k\u03A9 and R_in = 10k\u03A9. If the input voltage is 0.5V, what is the magnitude of the output voltage in Volts?",
-                    correctAnswer = 2.35,
-                    tolerance = 0.05,
-                    unit = "V",
-                    explanation = "Gain = -R_f/R_in = -47k/10k = -4.7. V_out = -4.7 \u00D7 0.5 = -2.35V. Magnitude = 2.35V."
-                ),
-                Question.NumericInput(
-                    id = "oa_ni2",
-                    questionText = "A non-inverting amplifier has R_f = 15k\u03A9 and R_in = 5k\u03A9. What is the gain?",
-                    correctAnswer = 4.0,
-                    tolerance = 0.1,
-                    unit = "",
-                    explanation = "Gain = 1 + R_f/R_in = 1 + 15k/5k = 1 + 3 = 4"
-                ),
                 Question.MultipleChoice(
                     id = "oa_mc2",
                     questionText = "What is the gain of a voltage follower?",
@@ -88,14 +95,6 @@ object OpAmpsContent {
                     ),
                     correctIndex = 0,
                     explanation = "A voltage follower has a gain of exactly 1. The output follows the input with no amplification or inversion."
-                ),
-                Question.NumericInput(
-                    id = "oa_ni3",
-                    questionText = "An inverting amplifier has a gain of -8. If R_in = 2k\u03A9, what is R_f in k\u03A9?",
-                    correctAnswer = 16.0,
-                    tolerance = 0.1,
-                    unit = "k\u03A9",
-                    explanation = "Gain = -R_f/R_in. |-8| = R_f/2k\u03A9. R_f = 8 \u00D7 2k = 16k\u03A9."
                 ),
                 Question.MultipleChoice(
                     id = "oa_mc3",
@@ -109,14 +108,87 @@ object OpAmpsContent {
                     correctIndex = 1,
                     explanation = "With equal input resistors, V_out = -(R_f/R)(V\u2081 + V\u2082 + ...). The output is proportional to the sum of all input voltages."
                 ),
-                Question.NumericInput(
-                    id = "oa_ni4",
-                    questionText = "A non-inverting amplifier with gain 6 receives a 2V input. What is the output voltage in Volts?",
-                    correctAnswer = 12.0,
-                    tolerance = 0.1,
-                    unit = "V",
-                    explanation = "V_out = Gain \u00D7 V_in = 6 \u00D7 2 = 12V"
+                Question.MultipleChoice(
+                    id = "oa_mc4",
+                    questionText = "With negative feedback and the output not saturated, an op-amp drives its output so that:",
+                    options = listOf(
+                        "The output current is zero",
+                        "The voltage difference between its inputs is (nearly) zero",
+                        "The output equals the supply voltage",
+                        "Both inputs are at 0V"
+                    ),
+                    correctIndex = 1,
+                    explanation = "This is the 'virtual short': with negative feedback the huge open-loop gain forces V+ ≈ V−. With the 'no input current' rule it's how you analyse op-amp circuits."
                 )
+            ),
+            generators = listOf(
+                generator("oa_ni1") { r ->
+                    val rf = feedbackResistors.pick(r)
+                    val rin = inputResistors.pick(r)
+                    val gain = rf / rin
+                    val vin = smallInputs.filter { it * gain <= MAX_OUTPUT }.pick(r)
+                    val vout = gain * vin
+                    Numeric(
+                        text = "An inverting amplifier has R_f = ${fmt(rf)}kΩ and R_in = ${fmt(rin)}kΩ. If the input is " +
+                            "${fmt(vin)}V, what is the magnitude of the output voltage, in Volts? Round to 2 decimal places.",
+                        answer = vout, unit = "V",
+                        explanation = "Gain = −R_f/R_in = −${fmt(rf)}/${fmt(rin)} = −${fmt(gain, 2)}. V_out = −${fmt(gain, 2)} × " +
+                            "${fmt(vin)}, so its magnitude is ${fmt(vout, 2)}V"
+                    )
+                },
+                generator("oa_ni2") { r ->
+                    val rf = nonInvFeedback.pick(r)
+                    val rin = nonInvInput.pick(r)
+                    val gain = 1 + rf / rin
+                    Numeric(
+                        text = "A non-inverting amplifier has R_f = ${fmt(rf)}kΩ and R_in = ${fmt(rin)}kΩ. What is its voltage " +
+                            "gain? Round to 2 decimal places.",
+                        answer = gain, unit = "",
+                        explanation = "Gain = 1 + R_f/R_in = 1 + ${fmt(rf)}/${fmt(rin)} = ${fmt(gain, 2)}"
+                    )
+                },
+                generator("oa_ni3") { r ->
+                    val g = invertingGains.pick(r)
+                    val rin = gainInputResistors.pick(r)
+                    Numeric(
+                        text = "An inverting amplifier needs a gain of −${fmt(g)}. If R_in = ${fmt(rin)}kΩ, what is R_f in kΩ?",
+                        answer = g * rin, unit = "kΩ",
+                        explanation = "|Gain| = R_f/R_in, so R_f = ${fmt(g)} × ${fmt(rin)}kΩ = ${fmt(g * rin)}kΩ"
+                    )
+                },
+                generator("oa_ni4") { r ->
+                    val g = nonInvGains.pick(r)
+                    val vin = nonInvInputs.filter { it * g <= MAX_OUTPUT }.pick(r)
+                    Numeric(
+                        text = "A non-inverting amplifier with a gain of ${fmt(g)} receives ${article(vin)} ${fmt(vin)}V input. " +
+                            "What is the output voltage, in Volts?",
+                        answer = g * vin, unit = "V",
+                        explanation = "V_out = Gain × V_in = ${fmt(g)} × ${fmt(vin)} = ${fmt(g * vin)}V"
+                    )
+                },
+                generator("oa_ni5") { r ->
+                    val (v1, v2) = summingInputs.pickTwo(r)
+                    val k = summingRatios.pick(r)
+                    val vout = k * (v1 + v2)
+                    Numeric(
+                        text = "An inverting summing amplifier has two inputs, ${fmt(v1)}V and ${fmt(v2)}V, each through R = 10kΩ, " +
+                            "and R_f = ${fmt(10 * k)}kΩ. What is the magnitude of the output voltage, in Volts?",
+                        answer = vout, unit = "V",
+                        explanation = "V_out = −(R_f/R)(V₁ + V₂) = −${fmt(k)} × (${fmt(v1)} + ${fmt(v2)}), so its magnitude is ${fmt(vout)}V"
+                    )
+                },
+                generator("oa_ni6") { r ->
+                    val ratio = diffRatios.pick(r)
+                    val v1 = diffBases.pick(r)
+                    val v2 = v1 + diffSteps.pick(r)
+                    val vout = ratio * (v2 - v1)
+                    Numeric(
+                        text = "A difference amplifier has R₂/R₁ = ${fmt(ratio)} (matched pairs). With V₁ = ${fmt(v1)}V and " +
+                            "V₂ = ${fmt(v2)}V, what is V_out = (R₂/R₁)(V₂ − V₁), in Volts?",
+                        answer = vout, unit = "V",
+                        explanation = "Only the difference is amplified: V_out = ${fmt(ratio)} × (${fmt(v2)} − ${fmt(v1)}) = ${fmt(vout)}V"
+                    )
+                }
             )
         )
     )

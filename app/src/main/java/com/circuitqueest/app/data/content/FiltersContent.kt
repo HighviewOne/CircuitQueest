@@ -1,6 +1,26 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import kotlin.math.PI
+import kotlin.math.sqrt
+
 object FiltersContent {
+    private const val NANO = 1e-9
+    private const val DB_PER_DECADE = 20
+    private val filterResistors = listOf(1.0, 4.7, 10.0, 22.0, 47.0)
+    private val filterCapacitors = listOf(10.0, 47.0, 100.0, 220.0)
+    private val filterOrders = listOf(1, 2, 3)
+    private val decades = listOf(1, 2)
+    private val centreFrequencies = listOf("10kHz" to 10.0, "100kHz" to 100.0, "1MHz" to 1000.0, "10.7MHz" to 10_700.0)
+    private val qualityFactors = listOf(10.0, 20.0, 50.0, 100.0)
+    private val rollOffOrders = listOf(1, 2, 3, 4, 5)
+    private val designResistors = listOf(1.0, 10.0)
+    private val designCutoffs = listOf(100.0, 1000.0, 3400.0)
+    private val inputAmplitudes = listOf(1.0, 2.0, 5.0, 10.0)
+
     val topic = Topic(
         id = "filters",
         title = "Filters",
@@ -49,14 +69,6 @@ object FiltersContent {
         quiz = Quiz(
             title = "Filters Boss Battle",
             questions = listOf(
-                Question.NumericInput(
-                    id = "flt_ni1",
-                    questionText = "What is the cutoff frequency (in Hz) of an RC low-pass filter with R = 10k\u03A9 and C = 100nF? Round to the nearest whole number.",
-                    correctAnswer = 159.0,
-                    tolerance = 2.0,
-                    unit = "Hz",
-                    explanation = "f_c = 1/(2\u03C0RC) = 1/(2\u03C0 \u00D7 10000 \u00D7 100\u00D710\u207B\u2079) = 1/(6.283 \u00D7 10\u207B\u00B3) \u2248 159Hz"
-                ),
                 Question.MultipleChoice(
                     id = "flt_mc1",
                     questionText = "A low-pass filter allows which frequencies to pass?",
@@ -81,22 +93,6 @@ object FiltersContent {
                     correctIndex = 1,
                     explanation = "The cutoff frequency is defined as the \u22123dB point, where output is 70.7% of the input (1/\u221A2)."
                 ),
-                Question.NumericInput(
-                    id = "flt_ni2",
-                    questionText = "A first-order low-pass filter has f_c = 1kHz. What is the attenuation in dB at 10kHz (one decade above cutoff)?",
-                    correctAnswer = 20.0,
-                    tolerance = 1.0,
-                    unit = "dB",
-                    explanation = "First-order roll-off is \u221220dB/decade. One decade above f_c: attenuation = 20dB."
-                ),
-                Question.NumericInput(
-                    id = "flt_ni3",
-                    questionText = "A band-pass filter has a center frequency of 1MHz and Q = 50. What is the bandwidth in kHz?",
-                    correctAnswer = 20.0,
-                    tolerance = 0.5,
-                    unit = "kHz",
-                    explanation = "BW = f\u2080/Q = 1,000,000/50 = 20,000Hz = 20kHz"
-                ),
                 Question.MultipleChoice(
                     id = "flt_mc3",
                     questionText = "What is a key advantage of active filters over passive filters?",
@@ -109,14 +105,84 @@ object FiltersContent {
                     correctIndex = 2,
                     explanation = "Active filters use op-amps to provide gain (amplification) in addition to filtering, which passive RC filters cannot do."
                 ),
-                Question.NumericInput(
-                    id = "flt_ni4",
-                    questionText = "What is the roll-off rate (in dB/decade) of a third-order filter?",
-                    correctAnswer = 60.0,
-                    tolerance = 1.0,
-                    unit = "dB/decade",
-                    explanation = "Roll-off = \u221220n dB/decade, where n is the filter order. Third-order: 20 \u00D7 3 = 60dB/decade."
+                Question.MultipleChoice(
+                    id = "flt_mc4",
+                    questionText = "In a first-order RC high-pass filter, where does the capacitor go?",
+                    options = listOf(
+                        "In series with the signal, with the resistor to ground",
+                        "From the signal to ground, with the resistor in series",
+                        "In parallel with the resistor",
+                        "It isn't needed"
+                    ),
+                    correctIndex = 0,
+                    explanation = "The series capacitor blocks low frequencies (its reactance is high there) and passes high ones. Swap the R and C positions and you get a low-pass filter."
                 )
+            ),
+            generators = listOf(
+                generator("flt_ni1") { r ->
+                    val res = filterResistors.pick(r)
+                    val c = filterCapacitors.pick(r)
+                    val fc = 1 / (2 * PI * res * 1000 * c * NANO)
+                    Numeric(
+                        text = "What is the cutoff frequency (in Hz) of an RC low-pass filter with R = ${fmt(res)}kΩ and " +
+                            "C = ${fmt(c)}nF? Round to the nearest whole number.",
+                        answer = fc, unit = "Hz", decimals = 0,
+                        explanation = "f_c = 1/(2πRC) = 1/(2π × ${fmt(res)}×10³ × ${fmt(c)}×10⁻⁹) ≈ ${fmt(fc, 0)}Hz"
+                    )
+                },
+                generator("flt_ni2") { r ->
+                    val order = filterOrders.pick(r)
+                    val n = decades.pick(r)
+                    val db = (DB_PER_DECADE * order * n).toDouble()
+                    val ratio = if (n == 1) "10×" else "100×"
+                    Numeric(
+                        text = "Using the asymptotic roll-off, how much (in dB) does an order-$order low-pass filter attenuate " +
+                            "a signal at $ratio its cutoff frequency (relative to the passband)?",
+                        answer = db, unit = "dB",
+                        explanation = "Roll-off is 20 × order = ${DB_PER_DECADE * order}dB per decade, and $ratio is " +
+                            "$n decade(s): ${DB_PER_DECADE * order} × $n = ${fmt(db)}dB"
+                    )
+                },
+                generator("flt_ni3") { r ->
+                    val (label, f0Khz) = centreFrequencies.pick(r)
+                    val q = qualityFactors.pick(r)
+                    val bw = f0Khz / q
+                    Numeric(
+                        text = "A band-pass filter has a centre frequency of $label and Q = ${fmt(q)}. What is its bandwidth " +
+                            "in kHz? Round to 2 decimal places.",
+                        answer = bw, unit = "kHz",
+                        explanation = "BW = f₀/Q = ${fmt(f0Khz)}kHz/${fmt(q)} = ${fmt(bw, 2)}kHz"
+                    )
+                },
+                generator("flt_ni4") { r ->
+                    val order = rollOffOrders.pick(r)
+                    Numeric(
+                        text = "What is the roll-off rate (in dB/decade) of an order-$order filter?",
+                        answer = (DB_PER_DECADE * order).toDouble(), unit = "dB/decade",
+                        explanation = "Each order adds 20dB/decade: 20 × $order = ${DB_PER_DECADE * order}dB/decade"
+                    )
+                },
+                generator("flt_ni5") { r ->
+                    val res = designResistors.pick(r)
+                    val fc = designCutoffs.pick(r)
+                    val cNf = 1 / (2 * PI * res * 1000 * fc) / NANO
+                    Numeric(
+                        text = "You want an RC low-pass filter with f_c = ${fmt(fc)}Hz using R = ${fmt(res)}kΩ. What capacitor " +
+                            "value is needed, in nF? Round to 2 decimal places.",
+                        answer = cNf, unit = "nF",
+                        explanation = "C = 1/(2πRf_c) = 1/(2π × ${fmt(res)}×10³ × ${fmt(fc)}) = ${fmt(cNf, 2)}nF"
+                    )
+                },
+                generator("flt_ni6") { r ->
+                    val vin = inputAmplitudes.pick(r)
+                    val vout = vin / sqrt(2.0)
+                    Numeric(
+                        text = "A ${fmt(vin)}V sine wave enters a first-order low-pass filter exactly at its cutoff frequency. " +
+                            "What is the output amplitude, in Volts? Round to 2 decimal places.",
+                        answer = vout, unit = "V",
+                        explanation = "At f_c the output is −3dB, i.e. 1/√2 ≈ 70.7% of the input: ${fmt(vin)} × 0.707 = ${fmt(vout, 2)}V"
+                    )
+                }
             )
         )
     )

@@ -1,6 +1,29 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import kotlin.math.PI
+import kotlin.math.log10
+
 object AnalogCircuitsContent {
+    private const val THERMAL_MV = 26.0
+    private const val MEGA = 1e6
+    private const val DB_AMPLITUDE = 20
+    private val openLoopGains = listOf(10_000.0, 100_000.0, 1_000_000.0)
+    private val feedbackFactors = listOf(0.01, 0.02, 0.05, 0.1)
+    private val gainBandwidths = listOf(1.0, 3.0, 10.0, 100.0)
+    private val closedLoopGains = listOf(10.0, 20.0, 50.0, 100.0)
+    private val referenceRatios = listOf(5.0, 10.0, 20.0)
+    private val outputRatios = listOf(10.0, 20.0, 30.0, 40.0, 60.0)
+    private val referenceCurrents = listOf(10.0, 50.0, 100.0, 200.0)
+    private val differentialGains = listOf(100.0, 1000.0, 10_000.0)
+    private val commonModeGains = listOf(0.01, 0.1, 1.0)
+    private val tailCurrents = listOf(0.1, 0.5, 1.0, 2.0)
+    private val slewRates = listOf(0.5, 1.0, 10.0, 20.0)
+    private val peakSwings = listOf(1.0, 5.0, 10.0)
+
     val topic = Topic(
         id = "analog_circuits",
         title = "Analog Circuit Design",
@@ -74,14 +97,6 @@ object AnalogCircuitsContent {
                     correctIndex = 1,
                     explanation = "A differential pair amplifies the voltage difference between its two inputs while rejecting signals common to both (common-mode rejection)."
                 ),
-                Question.NumericInput(
-                    id = "ac_ni1",
-                    questionText = "An op-amp has open-loop gain A = 100,000 and feedback factor \u03B2 = 0.01. What is the closed-loop gain?",
-                    correctAnswer = 100.0,
-                    tolerance = 0.5,
-                    unit = "",
-                    explanation = "A_closed = A/(1+A\u03B2) = 100000/(1+100000\u00D70.01) = 100000/1001 \u2248 100. Or simply 1/\u03B2 = 1/0.01 = 100."
-                ),
                 Question.MultipleChoice(
                     id = "ac_mc3",
                     questionText = "A bandgap voltage reference produces approximately:",
@@ -93,14 +108,6 @@ object AnalogCircuitsContent {
                     ),
                     correctIndex = 1,
                     explanation = "A silicon bandgap reference produces ~1.25V, close to the bandgap energy of silicon (1.12eV), by canceling opposing temperature coefficients."
-                ),
-                Question.NumericInput(
-                    id = "ac_ni2",
-                    questionText = "An amplifier has GBW = 10MHz. If the closed-loop gain is 100, what is the bandwidth in kHz?",
-                    correctAnswer = 100.0,
-                    tolerance = 1.0,
-                    unit = "kHz",
-                    explanation = "BW = GBW / Gain = 10MHz / 100 = 100kHz. Gain-bandwidth product is constant."
                 ),
                 Question.MultipleChoice(
                     id = "ac_mc4",
@@ -114,14 +121,87 @@ object AnalogCircuitsContent {
                     correctIndex = 1,
                     explanation = "The cascode stacks a second transistor to dramatically increase output resistance (and thus voltage gain) while also improving bandwidth by reducing Miller effect."
                 ),
-                Question.NumericInput(
-                    id = "ac_ni3",
-                    questionText = "A MOSFET current mirror has (W/L)\u2081 = 10 and (W/L)\u2082 = 30. If I_ref = 100\u00B5A, what is I_out in \u00B5A?",
-                    correctAnswer = 300.0,
-                    tolerance = 5.0,
-                    unit = "\u00B5A",
-                    explanation = "I_out = I_ref \u00D7 (W/L)\u2082/(W/L)\u2081 = 100 \u00D7 30/10 = 300\u00B5A"
+                Question.MultipleChoice(
+                    id = "ac_mc5",
+                    questionText = "Adding negative feedback to an amplifier lowers its gain. What does it gain in return?",
+                    options = listOf(
+                        "Higher open-loop gain",
+                        "Wider bandwidth, lower distortion and a predictable gain",
+                        "Higher power consumption",
+                        "Lower input impedance only"
+                    ),
+                    correctIndex = 1,
+                    explanation = "Feedback trades raw gain for accuracy: the closed-loop gain becomes ≈ 1/β (set by resistors, not transistors), distortion drops and bandwidth widens, since gain × bandwidth stays roughly constant."
                 )
+            ),
+            generators = listOf(
+                generator("ac_ni1") { r ->
+                    val a = openLoopGains.pick(r)
+                    val beta = feedbackFactors.pick(r)
+                    val acl = a / (1 + a * beta)
+                    Numeric(
+                        text = "An op-amp has open-loop gain A = ${fmt(a)} and feedback factor β = ${fmt(beta)}. What is the " +
+                            "closed-loop gain? Round to 2 decimal places.",
+                        answer = acl, unit = "",
+                        explanation = "With a large loop gain the answer is close to 1/β = ${fmt(1 / beta)}. Exactly: A/(1 + Aβ) = " +
+                            "${fmt(a)}/(1 + ${fmt(a * beta)}) = ${fmt(acl, 2)}"
+                    )
+                },
+                generator("ac_ni2") { r ->
+                    val gbw = gainBandwidths.pick(r)
+                    val g = closedLoopGains.pick(r)
+                    val khz = gbw * 1000 / g
+                    Numeric(
+                        text = "An op-amp has GBW = ${fmt(gbw)}MHz. With a closed-loop gain of ${fmt(g)}, what is the bandwidth " +
+                            "in kHz? Round to 2 decimal places.",
+                        answer = khz, unit = "kHz",
+                        explanation = "Gain × bandwidth is constant: BW = GBW/Gain = ${fmt(gbw)}MHz/${fmt(g)} = ${fmt(khz, 2)}kHz"
+                    )
+                },
+                generator("ac_ni3") { r ->
+                    val wl1 = referenceRatios.pick(r)
+                    val wl2 = outputRatios.pick(r)
+                    val iref = referenceCurrents.pick(r)
+                    val iout = iref * wl2 / wl1
+                    Numeric(
+                        text = "A MOSFET current mirror has (W/L)₁ = ${fmt(wl1)} on the reference side and (W/L)₂ = ${fmt(wl2)} " +
+                            "on the output. If I_ref = ${fmt(iref)}µA, what is I_out in µA? Round to 2 decimal places.",
+                        answer = iout, unit = "µA",
+                        explanation = "I_out = I_ref × (W/L)₂/(W/L)₁ = ${fmt(iref)} × ${fmt(wl2)}/${fmt(wl1)} = ${fmt(iout, 2)}µA"
+                    )
+                },
+                generator("ac_ni4") { r ->
+                    val ad = differentialGains.pick(r)
+                    val acm = commonModeGains.pick(r)
+                    val cmrr = DB_AMPLITUDE * log10(ad / acm)
+                    Numeric(
+                        text = "A differential amplifier has a differential gain of ${fmt(ad)} and a common-mode gain of " +
+                            "${fmt(acm)}. What is its CMRR in dB? Round to 1 decimal place.",
+                        answer = cmrr, unit = "dB", decimals = 1,
+                        explanation = "CMRR = 20·log₁₀(A_d/A_cm) = 20·log₁₀(${fmt(ad / acm)}) = ${fmt(cmrr, 1)}dB"
+                    )
+                },
+                generator("ac_ni5") { r ->
+                    val ic = tailCurrents.pick(r)
+                    val gm = ic / THERMAL_MV * 1000
+                    Numeric(
+                        text = "A BJT is biased at I_C = ${fmt(ic)}mA. What is its transconductance g_m = I_C/V_T, in mA/V? " +
+                            "Use V_T = 26mV and round to 2 decimal places.",
+                        answer = gm, unit = "mA/V",
+                        explanation = "g_m = I_C/V_T = ${fmt(ic)}mA/26mV = ${fmt(gm, 2)}mA/V"
+                    )
+                },
+                generator("ac_ni6") { r ->
+                    val sr = slewRates.pick(r)
+                    val vp = peakSwings.pick(r)
+                    val khz = sr * MEGA / (2 * PI * vp) / 1000
+                    Numeric(
+                        text = "An op-amp has a slew rate of ${fmt(sr)}V/µs. What is the highest frequency at which it can output " +
+                            "a ${fmt(vp)}V-peak sine wave without slew distortion, in kHz? Round to 2 decimal places.",
+                        answer = khz, unit = "kHz",
+                        explanation = "Full-power bandwidth f = SR/(2πV_p) = ${fmt(sr)}×10⁶/(2π × ${fmt(vp)}) = ${fmt(khz, 2)}kHz"
+                    )
+                }
             )
         )
     )
