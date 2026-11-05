@@ -1,6 +1,36 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.article
+import com.circuitqueest.app.data.content.QuestionMath.articleCap
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import kotlin.math.PI
+
 object PcbDesignContent {
+    private const val COPPER_RESISTIVITY = 1.72e-8
+    private const val OZ_MICRONS = 35.0
+    private const val MM_PER_MIL = 0.0254
+    private const val MILLI = 1e-3
+    private const val MICRO = 1e-6
+    private const val NANO = 1e-9
+    private const val MEGA = 1e6
+    private val traceLengths = listOf(50.0, 100.0, 200.0)
+    private val traceWidths = listOf(0.25, 0.5, 1.0)
+    private val copperWeights = listOf(1.0, 2.0)
+    private val traceCurrents = listOf(0.5, 1.0, 2.0)
+    private val decouplingNf = listOf(10.0, 100.0)
+    private val noiseFrequenciesMhz = listOf(1.0, 10.0, 100.0)
+    private val thicknessWeights = listOf(0.5, 1.0, 2.0, 3.0)
+    private val milValues = listOf(5.0, 6.0, 8.0, 10.0, 20.0, 50.0)
+    private val bulkNf = listOf(100.0, 1000.0)
+    private val allowedDroops = listOf(0.05, 0.1)
+    private val burstCurrentsMa = listOf(10.0, 50.0, 100.0)
+
+    private fun traceOhms(lengthMm: Double, widthMm: Double, oz: Double) =
+        COPPER_RESISTIVITY * lengthMm * MILLI / (widthMm * MILLI * oz * OZ_MICRONS * MICRO)
+
     val topic = Topic(
         id = "pcb_design",
         title = "PCB Design",
@@ -70,14 +100,6 @@ object PcbDesignContent {
                     correctIndex = 1,
                     explanation = "Decoupling capacitors provide a local reservoir of charge near ICs, supplying current during rapid switching before the main power supply can respond."
                 ),
-                Question.NumericInput(
-                    id = "pcb_ni1",
-                    questionText = "A 100mm long, 0.25mm wide copper trace (1oz, 35\u00B5m thick) has a resistance of about 23m\u03A9. If it carries 1A, what is the voltage drop in millivolts?",
-                    correctAnswer = 23.0,
-                    tolerance = 1.0,
-                    unit = "mV",
-                    explanation = "V = IR = 1A \u00D7 0.023\u03A9 = 0.023V = 23mV"
-                ),
                 Question.MultipleChoice(
                     id = "pcb_mc3",
                     questionText = "Why should you avoid splitting the ground plane?",
@@ -101,23 +123,81 @@ object PcbDesignContent {
                     ),
                     correctIndex = 2,
                     explanation = "Gerber files (RS-274X) are the industry standard for PCB manufacturing data, containing layer artwork, drill locations, and solder mask information."
-                ),
-                Question.NumericInput(
-                    id = "pcb_ni2",
-                    questionText = "A typical decoupling capacitor value placed at IC power pins is how many nanofarads?",
-                    correctAnswer = 100.0,
-                    tolerance = 5.0,
-                    unit = "nF",
-                    explanation = "100nF (0.1\u00B5F) ceramic capacitors are the standard decoupling value for most digital ICs."
-                ),
-                Question.NumericInput(
-                    id = "pcb_ni3",
-                    questionText = "Standard 1oz copper on a PCB is approximately how many micrometers thick?",
-                    correctAnswer = 35.0,
-                    tolerance = 1.0,
-                    unit = "\u00B5m",
-                    explanation = "1oz copper means 1 ounce of copper per square foot, which corresponds to approximately 35\u00B5m (1.4mil) thickness."
                 )
+            ),
+            generators = listOf(
+                generator("pcb_ni1") { r ->
+                    val l = traceLengths.pick(r)
+                    val w = traceWidths.pick(r)
+                    val oz = copperWeights.pick(r)
+                    val i = traceCurrents.pick(r)
+                    val ohms = traceOhms(l, w, oz)
+                    val mv = ohms * i * 1000
+                    Numeric(
+                        text = "A ${fmt(l)}mm long, ${fmt(w)}mm wide trace of ${fmt(oz)}oz copper (${fmt(oz * OZ_MICRONS)}µm thick, " +
+                            "ρ = 1.72×10⁻⁸Ω·m) carries ${fmt(i)}A. What is the voltage drop along it, in mV? Round to 2 decimal places.",
+                        answer = mv, unit = "mV",
+                        explanation = "R = ρL/(w·t) = 1.72×10⁻⁸ × ${fmt(l / 1000)}/(${fmt(w)}×10⁻³ × ${fmt(oz * OZ_MICRONS)}×10⁻⁶) = " +
+                            "${fmt(ohms * 1000, 1)}mΩ, so V = IR = ${fmt(i)} × ${fmt(ohms * 1000, 1)}mΩ = ${fmt(mv, 2)}mV"
+                    )
+                },
+                generator("pcb_ni2") { r ->
+                    val cNf = decouplingNf.pick(r)
+                    val fMhz = noiseFrequenciesMhz.pick(r)
+                    val x = 1 / (2 * PI * fMhz * MEGA * cNf * NANO)
+                    Numeric(
+                        text = "What is the reactance of ${article(cNf)} ${fmt(cNf)}nF decoupling capacitor at ${fmt(fMhz)}MHz, in Ω? " +
+                            "Treat it as ideal and round to 3 decimal places.",
+                        answer = x, unit = "Ω", decimals = 3,
+                        explanation = "X_C = 1/(2πfC) = 1/(2π × ${fmt(fMhz)}×10⁶ × ${fmt(cNf)}×10⁻⁹) = ${fmt(x, 3)}Ω. Real capacitors stop " +
+                            "helping above their self-resonance, which is why several values are often paralleled."
+                    )
+                },
+                generator("pcb_ni3") { r ->
+                    val oz = thicknessWeights.pick(r)
+                    Numeric(
+                        text = "1oz copper is about 35µm thick. How thick is ${fmt(oz)}oz copper, in µm?",
+                        answer = oz * OZ_MICRONS, unit = "µm",
+                        explanation = "Copper weight is ounces per square foot, so thickness scales with it: ${fmt(oz)} × 35 = " +
+                            "${fmt(oz * OZ_MICRONS)}µm"
+                    )
+                },
+                generator("pcb_ni4") { r ->
+                    val l = traceLengths.pick(r)
+                    val w = traceWidths.pick(r)
+                    val oz = copperWeights.pick(r)
+                    val i = traceCurrents.pick(r)
+                    val ohms = traceOhms(l, w, oz)
+                    val mw = i * i * ohms * 1000
+                    Numeric(
+                        text = "A ${fmt(l)}mm × ${fmt(w)}mm trace of ${fmt(oz)}oz copper (ρ = 1.72×10⁻⁸Ω·m, 1oz = 35µm) carries " +
+                            "${fmt(i)}A. How much power does it dissipate, in mW? Round to 2 decimal places.",
+                        answer = mw, unit = "mW",
+                        explanation = "R = ρL/(w·t) = ${fmt(ohms * 1000, 1)}mΩ, so P = I²R = ${fmt(i)}² × ${fmt(ohms * 1000, 1)}mΩ = " +
+                            "${fmt(mw, 2)}mW"
+                    )
+                },
+                generator("pcb_ni5") { r ->
+                    val mil = milValues.pick(r)
+                    val mm = mil * MM_PER_MIL
+                    Numeric(
+                        text = "A PCB design rule calls for ${fmt(mil)}mil spacing. What is that in millimetres? Round to 3 decimal places.",
+                        answer = mm, unit = "mm", decimals = 3,
+                        explanation = "1mil = 0.001 inch = 0.0254mm, so ${fmt(mil)}mil = ${fmt(mil)} × 0.0254 = ${fmt(mm, 3)}mm"
+                    )
+                },
+                generator("pcb_ni6") { r ->
+                    val cNf = bulkNf.pick(r)
+                    val dv = allowedDroops.pick(r)
+                    val ima = burstCurrentsMa.pick(r)
+                    val ns = cNf * NANO * dv / (ima * MILLI) / NANO
+                    Numeric(
+                        text = "${articleCap(cNf)} ${fmt(cNf)}nF capacitor supplies a ${fmt(ima)}mA current burst. How long can it do so " +
+                            "before its voltage droops by ${fmt(dv)}V, in ns? Round to 1 decimal place.",
+                        answer = ns, unit = "ns", decimals = 1,
+                        explanation = "From Q = CV: t = C·ΔV/I = ${fmt(cNf)}×10⁻⁹ × ${fmt(dv)}/${fmt(ima / 1000)} = ${fmt(ns, 1)}ns"
+                    )
+                }
             )
         )
     )

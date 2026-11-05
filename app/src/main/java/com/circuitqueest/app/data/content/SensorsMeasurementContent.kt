@@ -1,6 +1,26 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+
 object SensorsMeasurementContent {
+    private const val LM35_MV_PER_C = 10.0
+    private const val PT100_R0 = 100.0
+    private const val PT100_ALPHA = 0.385
+    private const val TYPE_K_MV_PER_C = 0.041
+    private const val QUARTER = 0.25
+    private val lm35Temps = listOf(5.0, 20.0, 25.0, 37.0, 60.0, 100.0)
+    private val feedbackKohms = listOf(10.0, 25.0)
+    private val gainKohms = listOf(0.5, 1.0, 2.2, 10.0)
+    private val rtdTemps = listOf(0.0, 25.0, 50.0, 100.0, 150.0)
+    private val readTemps = listOf(20.0, 50.0, 100.0, 200.0)
+    private val excitations = listOf(2.5, 5.0, 10.0)
+    private val gaugeResistances = listOf(120.0, 350.0)
+    private val resistanceChanges = listOf(0.12, 0.24, 0.35, 0.7)
+    private val junctionDeltas = listOf(50.0, 100.0, 200.0, 500.0)
+
     val topic = Topic(
         id = "sensors_measurement",
         title = "Sensors & Measurement",
@@ -60,14 +80,6 @@ object SensorsMeasurementContent {
                     correctIndex = 2,
                     explanation = "Thermocouples can measure from about \u2212200\u00B0C to over +2000\u00B0C, far exceeding the range of other sensor types."
                 ),
-                Question.NumericInput(
-                    id = "sm_ni1",
-                    questionText = "An LM35 temperature sensor outputs 10mV/\u00B0C. At 25\u00B0C, what is the output voltage in millivolts?",
-                    correctAnswer = 250.0,
-                    tolerance = 1.0,
-                    unit = "mV",
-                    explanation = "V_out = 10mV/\u00B0C \u00D7 25\u00B0C = 250mV"
-                ),
                 Question.MultipleChoice(
                     id = "sm_mc2",
                     questionText = "A Wheatstone bridge is used to measure:",
@@ -79,14 +91,6 @@ object SensorsMeasurementContent {
                     ),
                     correctIndex = 1,
                     explanation = "The Wheatstone bridge excels at detecting small resistance changes (e.g., from strain gauges or RTDs) by converting them to a measurable voltage."
-                ),
-                Question.NumericInput(
-                    id = "sm_ni2",
-                    questionText = "An instrumentation amplifier has R_f = 25k\u03A9 and R_gain = 1k\u03A9. What is the gain? (G = 1 + 2R_f/R_gain)",
-                    correctAnswer = 51.0,
-                    tolerance = 0.5,
-                    unit = "",
-                    explanation = "G = 1 + 2 \u00D7 25k/1k = 1 + 50 = 51"
                 ),
                 Question.MultipleChoice(
                     id = "sm_mc3",
@@ -100,14 +104,6 @@ object SensorsMeasurementContent {
                     correctIndex = 1,
                     explanation = "Precise but inaccurate means readings cluster tightly together (repeatable) but are consistently offset from the true value. Calibration can fix this."
                 ),
-                Question.NumericInput(
-                    id = "sm_ni3",
-                    questionText = "A Pt100 RTD has R = 100\u03A9 at 0\u00B0C and a coefficient of 0.385\u03A9/\u00B0C. What is its resistance at 50\u00B0C in Ohms?",
-                    correctAnswer = 119.25,
-                    tolerance = 0.25,
-                    unit = "\u03A9",
-                    explanation = "R = 100 + 0.385 \u00D7 50 = 100 + 19.25 = 119.25\u03A9"
-                ),
                 Question.MultipleChoice(
                     id = "sm_mc4",
                     questionText = "What is the main advantage of an instrumentation amplifier over a basic op-amp?",
@@ -119,7 +115,82 @@ object SensorsMeasurementContent {
                     ),
                     correctIndex = 1,
                     explanation = "Instrumentation amplifiers have very high CMRR (rejecting noise common to both inputs) and high input impedance (won't load the sensor), making them ideal for precision measurements."
+                ),
+                Question.MultipleChoice(
+                    id = "sm_mc5",
+                    questionText = "Which temperature sensor is a semiconductor resistor with a large, strongly non-linear response over a narrow range?",
+                    options = listOf(
+                        "Thermocouple",
+                        "RTD (Pt100)",
+                        "Thermistor",
+                        "LM35"
+                    ),
+                    correctIndex = 2,
+                    explanation = "A thermistor's resistance changes a lot per degree (very sensitive) but non-linearly, so it suits narrow ranges like body temperature or battery packs. RTDs are linear and precise; thermocouples cover huge ranges."
                 )
+            ),
+            generators = listOf(
+                generator("sm_ni1") { r ->
+                    val t = lm35Temps.pick(r)
+                    Numeric(
+                        text = "An LM35 temperature sensor outputs 10mV/°C. At ${fmt(t)}°C, what is its output, in mV?",
+                        answer = t * LM35_MV_PER_C, unit = "mV",
+                        explanation = "V_out = 10mV/°C × ${fmt(t)}°C = ${fmt(t * LM35_MV_PER_C)}mV"
+                    )
+                },
+                generator("sm_ni2") { r ->
+                    val rf = feedbackKohms.pick(r)
+                    val rg = gainKohms.pick(r)
+                    val g = 1 + 2 * rf / rg
+                    Numeric(
+                        text = "An instrumentation amplifier has R_f = ${fmt(rf)}kΩ and R_gain = ${fmt(rg)}kΩ. What is its gain, " +
+                            "using G = 1 + 2R_f/R_gain? Round to 2 decimal places.",
+                        answer = g, unit = "",
+                        explanation = "G = 1 + 2 × ${fmt(rf)}/${fmt(rg)} = ${fmt(g, 2)}"
+                    )
+                },
+                generator("sm_ni3") { r ->
+                    val t = rtdTemps.pick(r)
+                    val res = PT100_R0 + PT100_ALPHA * t
+                    Numeric(
+                        text = "A Pt100 RTD is 100Ω at 0°C and changes by 0.385Ω/°C. What is its resistance at ${fmt(t)}°C, in Ω?",
+                        answer = res, unit = "Ω",
+                        explanation = "R = 100 + 0.385 × ${fmt(t)} = ${fmt(res, 3)}Ω"
+                    )
+                },
+                generator("sm_ni4") { r ->
+                    val t = readTemps.pick(r)
+                    val res = PT100_R0 + PT100_ALPHA * t
+                    Numeric(
+                        text = "A Pt100 RTD (100Ω at 0°C, 0.385Ω/°C) reads ${fmt(res, 3)}Ω. What temperature is it, in °C?",
+                        answer = t, unit = "°C",
+                        explanation = "T = (R − 100)/0.385 = (${fmt(res, 3)} − 100)/0.385 = ${fmt(t)}°C"
+                    )
+                },
+                generator("sm_ni5") { r ->
+                    val vex = excitations.pick(r)
+                    val res = gaugeResistances.pick(r)
+                    val dr = resistanceChanges.pick(r)
+                    val mv = vex * dr / res * QUARTER * 1000
+                    Numeric(
+                        text = "A quarter-bridge strain gauge circuit uses ${fmt(res)}Ω gauges and ${fmt(vex)}V excitation. The " +
+                            "gauge changes by ${fmt(dr)}Ω. Using V_out ≈ V_ex·ΔR/(4R), what is the output in mV? Round to 3 " +
+                            "decimal places.",
+                        answer = mv, unit = "mV", decimals = 3,
+                        explanation = "V_out ≈ ${fmt(vex)} × ${fmt(dr)}/(4 × ${fmt(res)}) = ${fmt(mv, 3)}mV. Tiny signals like this " +
+                            "are why bridges feed an instrumentation amplifier."
+                    )
+                },
+                generator("sm_ni6") { r ->
+                    val dt = junctionDeltas.pick(r)
+                    val mv = dt * TYPE_K_MV_PER_C
+                    Numeric(
+                        text = "A type K thermocouple produces about 41µV/°C. What voltage does it give for a ${fmt(dt)}°C difference " +
+                            "between its junctions, in mV? Round to 2 decimal places.",
+                        answer = mv, unit = "mV",
+                        explanation = "V ≈ 41µV/°C × ${fmt(dt)}°C = ${fmt(mv * 1000)}µV = ${fmt(mv, 2)}mV"
+                    )
+                }
             )
         )
     )

@@ -1,6 +1,29 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import kotlin.math.ceil
+
 object IotWirelessContent {
+    private const val HOURS_PER_MONTH = 730.0
+    private const val HOURS_PER_DAY = 24
+    private val activeCurrentsMa = listOf(5.0, 10.0, 20.0)
+    private val activeTimesMs = listOf(10.0, 50.0, 100.0)
+    private val sleepCurrentsUa = listOf(1.0, 5.0, 10.0)
+    private val wakePeriodsS = listOf(10.0, 30.0, 60.0)
+    private val batteryMah = listOf(225.0, 1000.0, 2400.0)
+    private val averageUa = listOf(5.0, 10.0, 20.0, 50.0)
+    private val hopRanges = listOf(10.0, 30.0, 50.0, 100.0)
+    private val hopDistances = listOf(100.0, 200.0, 250.0, 450.0)
+    private val dutyActiveMs = listOf(5.0, 10.0, 50.0)
+    private val dutyPeriodsS = listOf(1.0, 10.0, 60.0)
+    private val packetBytes = listOf(12, 50, 200)
+    private val packetsPerHour = listOf(1, 4, 60)
+    private val radioPowers = listOf(14.0, 20.0)
+    private val sensitivities = listOf(-120.0, -130.0, -137.0)
+
     val topic = Topic(
         id = "iot_wireless",
         title = "IoT & Wireless",
@@ -72,14 +95,6 @@ object IotWirelessContent {
                     correctIndex = 2,
                     explanation = "Mesh networks route data through multiple hops, extending range and automatically rerouting if a node fails (self-healing)."
                 ),
-                Question.NumericInput(
-                    id = "iot_ni1",
-                    questionText = "A device draws 10mA for 100ms when active, then sleeps at 5\u00B5A for 59.9 seconds. What is the average current in \u00B5A? Round to nearest whole number.",
-                    correctAnswer = 22.0,
-                    tolerance = 1.0,
-                    unit = "\u00B5A",
-                    explanation = "I_avg = (10mA\u00D70.1s + 0.005mA\u00D759.9s)/60s = (1 + 0.2995)/60 = 1.2995/60 \u2248 0.0217mA = 21.7\u00B5A"
-                ),
                 Question.MultipleChoice(
                     id = "iot_mc3",
                     questionText = "BLE (Bluetooth Low Energy) is ideal for:",
@@ -92,14 +107,6 @@ object IotWirelessContent {
                     correctIndex = 1,
                     explanation = "BLE is optimized for low-power, short-range communication with small data packets \u2014 perfect for wearables, beacons, and proximity sensors."
                 ),
-                Question.NumericInput(
-                    id = "iot_ni2",
-                    questionText = "A CR2032 coin cell has 225mAh capacity. At 20\u00B5A average current draw, how many months will it last? (Assume 730 hours/month, round to nearest whole month.)",
-                    correctAnswer = 15.0,
-                    tolerance = 1.0,
-                    unit = "months",
-                    explanation = "Hours = 225mAh / 0.020mA = 11,250 hours. Months = 11250/730 \u2248 15.4 months."
-                ),
                 Question.MultipleChoice(
                     id = "iot_mc4",
                     questionText = "Which is NOT an essential IoT security practice?",
@@ -111,15 +118,81 @@ object IotWirelessContent {
                     ),
                     correctIndex = 2,
                     explanation = "Using the highest data rate has no security benefit. Encryption, secure boot, and OTA updates are all essential security practices for IoT devices."
-                ),
-                Question.NumericInput(
-                    id = "iot_ni3",
-                    questionText = "A Zigbee node has 30m range per hop. How many hops minimum are needed to reach a device 200m away?",
-                    correctAnswer = 7.0,
-                    tolerance = 0.1,
-                    unit = "hops",
-                    explanation = "200m / 30m per hop = 6.67, rounded up to 7 hops minimum."
                 )
+            ),
+            generators = listOf(
+                generator("iot_ni1") { r ->
+                    val ia = activeCurrentsMa.pick(r)
+                    val ta = activeTimesMs.pick(r)
+                    val isl = sleepCurrentsUa.pick(r)
+                    val period = wakePeriodsS.pick(r)
+                    val avgUa = (ia * 1000 * ta / 1000 + isl * (period - ta / 1000)) / period
+                    Numeric(
+                        text = "A sensor draws ${fmt(ia)}mA for ${fmt(ta)}ms when it wakes, then sleeps at ${fmt(isl)}µA, repeating " +
+                            "every ${fmt(period)}s. What is its average current, in µA? Round to 1 decimal place.",
+                        answer = avgUa, unit = "µA", decimals = 1,
+                        explanation = "Charge per cycle = ${fmt(ia * 1000)}µA × ${fmt(ta / 1000)}s + ${fmt(isl)}µA × " +
+                            "${fmt(period - ta / 1000)}s, divided by ${fmt(period)}s = ${fmt(avgUa, 1)}µA"
+                    )
+                },
+                generator("iot_ni2") { r ->
+                    val mah = batteryMah.pick(r)
+                    val ua = averageUa.pick(r)
+                    val hours = mah / (ua / 1000)
+                    val months = hours / HOURS_PER_MONTH
+                    Numeric(
+                        text = "A ${fmt(mah)}mAh battery powers a device averaging ${fmt(ua)}µA. Ideally, how many months does it " +
+                            "last? Assume 730 hours per month and round to 1 decimal place.",
+                        answer = months, unit = "months", decimals = 1,
+                        explanation = "Hours = ${fmt(mah)}mAh/${fmt(ua / 1000)}mA = ${fmt(hours)}h, and ${fmt(hours)}/730 = " +
+                            "${fmt(months, 1)} months"
+                    )
+                },
+                generator("iot_ni3") { r ->
+                    val range = hopRanges.pick(r)
+                    val d = hopDistances.pick(r)
+                    val hops = ceil(d / range)
+                    Numeric(
+                        text = "A mesh node reaches ${fmt(range)}m per hop. What is the fewest hops needed to reach a device " +
+                            "${fmt(d)}m away?",
+                        answer = hops, unit = "hops", exact = true,
+                        explanation = "${fmt(d)}/${fmt(range)} = ${fmt(d / range, 2)}" +
+                            "${if (hops == d / range) ", so" else ", rounded up to"} ${fmt(hops)} hops"
+                    )
+                },
+                generator("iot_ni4") { r ->
+                    val ta = dutyActiveMs.pick(r)
+                    val period = dutyPeriodsS.pick(r)
+                    val pct = ta / (period * 1000) * 100
+                    Numeric(
+                        text = "A radio is on for ${fmt(ta)}ms every ${fmt(period)}s. What is its duty cycle, in percent? " +
+                            "Round to 3 decimal places.",
+                        answer = pct, unit = "%", decimals = 3,
+                        explanation = "Duty = ${fmt(ta)}ms/${fmt(period * 1000)}ms × 100 = ${fmt(pct, 3)}%"
+                    )
+                },
+                generator("iot_ni5") { r ->
+                    val b = packetBytes.pick(r)
+                    val p = packetsPerHour.pick(r)
+                    val perDay = b * p * HOURS_PER_DAY
+                    Numeric(
+                        text = "A sensor sends a $b-byte packet ${if (p == 1) "once" else "$p times"} an hour. How many bytes does it " +
+                            "send per day?",
+                        answer = perDay.toDouble(), unit = "bytes", exact = true,
+                        explanation = "$b bytes × $p per hour × 24 hours = $perDay bytes"
+                    )
+                },
+                generator("iot_ni6") { r ->
+                    val ptx = radioPowers.pick(r)
+                    val sens = sensitivities.pick(r)
+                    val budget = ptx - sens
+                    Numeric(
+                        text = "A LoRa radio transmits at ${fmt(ptx)}dBm and the receiver's sensitivity is ${fmt(sens)}dBm. What is " +
+                            "the maximum path loss the link can tolerate, in dB (ignoring antenna gains)?",
+                        answer = budget, unit = "dB",
+                        explanation = "Link budget = P_tx − sensitivity = ${fmt(ptx)} − (${fmt(sens)}) = ${fmt(budget)}dB"
+                    )
+                }
             )
         )
     )
