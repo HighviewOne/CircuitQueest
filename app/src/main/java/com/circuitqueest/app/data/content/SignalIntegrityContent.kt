@@ -1,6 +1,27 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import kotlin.math.abs
+import kotlin.math.pow
+import kotlin.math.sqrt
+
 object SignalIntegrityContent {
+    private const val DB_AMPLITUDE = 20.0
+    private const val CRITICAL_FRACTION = 10.0
+    private const val C_CM_PER_NS = 30.0
+    private const val BANDWIDTH_FACTOR = 350.0
+    private val pinInductances = listOf(1.0, 2.0, 5.0)
+    private val currentStepsMa = listOf(100.0, 250.0, 500.0)
+    private val edgeTimesNs = listOf(0.5, 1.0, 2.0)
+    private val shieldings = listOf(20.0, 30.0, 40.0, 60.0)
+    private val riseTimesNs = listOf(0.1, 0.5, 1.0, 2.0)
+    private val traceSpeeds = listOf(15.0, 18.0, 20.0)
+    private val dielectricConstants = listOf(4.0, 4.3, 4.5)
+    private val stepImpedances = listOf(40.0, 60.0, 75.0, 90.0)
+
     val topic = Topic(
         id = "signal_integrity",
         title = "Signal Integrity & EMC",
@@ -72,14 +93,6 @@ object SignalIntegrityContent {
                     correctIndex = 2,
                     explanation = "The 3W rule recommends trace-to-trace spacing of at least 3 times the trace width to reduce capacitive and inductive coupling (crosstalk) between adjacent traces."
                 ),
-                Question.NumericInput(
-                    id = "si_ni1",
-                    questionText = "A package pin has 2nH inductance. If 500mA switches in 1ns, what is the ground bounce voltage in Volts?",
-                    correctAnswer = 1.0,
-                    tolerance = 0.05,
-                    unit = "V",
-                    explanation = "V = L \u00D7 dI/dt = 2\u00D710\u207B\u2079 \u00D7 (0.5/10\u207B\u2079) = 2\u00D710\u207B\u2079 \u00D7 5\u00D710\u2078 = 1.0V"
-                ),
                 Question.MultipleChoice(
                     id = "si_mc3",
                     questionText = "The single most effective technique for reducing radiated EMI is:",
@@ -92,14 +105,6 @@ object SignalIntegrityContent {
                     correctIndex = 2,
                     explanation = "Radiated emissions are proportional to current loop area. A continuous ground plane directly beneath signal traces minimizes loop area and is the most effective EMC measure."
                 ),
-                Question.NumericInput(
-                    id = "si_ni2",
-                    questionText = "A shield provides 40dB of attenuation. What percentage of the electromagnetic energy does it block?",
-                    correctAnswer = 99.0,
-                    tolerance = 0.5,
-                    unit = "%",
-                    explanation = "40dB = 10^(40/20) = 100\u00D7 voltage reduction. Power reduction = 10^(40/10) = 10,000\u00D7. That's 99.99% power blocked (or 99% field reduction)."
-                ),
                 Question.MultipleChoice(
                     id = "si_mc4",
                     questionText = "What does a ferrite bead do?",
@@ -111,15 +116,75 @@ object SignalIntegrityContent {
                     ),
                     correctIndex = 1,
                     explanation = "A ferrite bead presents low impedance at DC/low frequencies (passes signal) and high impedance at high frequencies (absorbs noise as heat)."
-                ),
-                Question.NumericInput(
-                    id = "si_ni3",
-                    questionText = "A signal with 1ns rise time travels at 15cm/ns on a PCB. What is the critical trace length (in cm) above which transmission line effects matter? (Use \u03BB/10 rule)",
-                    correctAnswer = 1.5,
-                    tolerance = 0.1,
-                    unit = "cm",
-                    explanation = "In 1ns, the signal travels 15cm. This is effectively \u03BB. Critical length = \u03BB/10 = 15/10 = 1.5cm."
                 )
+            ),
+            generators = listOf(
+                generator("si_ni1") { r ->
+                    val l = pinInductances.pick(r)
+                    val di = currentStepsMa.pick(r)
+                    val dt = edgeTimesNs.pick(r)
+                    val v = l * di / dt / 1000
+                    Numeric(
+                        text = "A package ground pin has ${fmt(l)}nH of inductance. If ${fmt(di)}mA switches in ${fmt(dt)}ns, what " +
+                            "ground bounce does it cause, in Volts? Round to 3 decimal places.",
+                        answer = v, unit = "V", decimals = 3,
+                        explanation = "V = L × dI/dt = ${fmt(l)}nH × ${fmt(di)}mA/${fmt(dt)}ns = ${fmt(v, 3)}V"
+                    )
+                },
+                generator("si_ni2") { r ->
+                    val db = shieldings.pick(r)
+                    val pct = (1 - 10.0.pow(-db / DB_AMPLITUDE)) * 100
+                    Numeric(
+                        text = "A shield provides ${fmt(db)}dB of attenuation. What percentage of the field strength (amplitude) " +
+                            "does it block? Round to 2 decimal places.",
+                        answer = pct, unit = "%",
+                        explanation = "For field amplitude, ${fmt(db)}dB is a factor of 10^(${fmt(db)}/20) = ${fmt(10.0.pow(db / DB_AMPLITUDE))}, " +
+                            "so ${fmt(pct, 2)}% is blocked"
+                    )
+                },
+                generator("si_ni3") { r ->
+                    val tr = riseTimesNs.pick(r)
+                    val v = traceSpeeds.pick(r)
+                    val cm = tr * v / CRITICAL_FRACTION
+                    Numeric(
+                        text = "A signal with a ${fmt(tr)}ns rise time travels at ${fmt(v)}cm/ns on a PCB. Above what trace length " +
+                            "must it be treated as a transmission line, in cm? Use a tenth of the rise-time distance and round to " +
+                            "2 decimal places.",
+                        answer = cm, unit = "cm",
+                        explanation = "In ${fmt(tr)}ns the edge travels ${fmt(tr * v)}cm. A tenth of that is ${fmt(cm, 2)}cm"
+                    )
+                },
+                generator("si_ni4") { r ->
+                    val er = dielectricConstants.pick(r)
+                    val v = C_CM_PER_NS / sqrt(er)
+                    Numeric(
+                        text = "A signal travels in a dielectric with ε_r = ${fmt(er)}. What is its speed, in cm/ns? " +
+                            "Use c = 30cm/ns and round to 2 decimal places.",
+                        answer = v, unit = "cm/ns",
+                        explanation = "v = c/√ε_r = 30/√${fmt(er)} = ${fmt(v, 2)}cm/ns, about half the speed of light"
+                    )
+                },
+                generator("si_ni5") { r ->
+                    val z2 = stepImpedances.pick(r)
+                    val g = abs(z2 - 50) / (z2 + 50)
+                    Numeric(
+                        text = "A 50Ω trace meets a section of ${fmt(z2)}Ω (a connector or a via). What is the magnitude of the " +
+                            "reflection coefficient at the step? Round to 3 decimal places.",
+                        answer = g, unit = "", decimals = 3,
+                        explanation = "|Γ| = |Z₂ − Z₁|/(Z₂ + Z₁) = |${fmt(z2)} − 50|/(${fmt(z2)} + 50) = ${fmt(g, 3)}"
+                    )
+                },
+                generator("si_ni6") { r ->
+                    val tr = riseTimesNs.pick(r)
+                    val mhz = BANDWIDTH_FACTOR / tr
+                    Numeric(
+                        text = "A digital edge has a ${fmt(tr)}ns rise time. Using BW ≈ 0.35/t_r, what bandwidth does it contain, in " +
+                            "MHz? Round to 1 decimal place.",
+                        answer = mhz, unit = "MHz", decimals = 1,
+                        explanation = "BW ≈ 0.35/(${fmt(tr)}×10⁻⁹) = ${fmt(mhz, 1)}MHz. Fast edges are high-frequency signals, " +
+                            "even at a slow clock rate."
+                    )
+                }
             )
         )
     )
