@@ -1,6 +1,30 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.articleCap
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import kotlin.math.PI
+import kotlin.math.pow
+
 object BiomedicalElectronicsContent {
+    private const val HOURS_PER_YEAR = 8760.0
+    private const val DB_AMPLITUDE = 20.0
+    private const val PER_MICRO = 1e6
+    private const val PICO = 1e-12
+    private val inAmpResistorsK = listOf(10.0, 24.7, 25.0, 49.4)
+    private val gainResistors = listOf(100.0, 250.0, 500.0, 1000.0)
+    private val pacemakerCurrentsUa = listOf(10.0, 15.0, 20.0, 25.0)
+    private val pacemakerAh = listOf(0.5, 1.0, 1.5, 2.0)
+    private val commonModeVolts = listOf(0.1, 0.5, 1.0)
+    private val cmrrDb = listOf(80.0, 100.0, 120.0)
+    private val ecgAmplitudesMv = listOf(0.5, 1.0, 2.0)
+    private val ecgGains = listOf(100.0, 500.0, 1000.0)
+    private val rrIntervals = listOf(0.6, 0.75, 0.8, 1.0, 1.2)
+    private val isolationPf = listOf(50.0, 100.0, 200.0)
+    private val mainsSupplies = listOf(230.0 to 50.0, 120.0 to 60.0)
+
     val topic = Topic(
         id = "biomedical_electronics",
         title = "Biomedical Electronics",
@@ -73,14 +97,6 @@ object BiomedicalElectronicsContent {
                     correctIndex = 1,
                     explanation = "The right-leg drive senses the common-mode signal, inverts and amplifies it, and drives it back to the patient through a third electrode. This actively cancels mains interference by 20\u201340 dB."
                 ),
-                Question.NumericInput(
-                    id = "biomed_ni1",
-                    questionText = "An instrumentation amplifier has R = 25 k\u03A9 and R_G = 500 \u03A9. What is the gain? (G = 1 + 2R/R_G)",
-                    correctAnswer = 101.0,
-                    tolerance = 0.5,
-                    unit = "",
-                    explanation = "G = 1 + 2\u00D725000/500 = 1 + 100 = 101"
-                ),
                 Question.MultipleChoice(
                     id = "biomed_mc3",
                     questionText = "Microshock (current directly to the heart) is dangerous at:",
@@ -92,22 +108,6 @@ object BiomedicalElectronicsContent {
                     ),
                     correctIndex = 2,
                     explanation = "When current flows directly to the heart (via catheters or pacemaker leads), as little as 10\u201350 \u00B5A can cause ventricular fibrillation. This is why CF-rated isolation is critical."
-                ),
-                Question.NumericInput(
-                    id = "biomed_ni2",
-                    questionText = "A pacemaker draws 15 \u00B5A average from a 1.5 Ah battery. How many years will it last? (Assume 8760 hours/year, round to one decimal.)",
-                    correctAnswer = 11.4,
-                    tolerance = 0.3,
-                    unit = "years",
-                    explanation = "Hours = 1.5 Ah / 0.000015 A = 100,000 hours. Years = 100000 / 8760 \u2248 11.4 years"
-                ),
-                Question.NumericInput(
-                    id = "biomed_ni3",
-                    questionText = "An EEG amplifier needs CMRR of 100 dB. If the common-mode 50 Hz interference is 1V, what is the maximum interference at the output in \u00B5V?",
-                    correctAnswer = 10.0,
-                    tolerance = 0.5,
-                    unit = "\u00B5V",
-                    explanation = "100 dB = 10^5 attenuation. Output = 1V / 100000 = 10 \u00B5V"
                 ),
                 Question.MultipleChoice(
                     id = "biomed_mc4",
@@ -121,6 +121,78 @@ object BiomedicalElectronicsContent {
                     correctIndex = 1,
                     explanation = "Pulse oximeters shine red (~660nm) and infrared (~940nm) light through tissue. The ratio of absorption at these wavelengths indicates oxygen saturation because oxygenated and deoxygenated hemoglobin absorb differently."
                 )
+            ),
+            generators = listOf(
+                generator("biomed_ni1") { r ->
+                    val rk = inAmpResistorsK.pick(r)
+                    val rg = gainResistors.pick(r)
+                    val g = 1 + 2 * rk * 1000 / rg
+                    Numeric(
+                        text = "An instrumentation amplifier has R = ${fmt(rk)}kΩ and R_G = ${fmt(rg)}Ω. What is its gain, using " +
+                            "G = 1 + 2R/R_G? Round to 2 decimal places.",
+                        answer = g, unit = "",
+                        explanation = "G = 1 + 2 × ${fmt(rk * 1000)}/${fmt(rg)} = ${fmt(g, 2)}"
+                    )
+                },
+                generator("biomed_ni2") { r ->
+                    val ua = pacemakerCurrentsUa.pick(r)
+                    val ah = pacemakerAh.pick(r)
+                    val hours = ah / (ua / PER_MICRO)
+                    val years = hours / HOURS_PER_YEAR
+                    Numeric(
+                        text = "A pacemaker draws ${fmt(ua)}µA on average from a ${fmt(ah)}Ah battery. How many years will it last? " +
+                            "Assume 8760 hours per year and round to 1 decimal place.",
+                        answer = years, unit = "years", decimals = 1,
+                        explanation = "Hours = ${fmt(ah)}Ah/${fmt(ua)}µA = ${fmt(hours)}h, and ${fmt(hours)}/8760 = ${fmt(years, 1)} years"
+                    )
+                },
+                generator("biomed_ni3") { r ->
+                    val vcm = commonModeVolts.pick(r)
+                    val db = cmrrDb.pick(r)
+                    val uv = vcm / 10.0.pow(db / DB_AMPLITUDE) * PER_MICRO
+                    Numeric(
+                        text = "An EEG amplifier has a CMRR of ${fmt(db)}dB and sees ${fmt(vcm)}V of common-mode mains interference. " +
+                            "What is that interference referred to the input (the equivalent differential error), in µV? Round " +
+                            "to 3 decimal places.",
+                        answer = uv, unit = "µV", decimals = 3,
+                        explanation = "${fmt(db)}dB is a factor of 10^(${fmt(db)}/20) = ${fmt(10.0.pow(db / DB_AMPLITUDE))}, so " +
+                            "${fmt(vcm)}V looks like ${fmt(uv, 3)}µV"
+                    )
+                },
+                generator("biomed_ni4") { r ->
+                    val mv = ecgAmplitudesMv.pick(r)
+                    val g = ecgGains.pick(r)
+                    val v = mv * g / 1000
+                    Numeric(
+                        text = "${articleCap(mv)} ${fmt(mv)}mV ECG signal passes through an amplifier with a gain of ${fmt(g)}. What is " +
+                            "the output amplitude, in Volts?",
+                        answer = v, unit = "V",
+                        explanation = "V_out = ${fmt(mv)}mV × ${fmt(g)} = ${fmt(mv * g)}mV = ${fmt(v)}V"
+                    )
+                },
+                generator("biomed_ni5") { r ->
+                    val rr = rrIntervals.pick(r)
+                    val bpm = 60 / rr
+                    Numeric(
+                        text = "An ECG shows ${fmt(rr)}s between successive R-peaks. What is the heart rate, in beats per minute? " +
+                            "Round to 1 decimal place.",
+                        answer = bpm, unit = "bpm", decimals = 1,
+                        explanation = "Heart rate = 60/RR = 60/${fmt(rr)} = ${fmt(bpm, 1)}bpm"
+                    )
+                },
+                generator("biomed_ni6") { r ->
+                    val pf = isolationPf.pick(r)
+                    val (v, f) = mainsSupplies.pick(r)
+                    val ua = 2 * PI * f * pf * PICO * v * PER_MICRO
+                    Numeric(
+                        text = "A device's isolation barrier has ${fmt(pf)}pF of stray capacitance and sits across ${fmt(v)}V, " +
+                            "${fmt(f)}Hz mains. What leakage current flows through it, in µA? Use I = 2πfCV and round to 2 " +
+                            "decimal places.",
+                        answer = ua, unit = "µA",
+                        explanation = "Patient-connected parts may leak only about 10µA, so stray capacitance matters. " +
+                            "I = 2π × ${fmt(f)} × ${fmt(pf)}×10⁻¹² × ${fmt(v)} = ${fmt(ua, 2)}µA"
+                    )
+                }
             )
         )
     )
