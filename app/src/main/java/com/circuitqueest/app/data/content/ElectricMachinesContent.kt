@@ -1,6 +1,30 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.articleCap
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import kotlin.math.PI
+
 object ElectricMachinesContent {
+    private const val SYNC_CONSTANT = 120.0
+    private const val FULL_TURN = 360.0
+    private const val FOUR_POLE = 4.0
+    private val torques = listOf(2.0, 5.0, 10.0, 20.0, 50.0)
+    private val shaftSpeeds = listOf(1500.0, 3000.0, 6000.0)
+    private val mainsFrequencies = listOf(50.0, 60.0)
+    private val poleCounts = listOf(2.0, 4.0, 6.0, 8.0)
+    private val stepsPerRev = listOf(24.0, 48.0, 100.0, 200.0, 400.0)
+    private val inputPowers = listOf(200.0, 500.0, 1000.0, 2000.0)
+    private val motorEfficiencies = listOf(75.0, 80.0, 85.0, 90.0, 95.0)
+    private val slips = listOf(0.02, 0.03, 0.04, 0.05)
+    private val ratedPowersKw = listOf(1.0, 5.0, 15.0)
+    private val ratedSpeeds = listOf(1450.0, 2900.0)
+    private val dcSupplies = listOf(12.0, 24.0, 48.0)
+    private val armatureCurrents = listOf(2.0, 5.0, 10.0)
+    private val armatureResistances = listOf(0.2, 0.5, 1.0)
+
     val topic = Topic(
         id = "electric_machines",
         title = "Electric Machines",
@@ -61,14 +85,6 @@ object ElectricMachinesContent {
                     correctIndex = 1,
                     explanation = "A motor converts electrical energy into mechanical energy (rotation). A generator does the reverse."
                 ),
-                Question.NumericInput(
-                    id = "mach_ni1",
-                    questionText = "A motor produces 10 N\u00B7m of torque at 3000 RPM. What is its mechanical power in Watts? (Use \u03C9 = 2\u03C0n/60, round to nearest whole number)",
-                    correctAnswer = 3142.0,
-                    tolerance = 20.0,
-                    unit = "W",
-                    explanation = "\u03C9 = 2\u03C0 \u00D7 3000/60 = 314.16 rad/s. P = T\u03C9 = 10 \u00D7 314.16 = 3141.6 \u2248 3142W"
-                ),
                 Question.MultipleChoice(
                     id = "mach_mc2",
                     questionText = "In an induction motor, slip is necessary because:",
@@ -80,22 +96,6 @@ object ElectricMachinesContent {
                     ),
                     correctIndex = 1,
                     explanation = "Slip (rotor slower than field) creates relative motion between the rotor and the rotating magnetic field, which induces current and produces torque."
-                ),
-                Question.NumericInput(
-                    id = "mach_ni2",
-                    questionText = "A 4-pole induction motor runs on 60Hz power. What is the synchronous speed in RPM?",
-                    correctAnswer = 1800.0,
-                    tolerance = 10.0,
-                    unit = "RPM",
-                    explanation = "n_sync = 120f/P = 120 \u00D7 60 / 4 = 1800 RPM"
-                ),
-                Question.NumericInput(
-                    id = "mach_ni3",
-                    questionText = "A stepper motor has 200 steps per revolution. What is the step angle in degrees?",
-                    correctAnswer = 1.8,
-                    tolerance = 0.05,
-                    unit = "\u00B0",
-                    explanation = "Step angle = 360\u00B0/200 = 1.8\u00B0 per step"
                 ),
                 Question.MultipleChoice(
                     id = "mach_mc3",
@@ -109,14 +109,100 @@ object ElectricMachinesContent {
                     correctIndex = 1,
                     explanation = "An H-bridge uses 4 switches to reverse the polarity of the voltage applied to the motor, enabling both forward and reverse rotation."
                 ),
-                Question.NumericInput(
-                    id = "mach_ni4",
-                    questionText = "A motor draws 500W from the supply and delivers 400W of mechanical power. What is its efficiency in percent?",
-                    correctAnswer = 80.0,
-                    tolerance = 0.5,
-                    unit = "%",
-                    explanation = "\u03B7 = P_out/P_in \u00D7 100 = 400/500 \u00D7 100 = 80%"
+                Question.MultipleChoice(
+                    id = "mach_mc4",
+                    questionText = "Why does a DC motor draw a very large current at the instant it starts?",
+                    options = listOf(
+                        "Its windings are cold",
+                        "It isn't spinning yet, so there is no back-EMF to oppose the supply",
+                        "The brushes short-circuit",
+                        "Friction is highest at rest"
+                    ),
+                    correctIndex = 1,
+                    explanation = "Current = (V − back-EMF)/R. At standstill the back-EMF is zero, so only the small winding resistance limits the current. That's why large motors use soft starters."
                 )
+            ),
+            generators = listOf(
+                generator("mach_ni1") { r ->
+                    val t = torques.pick(r)
+                    val n = shaftSpeeds.pick(r)
+                    val w = 2 * PI * n / 60
+                    val p = t * w
+                    Numeric(
+                        text = "A motor produces ${fmt(t)}N·m of torque at ${fmt(n)}RPM. What is its mechanical power in Watts? " +
+                            "Use ω = 2πn/60 and round to the nearest whole number.",
+                        answer = p, unit = "W", decimals = 0,
+                        explanation = "ω = 2π × ${fmt(n)}/60 = ${fmt(w, 2)}rad/s. P = Tω = ${fmt(t)} × ${fmt(w, 2)} = ${fmt(p, 0)}W"
+                    )
+                },
+                generator("mach_ni2") { r ->
+                    val f = mainsFrequencies.pick(r)
+                    val p = poleCounts.pick(r)
+                    val ns = SYNC_CONSTANT * f / p
+                    Numeric(
+                        text = "${articleCap(p)} ${fmt(p)}-pole induction motor runs on ${fmt(f)}Hz power. What is its synchronous " +
+                            "speed, in RPM?",
+                        answer = ns, unit = "RPM",
+                        explanation = "n_sync = 120f/P = 120 × ${fmt(f)}/${fmt(p)} = ${fmt(ns)}RPM"
+                    )
+                },
+                generator("mach_ni3") { r ->
+                    val steps = stepsPerRev.pick(r)
+                    val deg = FULL_TURN / steps
+                    Numeric(
+                        text = "A stepper motor has ${fmt(steps)} steps per revolution. What is its step angle, in degrees?",
+                        answer = deg, unit = "°",
+                        explanation = "Step angle = 360°/${fmt(steps)} = ${fmt(deg)}°"
+                    )
+                },
+                generator("mach_ni4") { r ->
+                    val pin = inputPowers.pick(r)
+                    val eff = motorEfficiencies.pick(r)
+                    val pout = pin * eff / 100
+                    Numeric(
+                        text = "A motor draws ${fmt(pin)}W from the supply and delivers ${fmt(pout)}W of mechanical power. What is " +
+                            "its efficiency in percent?",
+                        answer = eff, unit = "%",
+                        explanation = "η = P_out/P_in × 100 = ${fmt(pout)}/${fmt(pin)} × 100 = ${fmt(eff)}%"
+                    )
+                },
+                generator("mach_ni5") { r ->
+                    val f = mainsFrequencies.pick(r)
+                    val ns = SYNC_CONSTANT * f / FOUR_POLE
+                    val s = slips.pick(r)
+                    val n = ns * (1 - s)
+                    Numeric(
+                        text = "A 4-pole induction motor on ${fmt(f)}Hz runs at ${fmt(n)}RPM. What is its slip, in percent?",
+                        answer = s * 100, unit = "%",
+                        explanation = "n_sync = 120 × ${fmt(f)}/4 = ${fmt(ns)}RPM. Slip = (${fmt(ns)} − ${fmt(n)})/${fmt(ns)} × 100 = " +
+                            "${fmt(s * 100)}%"
+                    )
+                },
+                generator("mach_ni6") { r ->
+                    val kw = ratedPowersKw.pick(r)
+                    val n = ratedSpeeds.pick(r)
+                    val w = 2 * PI * n / 60
+                    val t = kw * 1000 / w
+                    Numeric(
+                        text = "${articleCap(kw)} ${fmt(kw)}kW motor runs at ${fmt(n)}RPM. What torque does it deliver, in N·m? " +
+                            "Round to 2 decimal places.",
+                        answer = t, unit = "N·m",
+                        explanation = "ω = 2π × ${fmt(n)}/60 = ${fmt(w, 2)}rad/s, so T = P/ω = ${fmt(kw * 1000)}/${fmt(w, 2)} = " +
+                            "${fmt(t, 2)}N·m"
+                    )
+                },
+                generator("mach_ni7") { r ->
+                    val v = dcSupplies.pick(r)
+                    val i = armatureCurrents.pick(r)
+                    val ra = armatureResistances.pick(r)
+                    val emf = v - i * ra
+                    Numeric(
+                        text = "A DC motor on ${fmt(v)}V draws ${fmt(i)}A, and its armature resistance is ${fmt(ra)}Ω. What is its " +
+                            "back-EMF, in Volts?",
+                        answer = emf, unit = "V",
+                        explanation = "E_b = V − I·R_a = ${fmt(v)} − ${fmt(i)} × ${fmt(ra)} = ${fmt(emf)}V"
+                    )
+                }
             )
         )
     )

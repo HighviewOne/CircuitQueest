@@ -1,6 +1,30 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.article
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import kotlin.math.PI
+import kotlin.math.sqrt
+
 object MemsContent {
+    private const val AIR_DENSITY = 1.225
+    private const val GRAVITY = 9.81
+    private const val GYRO_LEVELS = 65_536.0
+    private const val NANO = 1e-9
+    private const val HALF_TURN_DEG = 180.0
+    private val sensitivities = listOf(1.0, 2.0, 5.0, 10.0)
+    private val accelerations = listOf(0.5, 2.0, 5.0, 16.0)
+    private val altitudeChangesCm = listOf(10.0, 50.0, 100.0, 300.0)
+    private val gyroRanges = listOf(125.0, 250.0, 500.0, 2000.0)
+    private val accelRanges = listOf(2.0, 4.0, 8.0, 16.0)
+    private val accelBits = listOf(12, 16)
+    private val springConstants = listOf(0.5, 1.0, 5.0)
+    private val proofMassesUg = listOf(1.0, 5.0, 10.0)
+    private val driveVelocitiesMm = listOf(10.0, 100.0)
+    private val rotationRates = listOf(100.0, 500.0)
+
     val topic = Topic(
         id = "mems",
         title = "MEMS",
@@ -72,14 +96,6 @@ object MemsContent {
                     correctIndex = 2,
                     explanation = "MEMS gyroscopes drive a proof mass into vibration. When the device rotates, the Coriolis force (F = 2m\u00D7v\u00D7\u03A9) deflects the mass perpendicular to both the drive and rotation axes."
                 ),
-                Question.NumericInput(
-                    id = "mems_ni1",
-                    questionText = "A MEMS accelerometer has a sensitivity of 2 mV/g. If it experiences 5g acceleration, what is the output voltage in mV?",
-                    correctAnswer = 10.0,
-                    tolerance = 0.1,
-                    unit = "mV",
-                    explanation = "V_out = sensitivity \u00D7 acceleration = 2 mV/g \u00D7 5g = 10 mV"
-                ),
                 Question.MultipleChoice(
                     id = "mems_mc3",
                     questionText = "Deep Reactive Ion Etching (DRIE) is used in MEMS to:",
@@ -92,14 +108,6 @@ object MemsContent {
                     correctIndex = 1,
                     explanation = "DRIE (Bosch process) alternates etching and passivation to create deep vertical trenches (>100\u00B5m) with high aspect ratios, essential for robust inertial sensors."
                 ),
-                Question.NumericInput(
-                    id = "mems_ni2",
-                    questionText = "A smartphone barometer can resolve 10 cm altitude changes. If atmospheric pressure changes by approximately 0.012 hPa per 10 cm near sea level, what pressure resolution in Pa is needed?",
-                    correctAnswer = 1.2,
-                    tolerance = 0.1,
-                    unit = "Pa",
-                    explanation = "0.012 hPa = 0.012 \u00D7 100 Pa = 1.2 Pa resolution needed."
-                ),
                 Question.MultipleChoice(
                     id = "mems_mc4",
                     questionText = "In surface micromachining, movable structures are released by:",
@@ -111,15 +119,77 @@ object MemsContent {
                     ),
                     correctIndex = 1,
                     explanation = "Surface micromachining deposits structural layers over sacrificial layers, then chemically etches away the sacrificial material to free the movable structures."
-                ),
-                Question.NumericInput(
-                    id = "mems_ni3",
-                    questionText = "A MEMS gyroscope has a measurement range of \u00B1250\u00B0/s and 16-bit digital output. What is the resolution in \u00B0/s per LSB? Round to four decimal places.",
-                    correctAnswer = 0.0076,
-                    tolerance = 0.0002,
-                    unit = "\u00B0/s",
-                    explanation = "Full range = 500\u00B0/s. Resolution = 500 / 2^16 = 500 / 65536 \u2248 0.0076\u00B0/s per LSB."
                 )
+            ),
+            generators = listOf(
+                generator("mems_ni1") { r ->
+                    val s = sensitivities.pick(r)
+                    val g = accelerations.pick(r)
+                    Numeric(
+                        text = "A MEMS accelerometer's sensitivity is ${fmt(s)}mV/g. At ${fmt(g)}g, what is its output, in mV?",
+                        answer = s * g, unit = "mV",
+                        explanation = "V_out = sensitivity × acceleration = ${fmt(s)} × ${fmt(g)} = ${fmt(s * g)}mV"
+                    )
+                },
+                generator("mems_ni2") { r ->
+                    val cm = altitudeChangesCm.pick(r)
+                    val pa = AIR_DENSITY * GRAVITY * cm / 100
+                    Numeric(
+                        text = "A phone's MEMS barometer must detect a ${fmt(cm)}cm change in altitude near sea level. Using " +
+                            "ΔP = ρgΔh with ρ = 1.225kg/m³ and g = 9.81m/s², what pressure change is that, in Pa? Round to " +
+                            "2 decimal places.",
+                        answer = pa, unit = "Pa",
+                        explanation = "Near sea level air pressure falls by about 12Pa per metre. Here: ΔP = 1.225 × 9.81 × " +
+                            "${fmt(cm / 100)} = ${fmt(pa, 2)}Pa"
+                    )
+                },
+                generator("mems_ni3") { r ->
+                    val range = gyroRanges.pick(r)
+                    val res = 2 * range / GYRO_LEVELS
+                    Numeric(
+                        text = "A MEMS gyroscope has a ±${fmt(range)}°/s range and 16-bit output. What is its resolution in °/s per " +
+                            "LSB? Round to 4 decimal places.",
+                        answer = res, unit = "°/s", decimals = 4,
+                        explanation = "Full span = ${fmt(2 * range)}°/s over 2¹⁶ = 65536 codes: ${fmt(2 * range)}/65536 = " +
+                            "${fmt(res, 4)}°/s"
+                    )
+                },
+                generator("mems_ni4") { r ->
+                    val range = accelRanges.pick(r)
+                    val bits = accelBits.pick(r)
+                    val mg = 2 * range * 1000 / (1 shl bits)
+                    Numeric(
+                        text = "An accelerometer set to ±${fmt(range)}g has ${article(bits.toDouble())} $bits-bit output. What is its " +
+                            "resolution, in mg per LSB? Round to 3 decimal places.",
+                        answer = mg, unit = "mg", decimals = 3,
+                        explanation = "Span = ${fmt(2 * range * 1000)}mg over ${1 shl bits} codes = ${fmt(mg, 3)}mg"
+                    )
+                },
+                generator("mems_ni5") { r ->
+                    val k = springConstants.pick(r)
+                    val ug = proofMassesUg.pick(r)
+                    val khz = sqrt(k / (ug * NANO)) / (2 * PI) / 1000
+                    Numeric(
+                        text = "A MEMS proof mass of ${fmt(ug)}µg hangs on springs with k = ${fmt(k)}N/m. What is its resonant " +
+                            "frequency, in kHz? Round to 3 decimal places.",
+                        answer = khz, unit = "kHz", decimals = 3,
+                        explanation = "f = (1/2π)√(k/m) = (1/2π)√(${fmt(k)}/(${fmt(ug)}×10⁻⁹)) = ${fmt(khz, 3)}kHz"
+                    )
+                },
+                generator("mems_ni6") { r ->
+                    val ug = proofMassesUg.pick(r)
+                    val vmm = driveVelocitiesMm.pick(r)
+                    val deg = rotationRates.pick(r)
+                    val omega = deg * PI / HALF_TURN_DEG
+                    val nn = 2 * ug * NANO * vmm / 1000 * omega / NANO
+                    Numeric(
+                        text = "A gyroscope's ${fmt(ug)}µg proof mass is driven at ${fmt(vmm)}mm/s while the device turns at " +
+                            "${fmt(deg)}°/s. What Coriolis force acts on it, in nN? Use F = 2mvΩ and round to 3 decimal places.",
+                        answer = nn, unit = "nN", decimals = 3,
+                        explanation = "Ω = ${fmt(deg)}°/s = ${fmt(omega, 3)}rad/s. F = 2 × ${fmt(ug)}×10⁻⁹ × ${fmt(vmm / 1000)} × " +
+                            "${fmt(omega, 3)} = ${fmt(nn, 3)}nN"
+                    )
+                }
             )
         )
     )
