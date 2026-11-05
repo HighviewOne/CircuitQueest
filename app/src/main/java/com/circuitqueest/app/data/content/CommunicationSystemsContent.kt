@@ -1,6 +1,23 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import kotlin.math.log2
+import kotlin.math.log10
+
 object CommunicationSystemsContent {
+    private val audioBandwidths = listOf(3.0, 4.5, 5.0, 10.0, 15.0)
+    private val sampledBandwidths = listOf(3.4, 10.0, 20.0)
+    private val signalPowers = listOf(0.5, 1.0, 2.0)
+    private val noisePowersMw = listOf(0.1, 1.0, 10.0)
+    private val channelBandwidths = listOf(1.0, 5.0, 20.0)
+    private val linearSnrs = listOf(3.0, 7.0, 15.0, 31.0, 63.0, 255.0)
+    private val constellationSizes = listOf(4, 16, 64, 256, 1024)
+    private val symbolRates = listOf(1.0, 5.0, 10.0)
+    private val rateConstellations = listOf(4, 16, 64)
+
     val topic = Topic(
         id = "communication_systems",
         title = "Communication Systems",
@@ -50,14 +67,6 @@ object CommunicationSystemsContent {
         quiz = Quiz(
             title = "Communication Systems Boss Battle",
             questions = listOf(
-                Question.NumericInput(
-                    id = "comm_ni1",
-                    questionText = "An AM radio station transmits audio up to 5kHz. What bandwidth (in kHz) does the AM signal occupy?",
-                    correctAnswer = 10.0,
-                    tolerance = 0.5,
-                    unit = "kHz",
-                    explanation = "AM bandwidth = 2 \u00D7 f_max = 2 \u00D7 5kHz = 10kHz."
-                ),
                 Question.MultipleChoice(
                     id = "comm_mc1",
                     questionText = "Which modulation scheme is more resistant to noise?",
@@ -69,22 +78,6 @@ object CommunicationSystemsContent {
                     ),
                     correctIndex = 1,
                     explanation = "FM is more noise-resistant because information is encoded in frequency, not amplitude. Noise primarily affects amplitude."
-                ),
-                Question.NumericInput(
-                    id = "comm_ni2",
-                    questionText = "What is the minimum sampling frequency (in kHz) needed to digitize a 10kHz audio signal without aliasing?",
-                    correctAnswer = 20.0,
-                    tolerance = 0.5,
-                    unit = "kHz",
-                    explanation = "Nyquist rate: f_sample \u2265 2 \u00D7 f_max = 2 \u00D7 10kHz = 20kHz."
-                ),
-                Question.NumericInput(
-                    id = "comm_ni3",
-                    questionText = "A signal has power 1W and noise power is 0.001W. What is the SNR in dB?",
-                    correctAnswer = 30.0,
-                    tolerance = 0.5,
-                    unit = "dB",
-                    explanation = "SNR = 10 log\u2081\u2080(1/0.001) = 10 log\u2081\u2080(1000) = 10 \u00D7 3 = 30dB."
                 ),
                 Question.MultipleChoice(
                     id = "comm_mc2",
@@ -110,14 +103,81 @@ object CommunicationSystemsContent {
                     correctIndex = 2,
                     explanation = "Sampling below 2\u00D7f_max causes aliasing: high-frequency components fold into lower frequencies, corrupting the reconstructed signal."
                 ),
-                Question.NumericInput(
-                    id = "comm_ni4",
-                    questionText = "A channel has bandwidth 1MHz and SNR = 31 (linear, not dB). What is the Shannon capacity in Mbps?",
-                    correctAnswer = 5.0,
-                    tolerance = 0.1,
-                    unit = "Mbps",
-                    explanation = "C = BW \u00D7 log\u2082(1 + SNR) = 10\u2076 \u00D7 log\u2082(32) = 10\u2076 \u00D7 5 = 5Mbps."
+                Question.MultipleChoice(
+                    id = "comm_mc4",
+                    questionText = "By Carson's rule, the bandwidth of an FM signal is about:",
+                    options = listOf(
+                        "2 × the audio bandwidth",
+                        "2 × (peak deviation + highest audio frequency)",
+                        "The peak deviation only",
+                        "Half the carrier frequency"
+                    ),
+                    correctIndex = 1,
+                    explanation = "Carson's rule: B ≈ 2(Δf + f_m). Broadcast FM with Δf = 75kHz and f_m = 15kHz needs about 180kHz, which is why FM channels are much wider than AM."
                 )
+            ),
+            generators = listOf(
+                generator("comm_ni1") { r ->
+                    val fm = audioBandwidths.pick(r)
+                    Numeric(
+                        text = "An AM transmitter sends audio up to ${fmt(fm)}kHz. What bandwidth does the AM signal occupy, in kHz?",
+                        answer = 2 * fm, unit = "kHz",
+                        explanation = "AM has upper and lower sidebands: bandwidth = 2 × f_max = 2 × ${fmt(fm)} = ${fmt(2 * fm)}kHz"
+                    )
+                },
+                generator("comm_ni2") { r ->
+                    val fm = sampledBandwidths.pick(r)
+                    Numeric(
+                        text = "What is the minimum sampling frequency, in kHz, needed to digitize a signal with content up to " +
+                            "${fmt(fm)}kHz without aliasing?",
+                        answer = 2 * fm, unit = "kHz",
+                        explanation = "Nyquist: f_s ≥ 2 × f_max = 2 × ${fmt(fm)} = ${fmt(2 * fm)}kHz"
+                    )
+                },
+                generator("comm_ni3") { r ->
+                    val ps = signalPowers.pick(r)
+                    val pnMw = noisePowersMw.pick(r)
+                    val ratio = ps * 1000 / pnMw
+                    val db = 10 * log10(ratio)
+                    Numeric(
+                        text = "A received signal has ${fmt(ps)}W of power and the noise power is ${fmt(pnMw)}mW. What is the SNR in " +
+                            "dB? Round to 2 decimal places.",
+                        answer = db, unit = "dB",
+                        explanation = "SNR = 10·log₁₀(P_s/P_n) = 10·log₁₀(${fmt(ps * 1000)}mW/${fmt(pnMw)}mW) = " +
+                            "10·log₁₀(${fmt(ratio)}) = ${fmt(db, 2)}dB"
+                    )
+                },
+                generator("comm_ni4") { r ->
+                    val b = channelBandwidths.pick(r)
+                    val snr = linearSnrs.pick(r)
+                    val c = b * log2(1 + snr)
+                    Numeric(
+                        text = "A channel has ${fmt(b)}MHz bandwidth and a linear SNR of ${fmt(snr)}. What is its Shannon capacity, " +
+                            "in Mbps? Round to 2 decimal places.",
+                        answer = c, unit = "Mbps",
+                        explanation = "C = B × log₂(1 + SNR) = ${fmt(b)} × log₂(${fmt(1 + snr)}) = ${fmt(c, 2)}Mbps"
+                    )
+                },
+                generator("comm_ni5") { r ->
+                    val m = constellationSizes.pick(r)
+                    val bits = Int.SIZE_BITS - 1 - Integer.numberOfLeadingZeros(m)
+                    Numeric(
+                        text = "How many bits does each symbol carry in $m-QAM?",
+                        answer = bits.toDouble(), unit = "bits", exact = true,
+                        explanation = "Bits per symbol = log₂(M) = log₂($m) = $bits bits"
+                    )
+                },
+                generator("comm_ni6") { r ->
+                    val rs = symbolRates.pick(r)
+                    val m = rateConstellations.pick(r)
+                    val bits = Int.SIZE_BITS - 1 - Integer.numberOfLeadingZeros(m)
+                    val rb = rs * bits
+                    Numeric(
+                        text = "A link sends ${fmt(rs)} million symbols per second using $m-QAM. What is its bit rate, in Mbps?",
+                        answer = rb, unit = "Mbps",
+                        explanation = "$m-QAM carries log₂($m) = $bits bits per symbol: ${fmt(rs)} × $bits = ${fmt(rb)}Mbps"
+                    )
+                }
             )
         )
     )

@@ -1,6 +1,25 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.article
+import com.circuitqueest.app.data.content.QuestionMath.articleCap
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+
 object RadarSystemsContent {
+    private const val KMH_PER_MS = 3.6
+    private const val LIGHT = 3e8
+    private const val MICRO = 1e-6
+    private const val GIGA = 1e9
+    private val echoDelays = listOf(10.0, 20.0, 50.0, 100.0, 200.0)
+    private val pulseWidths = listOf(0.1, 0.5, 1.0, 2.0)
+    private val carrierGhz = listOf(3.0, 10.0, 24.0, 77.0)
+    private val dopplerKhz = listOf(1.0, 2.0, 5.0)
+    private val repetitionFrequencies = listOf(1000.0, 2000.0, 5000.0, 10_000.0)
+    private val rangeFactors = listOf(2.0, 3.0, 10.0)
+    private val targetSpeedsKmh = listOf(50.0, 100.0, 300.0)
+
     val topic = Topic(
         id = "radar_systems",
         title = "Radar Systems",
@@ -50,14 +69,6 @@ object RadarSystemsContent {
         quiz = Quiz(
             title = "Radar Systems Boss Battle",
             questions = listOf(
-                Question.NumericInput(
-                    id = "radar_ni1",
-                    questionText = "A radar pulse returns after 20 \u00B5s. How far away is the target in km? (c = 3\u00D710\u2078 m/s)",
-                    correctAnswer = 3.0,
-                    tolerance = 0.1,
-                    unit = "km",
-                    explanation = "R = c\u00D7\u0394t/2 = 3\u00D710\u2078 \u00D7 20\u00D710\u207B\u2076 / 2 = 3000 m = 3 km"
-                ),
                 Question.MultipleChoice(
                     id = "radar_mc1",
                     questionText = "In the radar range equation, received power drops with range as:",
@@ -69,14 +80,6 @@ object RadarSystemsContent {
                     ),
                     correctIndex = 3,
                     explanation = "The radar range equation shows P_r \u221D 1/R\u2074. The signal spreads as 1/R\u00B2 going out and 1/R\u00B2 coming back, giving 1/R\u2074 total."
-                ),
-                Question.NumericInput(
-                    id = "radar_ni2",
-                    questionText = "A pulse radar has a pulse width of 1 \u00B5s. What is the range resolution in meters?",
-                    correctAnswer = 150.0,
-                    tolerance = 1.0,
-                    unit = "m",
-                    explanation = "\u0394R = c\u03C4/2 = 3\u00D710\u2078 \u00D7 1\u00D710\u207B\u2076 / 2 = 150 m"
                 ),
                 Question.MultipleChoice(
                     id = "radar_mc2",
@@ -90,14 +93,6 @@ object RadarSystemsContent {
                     correctIndex = 1,
                     explanation = "FMCW (Frequency-Modulated Continuous Wave) radar uses a frequency sweep to determine range from beat frequency and velocity from Doppler shift, measuring both simultaneously."
                 ),
-                Question.NumericInput(
-                    id = "radar_ni3",
-                    questionText = "A 10 GHz radar observes a Doppler shift of 2 kHz from a target. What is the target's radial velocity in m/s? (c = 3\u00D710\u2078 m/s)",
-                    correctAnswer = 30.0,
-                    tolerance = 0.5,
-                    unit = "m/s",
-                    explanation = "v = f_d\u00D7c/(2f_0) = 2000 \u00D7 3\u00D710\u2078 / (2 \u00D7 10\u00D710\u2079) = 6\u00D710\u00B9\u00B9 / 2\u00D710\u00B9\u2070 = 30 m/s"
-                ),
                 Question.MultipleChoice(
                     id = "radar_mc3",
                     questionText = "The main advantage of a phased array antenna is:",
@@ -110,14 +105,81 @@ object RadarSystemsContent {
                     correctIndex = 1,
                     explanation = "Phased arrays steer the beam electronically by adjusting element phase shifts, enabling microsecond beam repositioning without any mechanical movement."
                 ),
-                Question.NumericInput(
-                    id = "radar_ni4",
-                    questionText = "A radar with PRF = 5000 Hz has a maximum unambiguous range of how many km? (c = 3\u00D710\u2078 m/s)",
-                    correctAnswer = 30.0,
-                    tolerance = 0.5,
-                    unit = "km",
-                    explanation = "R_unamb = c/(2\u00D7PRF) = 3\u00D710\u2078/(2\u00D75000) = 30,000 m = 30 km"
+                Question.MultipleChoice(
+                    id = "radar_mc4",
+                    questionText = "Why does a single-antenna pulsed radar have a minimum range (a blind zone)?",
+                    options = listOf(
+                        "The target is too bright up close",
+                        "The receiver is switched off while the pulse is being transmitted",
+                        "Close targets have no Doppler shift",
+                        "The antenna can't point downward"
+                    ),
+                    correctIndex = 1,
+                    explanation = "While the transmitter fires, the receiver is protected (off), so echoes returning during the pulse are missed: R_min ≈ cτ/2. Shorter pulses shrink the blind zone."
                 )
+            ),
+            generators = listOf(
+                generator("radar_ni1") { r ->
+                    val us = echoDelays.pick(r)
+                    val km = LIGHT * us * MICRO / 2 / 1000
+                    Numeric(
+                        text = "A radar pulse returns after ${fmt(us)}µs. How far away is the target, in km? Use c = 3×10⁸m/s.",
+                        answer = km, unit = "km",
+                        explanation = "R = cΔt/2 = 3×10⁸ × ${fmt(us)}×10⁻⁶/2 = ${fmt(km * 1000)}m = ${fmt(km)}km"
+                    )
+                },
+                generator("radar_ni2") { r ->
+                    val us = pulseWidths.pick(r)
+                    val m = LIGHT * us * MICRO / 2
+                    Numeric(
+                        text = "A pulse radar has a pulse width of ${fmt(us)}µs. What is its range resolution, in metres?",
+                        answer = m, unit = "m",
+                        explanation = "ΔR = cτ/2 = 3×10⁸ × ${fmt(us)}×10⁻⁶/2 = ${fmt(m)}m"
+                    )
+                },
+                generator("radar_ni3") { r ->
+                    val f0 = carrierGhz.pick(r)
+                    val fd = dopplerKhz.pick(r)
+                    val v = fd * 1000 * LIGHT / (2 * f0 * GIGA)
+                    Numeric(
+                        text = "${articleCap(f0)} ${fmt(f0)}GHz radar sees a Doppler shift of ${fmt(fd)}kHz. What is the target's " +
+                            "radial velocity, in m/s? Use c = 3×10⁸m/s and round to 2 decimal places.",
+                        answer = v, unit = "m/s",
+                        explanation = "v = f_d × c/(2f₀) = ${fmt(fd * 1000)} × 3×10⁸/(2 × ${fmt(f0)}×10⁹) = ${fmt(v, 2)}m/s"
+                    )
+                },
+                generator("radar_ni4") { r ->
+                    val prf = repetitionFrequencies.pick(r)
+                    val km = LIGHT / (2 * prf) / 1000
+                    Numeric(
+                        text = "A radar has a pulse repetition frequency of ${fmt(prf)}Hz. What is its maximum unambiguous range, " +
+                            "in km? Use c = 3×10⁸m/s.",
+                        answer = km, unit = "km",
+                        explanation = "R_max = c/(2 × PRF) = 3×10⁸/(2 × ${fmt(prf)}) = ${fmt(km * 1000)}m = ${fmt(km)}km"
+                    )
+                },
+                generator("radar_ni5") { r ->
+                    val k = rangeFactors.pick(r)
+                    val factor = k * k * k * k
+                    Numeric(
+                        text = "A target moves ${fmt(k)} times farther from a radar. By what factor does the echo power drop?",
+                        answer = factor, unit = "×",
+                        explanation = "The echo falls as 1/R⁴ (1/R² out and 1/R² back): ${fmt(k)}⁴ = ${fmt(factor)}×"
+                    )
+                },
+                generator("radar_ni6") { r ->
+                    val kmh = targetSpeedsKmh.pick(r)
+                    val f0 = carrierGhz.pick(r)
+                    val v = kmh / KMH_PER_MS
+                    val khz = 2 * v * f0 * GIGA / LIGHT / 1000
+                    Numeric(
+                        text = "A car approaches ${article(f0)} ${fmt(f0)}GHz radar at ${fmt(kmh)}km/h. What Doppler shift does the " +
+                            "radar measure, in kHz? Round to 2 decimal places.",
+                        answer = khz, unit = "kHz",
+                        explanation = "v = ${fmt(kmh)}/3.6 = ${fmt(v, 2)}m/s. f_d = 2vf₀/c = 2 × ${fmt(v, 2)} × ${fmt(f0)}×10⁹/3×10⁸ = " +
+                            "${fmt(khz, 2)}kHz"
+                    )
+                }
             )
         )
     )

@@ -1,6 +1,25 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.article
+import com.circuitqueest.app.data.content.QuestionMath.articleCap
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import kotlin.math.abs
+import kotlin.math.log10
+import kotlin.math.sqrt
+
 object TransmissionLinesContent {
+    private const val C_M_MHZ = 300.0
+    private const val DB_AMPLITUDE = 20
+    private val lineImpedances = listOf(50.0, 75.0)
+    private val loadImpedances = listOf(10.0, 25.0, 100.0, 150.0, 200.0, 300.0)
+    private val reflectionMagnitudes = listOf(0.1, 0.2, 0.333, 0.5)
+    private val cableFrequenciesMhz = listOf(100.0, 300.0, 1000.0)
+    private val velocityFactors = listOf(0.66, 0.8, 1.0)
+    private val matchLoads = listOf(12.5, 100.0, 200.0, 300.0)
+
     val topic = Topic(
         id = "transmission_lines",
         title = "Transmission Lines",
@@ -50,14 +69,6 @@ object TransmissionLinesContent {
         quiz = Quiz(
             title = "Transmission Lines Boss Battle",
             questions = listOf(
-                Question.NumericInput(
-                    id = "tl_ni1",
-                    questionText = "A 50\u03A9 transmission line is terminated with a 150\u03A9 load. What is the reflection coefficient \u0393?",
-                    correctAnswer = 0.5,
-                    tolerance = 0.02,
-                    unit = "",
-                    explanation = "\u0393 = (Z_L \u2212 Z\u2080)/(Z_L + Z\u2080) = (150 \u2212 50)/(150 + 50) = 100/200 = 0.5"
-                ),
                 Question.MultipleChoice(
                     id = "tl_mc1",
                     questionText = "What reflection coefficient indicates a perfect impedance match?",
@@ -69,14 +80,6 @@ object TransmissionLinesContent {
                     ),
                     correctIndex = 2,
                     explanation = "When Z_L = Z\u2080, \u0393 = (Z\u2080 \u2212 Z\u2080)/(Z\u2080 + Z\u2080) = 0. No reflection occurs."
-                ),
-                Question.NumericInput(
-                    id = "tl_ni2",
-                    questionText = "If |\u0393| = 0.333, what is the VSWR? Round to one decimal place.",
-                    correctAnswer = 2.0,
-                    tolerance = 0.1,
-                    unit = "",
-                    explanation = "VSWR = (1 + 0.333)/(1 \u2212 0.333) = 1.333/0.667 = 2.0"
                 ),
                 Question.MultipleChoice(
                     id = "tl_mc2",
@@ -90,22 +93,6 @@ object TransmissionLinesContent {
                     correctIndex = 1,
                     explanation = "RG-58 coaxial cable has a characteristic impedance of 50\u03A9, which is the standard for RF and test equipment."
                 ),
-                Question.NumericInput(
-                    id = "tl_ni3",
-                    questionText = "What is the wavelength in meters of a 300MHz signal traveling at the speed of light (3\u00D710\u2078 m/s)?",
-                    correctAnswer = 1.0,
-                    tolerance = 0.05,
-                    unit = "m",
-                    explanation = "\u03BB = c/f = 3\u00D710\u2078 / 300\u00D710\u2076 = 1.0m"
-                ),
-                Question.NumericInput(
-                    id = "tl_ni4",
-                    questionText = "A quarter-wave transformer must match a 50\u03A9 line to a 200\u03A9 load. What impedance (in \u03A9) should the transformer section have?",
-                    correctAnswer = 100.0,
-                    tolerance = 1.0,
-                    unit = "\u03A9",
-                    explanation = "Z_match = \u221A(Z\u2080 \u00D7 Z_L) = \u221A(50 \u00D7 200) = \u221A10000 = 100\u03A9"
-                ),
                 Question.MultipleChoice(
                     id = "tl_mc3",
                     questionText = "On a Smith chart, the center point represents:",
@@ -117,7 +104,83 @@ object TransmissionLinesContent {
                     ),
                     correctIndex = 2,
                     explanation = "The center of the Smith chart is the normalized impedance z = 1, meaning Z = Z\u2080 (perfect match, \u0393 = 0)."
+                ),
+                Question.MultipleChoice(
+                    id = "tl_mc4",
+                    questionText = "What is the reflection coefficient Γ of a line terminated in a short circuit?",
+                    options = listOf(
+                        "0",
+                        "+1",
+                        "−1",
+                        "∞"
+                    ),
+                    correctIndex = 2,
+                    explanation = "With Z_L = 0, Γ = (0 − Z₀)/(0 + Z₀) = −1: all the power reflects, with the voltage inverted. An open circuit gives Γ = +1."
                 )
+            ),
+            generators = listOf(
+                generator("tl_ni1") { r ->
+                    val z0 = lineImpedances.pick(r)
+                    val zl = loadImpedances.pick(r)
+                    val g = abs((zl - z0) / (zl + z0))
+                    Numeric(
+                        text = "${articleCap(z0)} ${fmt(z0)}Ω line is terminated with ${article(zl)} ${fmt(zl)}Ω load. What is the " +
+                            "magnitude of the reflection coefficient |Γ|? Round to 3 decimal places.",
+                        answer = g, unit = "", decimals = 3,
+                        explanation = "Γ = (Z_L − Z₀)/(Z_L + Z₀) = (${fmt(zl)} − ${fmt(z0)})/(${fmt(zl)} + ${fmt(z0)}), so " +
+                            "|Γ| = ${fmt(g, 3)}"
+                    )
+                },
+                generator("tl_ni2") { r ->
+                    val g = reflectionMagnitudes.pick(r)
+                    val vswr = (1 + g) / (1 - g)
+                    Numeric(
+                        text = "If |Γ| = ${fmt(g)}, what is the VSWR? Round to 2 decimal places.",
+                        answer = vswr, unit = "",
+                        explanation = "VSWR = (1 + |Γ|)/(1 − |Γ|) = ${fmt(1 + g)}/${fmt(1 - g)} = ${fmt(vswr, 2)}"
+                    )
+                },
+                generator("tl_ni3") { r ->
+                    val f = cableFrequenciesMhz.pick(r)
+                    val vf = velocityFactors.pick(r)
+                    val lambda = C_M_MHZ * vf / f
+                    Numeric(
+                        text = "A ${fmt(f)}MHz signal travels on a cable with velocity factor ${fmt(vf)}. What is its wavelength in " +
+                            "the cable, in metres? Round to 3 decimal places.",
+                        answer = lambda, unit = "m", decimals = 3,
+                        explanation = "λ = VF × c/f = ${fmt(vf)} × 3×10⁸/(${fmt(f)}×10⁶) = ${fmt(lambda, 3)}m"
+                    )
+                },
+                generator("tl_ni4") { r ->
+                    val z0 = lineImpedances.pick(r)
+                    val zl = matchLoads.pick(r)
+                    val zq = sqrt(z0 * zl)
+                    Numeric(
+                        text = "A quarter-wave transformer must match ${article(z0)} ${fmt(z0)}Ω line to ${article(zl)} ${fmt(zl)}Ω " +
+                            "load. What impedance should the quarter-wave section have, in Ω? Round to 2 decimal places.",
+                        answer = zq, unit = "Ω",
+                        explanation = "Z_q = √(Z₀ × Z_L) = √(${fmt(z0)} × ${fmt(zl)}) = ${fmt(zq, 2)}Ω"
+                    )
+                },
+                generator("tl_ni5") { r ->
+                    val g = reflectionMagnitudes.pick(r)
+                    val rl = -DB_AMPLITUDE * log10(g)
+                    Numeric(
+                        text = "A load has |Γ| = ${fmt(g)}. What is the return loss, in dB? Round to 2 decimal places.",
+                        answer = rl, unit = "dB",
+                        explanation = "Return loss = −20·log₁₀|Γ| = −20·log₁₀(${fmt(g)}) = ${fmt(rl, 2)}dB. Higher is a better match."
+                    )
+                },
+                generator("tl_ni6") { r ->
+                    val g = reflectionMagnitudes.pick(r)
+                    val pct = g * g * 100
+                    Numeric(
+                        text = "A mismatched load has |Γ| = ${fmt(g)}. What percentage of the incident power is reflected? " +
+                            "Round to 2 decimal places.",
+                        answer = pct, unit = "%",
+                        explanation = "Reflected power fraction = |Γ|² = ${fmt(g)}² = ${fmt(pct, 2)}%"
+                    )
+                }
             )
         )
     )

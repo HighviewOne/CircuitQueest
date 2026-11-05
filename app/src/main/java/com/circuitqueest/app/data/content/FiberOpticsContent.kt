@@ -1,6 +1,26 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import kotlin.math.sqrt
+
 object FiberOpticsContent {
+    private val attenuations = listOf(0.2, 0.25, 0.35, 0.5)
+    private val linkLengths = listOf(10.0, 20.0, 50.0, 80.0)
+    private val channelCounts = listOf(40.0, 80.0, 96.0)
+    private val channelRates = listOf(10.0, 100.0, 400.0)
+    private val responsivities = listOf(0.5, 0.8, 0.9, 1.0)
+    private val opticalPowers = listOf(0.01, 0.1, 1.0)
+    private val launchPowers = listOf(0.0, 3.0, 5.0)
+    private val budgetAttenuations = listOf(0.2, 0.25)
+    private val budgetLengths = listOf(20.0, 40.0, 80.0)
+    private val sensitivities = listOf(-28.0, -24.0, -20.0)
+    private val coreIndices = listOf(1.46, 1.47, 1.48)
+    private val indexSteps = listOf(0.005, 0.01, 0.02)
+    private val lossBudgets = listOf(10.0, 20.0, 30.0)
+
     val topic = Topic(
         id = "fiber_optics",
         title = "Fiber Optics & Photonics",
@@ -60,14 +80,6 @@ object FiberOpticsContent {
                     correctIndex = 1,
                     explanation = "Single-mode fiber's tiny core (~8\u00B5m) supports only one propagation mode, eliminating modal dispersion. Combined with low attenuation at 1550nm, it enables transmission over thousands of km."
                 ),
-                Question.NumericInput(
-                    id = "fo_ni1",
-                    questionText = "A fiber link is 50 km long with attenuation of 0.2 dB/km. What is the total loss in dB?",
-                    correctAnswer = 10.0,
-                    tolerance = 0.1,
-                    unit = "dB",
-                    explanation = "Total loss = \u03B1 \u00D7 L = 0.2 dB/km \u00D7 50 km = 10 dB"
-                ),
                 Question.MultipleChoice(
                     id = "fo_mc2",
                     questionText = "Which photodetector has internal gain through avalanche multiplication?",
@@ -79,14 +91,6 @@ object FiberOpticsContent {
                     ),
                     correctIndex = 1,
                     explanation = "APDs use high reverse bias to create avalanche multiplication, providing internal current gain of 10\u2013100\u00D7, making them more sensitive than PIN photodiodes."
-                ),
-                Question.NumericInput(
-                    id = "fo_ni2",
-                    questionText = "A DWDM system uses 80 wavelengths, each carrying 100 Gbps. What is the total capacity in Tbps?",
-                    correctAnswer = 8.0,
-                    tolerance = 0.1,
-                    unit = "Tbps",
-                    explanation = "Total = 80 wavelengths \u00D7 100 Gbps = 8000 Gbps = 8 Tbps"
                 ),
                 Question.MultipleChoice(
                     id = "fo_mc3",
@@ -100,14 +104,6 @@ object FiberOpticsContent {
                     correctIndex = 1,
                     explanation = "The core has a higher refractive index than the cladding, causing total internal reflection at the boundary, which keeps light confined to the core."
                 ),
-                Question.NumericInput(
-                    id = "fo_ni3",
-                    questionText = "A PIN photodiode has a responsivity of 0.8 A/W. If 1 mW of optical power hits it, what photocurrent is generated in mA?",
-                    correctAnswer = 0.8,
-                    tolerance = 0.05,
-                    unit = "mA",
-                    explanation = "I = R \u00D7 P = 0.8 A/W \u00D7 0.001 W = 0.0008 A = 0.8 mA"
-                ),
                 Question.MultipleChoice(
                     id = "fo_mc4",
                     questionText = "The lowest-loss wavelength window for silica fiber is:",
@@ -120,6 +116,75 @@ object FiberOpticsContent {
                     correctIndex = 2,
                     explanation = "Silica fiber has minimum attenuation (~0.2 dB/km) at 1550 nm, making it the preferred wavelength for long-haul telecommunications."
                 )
+            ),
+            generators = listOf(
+                generator("fo_ni1") { r ->
+                    val a = attenuations.pick(r)
+                    val l = linkLengths.pick(r)
+                    Numeric(
+                        text = "A fiber link is ${fmt(l)}km long with attenuation ${fmt(a)}dB/km. What is the total fiber loss, in dB?",
+                        answer = a * l, unit = "dB",
+                        explanation = "Loss = α × L = ${fmt(a)} × ${fmt(l)} = ${fmt(a * l)}dB"
+                    )
+                },
+                generator("fo_ni2") { r ->
+                    val n = channelCounts.pick(r)
+                    val g = channelRates.pick(r)
+                    val tbps = n * g / 1000
+                    Numeric(
+                        text = "A DWDM system carries ${fmt(n)} wavelengths at ${fmt(g)}Gbps each. What is the total capacity, in " +
+                            "Tbps? Round to 2 decimal places.",
+                        answer = tbps, unit = "Tbps",
+                        explanation = "Total = ${fmt(n)} × ${fmt(g)}Gbps = ${fmt(n * g)}Gbps = ${fmt(tbps, 2)}Tbps"
+                    )
+                },
+                generator("fo_ni3") { r ->
+                    val resp = responsivities.pick(r)
+                    val p = opticalPowers.pick(r)
+                    Numeric(
+                        text = "A PIN photodiode with responsivity ${fmt(resp)}A/W receives ${fmt(p)}mW. What photocurrent does it " +
+                            "produce, in mA? Round to 3 decimal places.",
+                        answer = resp * p, unit = "mA", decimals = 3,
+                        explanation = "I = R × P = ${fmt(resp)}A/W × ${fmt(p)}mW = ${fmt(resp * p, 3)}mA"
+                    )
+                },
+                generator("fo_ni4") { r ->
+                    val ptx = launchPowers.pick(r)
+                    val a = budgetAttenuations.pick(r)
+                    val l = budgetLengths.pick(r)
+                    val sens = sensitivities.pick(r)
+                    val prx = ptx - a * l
+                    val margin = prx - sens
+                    Numeric(
+                        text = "A link launches ${fmt(ptx)}dBm into ${fmt(l)}km of fiber at ${fmt(a)}dB/km, and the receiver needs " +
+                            "${fmt(sens)}dBm. What is the link margin, in dB?",
+                        answer = margin, unit = "dB",
+                        explanation = "Received = ${fmt(ptx)} − ${fmt(a)} × ${fmt(l)} = ${fmt(prx)}dBm. Margin = ${fmt(prx)} − " +
+                            "(${fmt(sens)}) = ${fmt(margin)}dB"
+                    )
+                },
+                generator("fo_ni5") { r ->
+                    val n1 = coreIndices.pick(r)
+                    val n2 = n1 - indexSteps.pick(r)
+                    val na = sqrt(n1 * n1 - n2 * n2)
+                    Numeric(
+                        text = "A fiber's core index is ${fmt(n1)} and its cladding index is ${fmt(n2)}. What is its numerical " +
+                            "aperture? Round to 3 decimal places.",
+                        answer = na, unit = "", decimals = 3,
+                        explanation = "NA = √(n₁² − n₂²) = √(${fmt(n1)}² − ${fmt(n2)}²) = ${fmt(na, 3)}"
+                    )
+                },
+                generator("fo_ni6") { r ->
+                    val budget = lossBudgets.pick(r)
+                    val a = attenuations.pick(r)
+                    val km = budget / a
+                    Numeric(
+                        text = "A link has a ${fmt(budget)}dB loss budget for the fiber, which has ${fmt(a)}dB/km attenuation. What " +
+                            "is the longest span, in km? Round to 1 decimal place.",
+                        answer = km, unit = "km", decimals = 1,
+                        explanation = "Length = budget/attenuation = ${fmt(budget)}/${fmt(a)} = ${fmt(km, 1)}km"
+                    )
+                }
             )
         )
     )

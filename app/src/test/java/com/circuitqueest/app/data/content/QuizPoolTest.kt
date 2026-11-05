@@ -14,7 +14,8 @@ class QuizPoolTest {
     private val topics = TopicsService.allTopics
     /** Categories converted to deeper practice so far. */
     private val deepened = TopicCategories.categories
-        .filter { it.name in setOf("Circuit Fundamentals", "Semiconductor Devices", "Analog Design", "Digital Systems", "Signals & Control", "Power & Energy") }
+        .filter { it.name in setOf("Circuit Fundamentals", "Semiconductor Devices", "Analog Design", "Digital Systems", "Signals & Control", "Power & Energy",
+            "RF & Communications") }
         .flatMap { it.topicIds }.map { id -> topics.first { it.id == id } }
 
     /** Every question a generator can produce, over many draws. */
@@ -31,7 +32,7 @@ class QuizPoolTest {
 
     @Test
     fun deepenedCategories_haveDeeperPools_withGeneratedNumbers() {
-        assertEquals(27, deepened.size)
+        assertEquals(34, deepened.size)
         for (topic in deepened) {
             assertTrue(topic.quiz.poolSize >= 10, "${topic.id} pool should be at least 10")
             assertTrue(topic.quiz.generators.size >= 5, "${topic.id} should have generated numeric questions")
