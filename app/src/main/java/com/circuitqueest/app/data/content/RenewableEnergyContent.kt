@@ -1,6 +1,28 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import kotlin.math.PI
+
 object RenewableEnergyContent {
+    private const val STC_IRRADIANCE = 1000.0
+    private const val AIR_DENSITY = 1.225
+    private const val BETZ_LIMIT = 16.0 / 27.0
+    private const val QUARTER = 0.25
+    private val panelPowers = listOf(250.0, 300.0, 350.0, 400.0)
+    private val panelAreas = listOf(1.6, 1.7, 1.9, 2.0)
+    private val availablePowers = listOf(10.0, 50.0, 100.0, 500.0)
+    private val cellCounts = listOf(36.0, 60.0, 72.0, 96.0)
+    private val cellVoltages = listOf(0.5, 0.6, 0.65)
+    private val windSpeeds = listOf(4.0, 5.0, 6.0)
+    private val speedFactors = listOf(1.5, 2.0, 3.0)
+    private val rotorDiameters = listOf(2.0, 10.0, 40.0, 80.0)
+    private val ratedSpeeds = listOf(5.0, 8.0, 10.0, 12.0)
+    private val sunHours = listOf(3.0, 4.0, 5.0, 6.0)
+    private val panelCounts = listOf(10.0, 20.0)
+
     val topic = Topic(
         id = "renewable_energy",
         title = "Renewable Energy",
@@ -49,14 +71,6 @@ object RenewableEnergyContent {
         quiz = Quiz(
             title = "Renewable Energy Boss Battle",
             questions = listOf(
-                Question.NumericInput(
-                    id = "re_ni1",
-                    questionText = "A solar panel produces 300W under STC (1000 W/m\u00B2) and has an area of 1.6 m\u00B2. What is its efficiency in percent? Round to one decimal.",
-                    correctAnswer = 18.8,
-                    tolerance = 0.2,
-                    unit = "%",
-                    explanation = "\u03B7 = P/(G\u00D7A) \u00D7 100 = 300/(1000\u00D71.6) \u00D7 100 = 300/1600 \u00D7 100 = 18.75%"
-                ),
                 Question.MultipleChoice(
                     id = "re_mc1",
                     questionText = "Wind power is proportional to wind speed:",
@@ -81,14 +95,6 @@ object RenewableEnergyContent {
                     correctIndex = 1,
                     explanation = "MPPT continuously adjusts the operating point on the panel's I-V curve to extract maximum power as conditions change."
                 ),
-                Question.NumericInput(
-                    id = "re_ni2",
-                    questionText = "The Betz limit states the maximum fraction of wind energy a turbine can extract. What is this limit in percent? Round to one decimal.",
-                    correctAnswer = 59.3,
-                    tolerance = 0.5,
-                    unit = "%",
-                    explanation = "The Betz limit is 16/27 \u2248 0.593 or 59.3%. No wind turbine can exceed this theoretical maximum."
-                ),
                 Question.MultipleChoice(
                     id = "re_mc3",
                     questionText = "Anti-islanding protection in grid-tie inverters ensures:",
@@ -101,22 +107,88 @@ object RenewableEnergyContent {
                     correctIndex = 1,
                     explanation = "Anti-islanding detects grid outage and disconnects the inverter within 2 seconds to prevent energizing downed power lines, which would endanger utility workers."
                 ),
-                Question.NumericInput(
-                    id = "re_ni3",
-                    questionText = "A 60-cell solar panel has cells in series, each producing 0.5V. What is the panel's open-circuit voltage in Volts?",
-                    correctAnswer = 30.0,
-                    tolerance = 0.5,
-                    unit = "V",
-                    explanation = "V_oc = 60 cells \u00D7 0.5V/cell = 30V"
-                ),
-                Question.NumericInput(
-                    id = "re_ni4",
-                    questionText = "If wind speed doubles from 5 m/s to 10 m/s, by what factor does the available wind power increase?",
-                    correctAnswer = 8.0,
-                    tolerance = 0.1,
-                    unit = "\u00D7",
-                    explanation = "P \u221D v\u00B3. Factor = (10/5)\u00B3 = 2\u00B3 = 8\u00D7"
+                Question.MultipleChoice(
+                    id = "re_mc4",
+                    questionText = "Why does a solar panel produce less power on a very hot day, even in full sun?",
+                    options = listOf(
+                        "The sunlight is weaker",
+                        "Cell voltage drops as temperature rises",
+                        "The inverter switches off",
+                        "Heat increases the cell's band gap"
+                    ),
+                    correctIndex = 1,
+                    explanation = "Silicon cell voltage falls by about 0.3–0.5% per °C above 25°C, so a hot panel makes noticeably less power. That's why panels are rated at 25°C and good airflow behind them helps."
                 )
+            ),
+            generators = listOf(
+                generator("re_ni1") { r ->
+                    val p = panelPowers.pick(r)
+                    val area = panelAreas.pick(r)
+                    val eff = p / (STC_IRRADIANCE * area) * 100
+                    Numeric(
+                        text = "A solar panel produces ${fmt(p)}W under standard test conditions (1000W/m²) and has an area of " +
+                            "${fmt(area)}m². What is its efficiency in percent? Round to 1 decimal place.",
+                        answer = eff, unit = "%", decimals = 1,
+                        explanation = "η = P/(G × A) × 100 = ${fmt(p)}/(1000 × ${fmt(area)}) × 100 = ${fmt(eff, 1)}%"
+                    )
+                },
+                generator("re_ni2") { r ->
+                    val avail = availablePowers.pick(r)
+                    val max = avail * BETZ_LIMIT
+                    Numeric(
+                        text = "The wind passing through a turbine's rotor carries ${fmt(avail)}kW. By the Betz limit, what is the " +
+                            "most power any turbine could extract, in kW? Round to 1 decimal place.",
+                        answer = max, unit = "kW", decimals = 1,
+                        explanation = "The Betz limit is 16/27 ≈ 59.3% of the wind's power: 0.593 × ${fmt(avail)} = ${fmt(max, 1)}kW"
+                    )
+                },
+                generator("re_ni3") { r ->
+                    val n = cellCounts.pick(r)
+                    val vc = cellVoltages.pick(r)
+                    Numeric(
+                        text = "A ${fmt(n)}-cell solar panel has its cells in series, each giving ${fmt(vc)}V. What is the panel's " +
+                            "open-circuit voltage in Volts? Round to 2 decimal places.",
+                        answer = n * vc, unit = "V",
+                        explanation = "Series cells add: V_oc = ${fmt(n)} × ${fmt(vc)}V = ${fmt(n * vc, 2)}V"
+                    )
+                },
+                generator("re_ni4") { r ->
+                    val v1 = windSpeeds.pick(r)
+                    val k = speedFactors.pick(r)
+                    val v2 = v1 * k
+                    val factor = k * k * k
+                    Numeric(
+                        text = "Wind speed rises from ${fmt(v1)}m/s to ${fmt(v2)}m/s. By what factor does the available wind " +
+                            "power increase? Round to 3 decimal places.",
+                        answer = factor, unit = "×", decimals = 3,
+                        explanation = "P ∝ v³, so the factor is (${fmt(v2)}/${fmt(v1)})³ = ${fmt(k)}³ = ${fmt(factor, 3)}×"
+                    )
+                },
+                generator("re_ni5") { r ->
+                    val d = rotorDiameters.pick(r)
+                    val v = ratedSpeeds.pick(r)
+                    val area = PI * d * d * QUARTER
+                    val kw = AIR_DENSITY * area * v * v * v / 2 / 1000
+                    Numeric(
+                        text = "A wind turbine has a ${fmt(d)}m rotor diameter. How much power does a ${fmt(v)}m/s wind carry through " +
+                            "it, in kW? Use P = ½ρAv³ with ρ = 1.225kg/m³ and round to 1 decimal place.",
+                        answer = kw, unit = "kW", decimals = 1,
+                        explanation = "A = π × ${fmt(d)}²/4 = ${fmt(area, 1)}m². P = ½ × 1.225 × ${fmt(area, 1)} × ${fmt(v)}³ = " +
+                            "${fmt(kw, 1)}kW"
+                    )
+                },
+                generator("re_ni6") { r ->
+                    val n = panelCounts.pick(r)
+                    val p = panelPowers.pick(r)
+                    val h = sunHours.pick(r)
+                    val kwh = n * p * h / 1000
+                    Numeric(
+                        text = "A roof has ${fmt(n)} panels of ${fmt(p)}W each, and the site gets ${fmt(h)} peak sun hours a day. " +
+                            "Roughly how much energy does it produce per day, in kWh (ignore losses)?",
+                        answer = kwh, unit = "kWh",
+                        explanation = "Energy = ${fmt(n)} × ${fmt(p)}W × ${fmt(h)}h = ${fmt(n * p * h)}Wh = ${fmt(kwh)}kWh"
+                    )
+                }
             )
         )
     )

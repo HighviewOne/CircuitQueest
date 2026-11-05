@@ -1,6 +1,29 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.articleCap
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+import kotlin.math.PI
+
 object ElectricVehiclesContent {
+    private const val KMH_PER_MS = 3.6
+    private val packVoltages = listOf(400.0, 800.0)
+    private val nominalCellVoltages = listOf(3.6, 3.7)
+    private val chargerPowers = listOf(7.4, 11.0, 22.0, 50.0, 150.0)
+    private val batteryCapacities = listOf(40.0, 60.0, 77.0, 100.0)
+    private val vehicleMasses = listOf(1500.0, 2000.0, 2500.0)
+    private val speedsKmh = listOf(50.0, 80.0, 100.0, 120.0)
+    private val regenEfficiencies = listOf(60.0, 65.0, 70.0)
+    private val rangeBatteries = listOf(60.0, 77.0, 100.0)
+    private val consumptions = listOf(15.0, 18.0, 20.0, 25.0)
+    private val seriesCounts = listOf(96.0, 108.0)
+    private val parallelCounts = listOf(20.0, 30.0, 46.0)
+    private val cellCapacities = listOf(3.0, 5.0)
+    private val motorTorques = listOf(200.0, 300.0, 400.0)
+    private val motorSpeeds = listOf(3000.0, 6000.0)
+
     val topic = Topic(
         id = "electric_vehicles",
         title = "Electric Vehicles",
@@ -61,14 +84,6 @@ object ElectricVehiclesContent {
                     correctIndex = 1,
                     explanation = "The traction inverter converts the battery's DC voltage into variable-frequency, variable-voltage 3-phase AC to control the motor's speed and torque."
                 ),
-                Question.NumericInput(
-                    id = "ev_ni1",
-                    questionText = "An 800V battery pack uses cells with 4.2V nominal voltage in series. How many cells are needed in series? Round to nearest whole number.",
-                    correctAnswer = 190.0,
-                    tolerance = 2.0,
-                    unit = "cells",
-                    explanation = "N_series = V_pack / V_cell = 800 / 4.2 \u2248 190 cells in series."
-                ),
                 Question.MultipleChoice(
                     id = "ev_mc2",
                     questionText = "Regenerative braking works by:",
@@ -80,14 +95,6 @@ object ElectricVehiclesContent {
                     ),
                     correctIndex = 1,
                     explanation = "During regenerative braking, the motor operates as a generator, converting the vehicle's kinetic energy back into electrical energy that charges the battery."
-                ),
-                Question.NumericInput(
-                    id = "ev_ni2",
-                    questionText = "A Level 2 charger delivers 11 kW. How many hours to charge a 77 kWh battery from empty? Round to one decimal.",
-                    correctAnswer = 7.0,
-                    tolerance = 0.1,
-                    unit = "hours",
-                    explanation = "Time = Energy / Power = 77 kWh / 11 kW = 7.0 hours"
                 ),
                 Question.MultipleChoice(
                     id = "ev_mc3",
@@ -101,14 +108,6 @@ object ElectricVehiclesContent {
                     correctIndex = 1,
                     explanation = "SiC MOSFETs switch faster with lower losses, handle higher voltages (800V+), and reduce cooling requirements, improving overall EV efficiency and range."
                 ),
-                Question.NumericInput(
-                    id = "ev_ni3",
-                    questionText = "Regenerative braking recovers 65% of braking energy. A 2000 kg car decelerates from 100 km/h (27.8 m/s) to 0. How much energy is recovered in kJ? Round to nearest whole number.",
-                    correctAnswer = 502.0,
-                    tolerance = 10.0,
-                    unit = "kJ",
-                    explanation = "KE = \u00BD\u00D7m\u00D7v\u00B2 = \u00BD\u00D72000\u00D727.8\u00B2 = 772,840 J \u2248 773 kJ. Recovered = 773 \u00D7 0.65 \u2248 502 kJ"
-                ),
                 Question.MultipleChoice(
                     id = "ev_mc4",
                     questionText = "DC fast charging is faster than Level 2 because it:",
@@ -121,6 +120,83 @@ object ElectricVehiclesContent {
                     correctIndex = 1,
                     explanation = "DC fast chargers contain their own large AC-DC converter, bypassing the vehicle's smaller onboard charger. This allows power delivery of 50\u2013350 kW directly to the battery."
                 )
+            ),
+            generators = listOf(
+                generator("ev_ni1") { r ->
+                    val vpack = packVoltages.pick(r)
+                    val vcell = nominalCellVoltages.pick(r)
+                    val n = vpack / vcell
+                    Numeric(
+                        text = "${articleCap(vpack)} ${fmt(vpack)}V nominal battery pack uses Li-ion cells of ${fmt(vcell)}V nominal " +
+                            "voltage in series. How many cells are in series? Round to the nearest whole number.",
+                        answer = n, unit = "cells", decimals = 0,
+                        explanation = "N_series = V_pack/V_cell = ${fmt(vpack)}/${fmt(vcell)} ≈ ${fmt(n, 0)} cells. (4.2V is the " +
+                            "full-charge voltage, not the nominal.)"
+                    )
+                },
+                generator("ev_ni2") { r ->
+                    val p = chargerPowers.pick(r)
+                    val e = batteryCapacities.pick(r)
+                    val h = e / p
+                    Numeric(
+                        text = "${articleCap(p)} ${fmt(p)}kW charger fills a ${fmt(e)}kWh battery from empty. Ignoring losses and " +
+                            "charge taper, how many hours does it take? Round to 2 decimal places.",
+                        answer = h, unit = "hours",
+                        explanation = "Time = energy/power = ${fmt(e)}kWh/${fmt(p)}kW = ${fmt(h, 2)} hours"
+                    )
+                },
+                generator("ev_ni3") { r ->
+                    val m = vehicleMasses.pick(r)
+                    val kmh = speedsKmh.pick(r)
+                    val eff = regenEfficiencies.pick(r)
+                    val v = kmh / KMH_PER_MS
+                    val ke = m * v * v / 2 / 1000
+                    val rec = ke * eff / 100
+                    Numeric(
+                        text = "Regenerative braking recovers ${fmt(eff)}% of braking energy. A ${fmt(m)}kg car brakes from " +
+                            "${fmt(kmh)}km/h to a stop. How much energy is recovered, in kJ? Round to the nearest whole number.",
+                        answer = rec, unit = "kJ", decimals = 0,
+                        explanation = "v = ${fmt(kmh)}/3.6 = ${fmt(v, 2)}m/s. KE = ½mv² = ${fmt(ke, 0)}kJ, and " +
+                            "${fmt(eff)}% of that is ${fmt(rec, 0)}kJ"
+                    )
+                },
+                generator("ev_ni4") { r ->
+                    val e = rangeBatteries.pick(r)
+                    val c = consumptions.pick(r)
+                    val km = e / c * 100
+                    Numeric(
+                        text = "An EV has a ${fmt(e)}kWh usable battery and uses ${fmt(c)}kWh per 100km. What is its range, in km? " +
+                            "Round to 1 decimal place.",
+                        answer = km, unit = "km", decimals = 1,
+                        explanation = "Range = ${fmt(e)}/${fmt(c)} × 100 = ${fmt(km, 1)}km"
+                    )
+                },
+                generator("ev_ni5") { r ->
+                    val s = seriesCounts.pick(r)
+                    val p = parallelCounts.pick(r)
+                    val ah = cellCapacities.pick(r)
+                    val vcell = nominalCellVoltages.pick(r)
+                    val kwh = s * p * vcell * ah / 1000
+                    Numeric(
+                        text = "A pack is built ${fmt(s)}s${fmt(p)}p from ${fmt(vcell)}V, ${fmt(ah)}Ah cells. What is its energy " +
+                            "in kWh? Round to 2 decimal places.",
+                        answer = kwh, unit = "kWh",
+                        explanation = "Voltage = ${fmt(s)} × ${fmt(vcell)} = ${fmt(s * vcell, 1)}V and capacity = ${fmt(p)} × " +
+                            "${fmt(ah)} = ${fmt(p * ah)}Ah, so energy = ${fmt(s * vcell, 1)} × ${fmt(p * ah)} = ${fmt(kwh, 2)}kWh"
+                    )
+                },
+                generator("ev_ni6") { r ->
+                    val t = motorTorques.pick(r)
+                    val rpm = motorSpeeds.pick(r)
+                    val kw = t * rpm * 2 * PI / 60 / 1000
+                    Numeric(
+                        text = "A traction motor delivers ${fmt(t)}N·m at ${fmt(rpm)}rpm. What is its mechanical power, in kW? " +
+                            "Round to 1 decimal place.",
+                        answer = kw, unit = "kW", decimals = 1,
+                        explanation = "P = T × ω, with ω = rpm × 2π/60 = ${fmt(rpm * 2 * PI / 60, 1)}rad/s: P = ${fmt(t)} × " +
+                            "${fmt(rpm * 2 * PI / 60, 1)} = ${fmt(kw, 1)}kW"
+                    )
+                }
             )
         )
     )

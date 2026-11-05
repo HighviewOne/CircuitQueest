@@ -1,6 +1,24 @@
 package com.circuitqueest.app.data.content
 
+import com.circuitqueest.app.data.content.QuestionMath.Numeric
+import com.circuitqueest.app.data.content.QuestionMath.fmt
+import com.circuitqueest.app.data.content.QuestionMath.generator
+import com.circuitqueest.app.data.content.QuestionMath.pick
+
 object PowerElectronicsContent {
+    private val linearInputs = listOf(9.0, 12.0, 15.0, 24.0)
+    private val linearOutputs = listOf(3.3, 5.0)
+    private val linearCurrents = listOf(0.1, 0.25, 0.5, 1.0)
+    private val buckInputs = listOf(12.0, 24.0, 48.0)
+    private val buckDuties = listOf(0.1, 0.25, 0.4, 0.5, 0.75)
+    private val boostInputs = listOf(3.3, 5.0, 12.0)
+    private val boostDuties = listOf(0.2, 0.25, 0.4, 0.5, 0.6, 0.75)
+    private val efficiencyInputs = listOf(5.0, 9.0, 12.0, 24.0)
+    private val efficiencyOutputs = listOf(1.8, 3.3)
+    private val buckTargets = listOf(1.2, 3.3, 5.0)
+    private val outputCurrents = listOf(0.5, 1.0, 2.0)
+    private val converterEfficiencies = listOf(85.0, 90.0, 95.0)
+
     val topic = Topic(
         id = "power_electronics",
         title = "Power Electronics",
@@ -50,14 +68,6 @@ object PowerElectronicsContent {
         quiz = Quiz(
             title = "Power Electronics Boss Battle",
             questions = listOf(
-                Question.NumericInput(
-                    id = "pe_ni1",
-                    questionText = "A linear regulator converts 9V to 5V at 500mA. How much power is wasted as heat in Watts?",
-                    correctAnswer = 2.0,
-                    tolerance = 0.1,
-                    unit = "W",
-                    explanation = "P_loss = (V_in \u2212 V_out) \u00D7 I = (9 \u2212 5) \u00D7 0.5 = 2W"
-                ),
                 Question.MultipleChoice(
                     id = "pe_mc1",
                     questionText = "Which type of regulator is more efficient?",
@@ -69,22 +79,6 @@ object PowerElectronicsContent {
                     ),
                     correctIndex = 1,
                     explanation = "Switching regulators are much more efficient (typically 85\u201395%) because they transfer energy through inductors rather than dissipating excess voltage as heat."
-                ),
-                Question.NumericInput(
-                    id = "pe_ni2",
-                    questionText = "A buck converter has V_in = 24V and duty cycle D = 0.25. What is V_out in Volts?",
-                    correctAnswer = 6.0,
-                    tolerance = 0.1,
-                    unit = "V",
-                    explanation = "V_out = D \u00D7 V_in = 0.25 \u00D7 24 = 6V"
-                ),
-                Question.NumericInput(
-                    id = "pe_ni3",
-                    questionText = "A boost converter has V_in = 5V and D = 0.5. What is V_out in Volts?",
-                    correctAnswer = 10.0,
-                    tolerance = 0.1,
-                    unit = "V",
-                    explanation = "V_out = V_in / (1 \u2212 D) = 5 / (1 \u2212 0.5) = 5 / 0.5 = 10V"
                 ),
                 Question.MultipleChoice(
                     id = "pe_mc2",
@@ -98,14 +92,6 @@ object PowerElectronicsContent {
                     correctIndex = 2,
                     explanation = "LDO stands for Low Dropout, meaning the regulator can operate with a very small difference between input and output voltage (as low as 0.1\u20130.3V)."
                 ),
-                Question.NumericInput(
-                    id = "pe_ni4",
-                    questionText = "A linear regulator converts 12V to 3.3V. What is its efficiency in percent?",
-                    correctAnswer = 27.5,
-                    tolerance = 0.5,
-                    unit = "%",
-                    explanation = "\u03B7 = V_out/V_in \u00D7 100 = 3.3/12 \u00D7 100 = 27.5%. This shows why linear regulators are poor for large voltage drops."
-                ),
                 Question.MultipleChoice(
                     id = "pe_mc3",
                     questionText = "In a buck converter, increasing the duty cycle:",
@@ -117,7 +103,91 @@ object PowerElectronicsContent {
                     ),
                     correctIndex = 1,
                     explanation = "V_out = D \u00D7 V_in, so increasing D increases V_out (the switch is ON for a larger fraction of each cycle)."
+                ),
+                Question.MultipleChoice(
+                    id = "pe_mc4",
+                    questionText = "In a buck converter, what is the inductor's job?",
+                    options = listOf(
+                        "To raise the output voltage",
+                        "To store energy while the switch is on and keep current flowing while it's off",
+                        "To filter the input AC",
+                        "To limit the switching frequency"
+                    ),
+                    correctIndex = 1,
+                    explanation = "The switch chops the input. The inductor stores energy during the ON time and keeps current flowing (through the diode or low-side switch) during the OFF time, so the output gets a smooth average D × V_in."
                 )
+            ),
+            generators = listOf(
+                generator("pe_ni1") { r ->
+                    val vin = linearInputs.pick(r)
+                    val vout = linearOutputs.pick(r)
+                    val i = linearCurrents.pick(r)
+                    val p = (vin - vout) * i
+                    Numeric(
+                        text = "A linear regulator converts ${fmt(vin)}V to ${fmt(vout)}V at " +
+                            "${if (i < 1) "${fmt(i * 1000)}mA" else "${fmt(i)}A"}. How much power is " +
+                            "wasted as heat, in Watts? Round to 2 decimal places.",
+                        answer = p, unit = "W",
+                        explanation = "P_loss = (V_in − V_out) × I = (${fmt(vin)} − ${fmt(vout)}) × ${fmt(i)} = ${fmt(p, 2)}W"
+                    )
+                },
+                generator("pe_ni2") { r ->
+                    val vin = buckInputs.pick(r)
+                    val d = buckDuties.pick(r)
+                    Numeric(
+                        text = "A buck converter has V_in = ${fmt(vin)}V and duty cycle D = ${fmt(d)}. What is V_out in Volts?",
+                        answer = d * vin, unit = "V",
+                        explanation = "V_out = D × V_in = ${fmt(d)} × ${fmt(vin)} = ${fmt(d * vin)}V"
+                    )
+                },
+                generator("pe_ni3") { r ->
+                    val vin = boostInputs.pick(r)
+                    val d = boostDuties.pick(r)
+                    val vout = vin / (1 - d)
+                    Numeric(
+                        text = "A boost converter has V_in = ${fmt(vin)}V and duty cycle D = ${fmt(d)}. What is V_out in Volts? " +
+                            "Round to 2 decimal places.",
+                        answer = vout, unit = "V",
+                        explanation = "V_out = V_in/(1 − D) = ${fmt(vin)}/(1 − ${fmt(d)}) = ${fmt(vout, 2)}V"
+                    )
+                },
+                generator("pe_ni4") { r ->
+                    val vin = efficiencyInputs.pick(r)
+                    val vout = efficiencyOutputs.pick(r)
+                    val eff = vout / vin * 100
+                    Numeric(
+                        text = "A linear regulator converts ${fmt(vin)}V to ${fmt(vout)}V. What is its efficiency in percent? " +
+                            "Round to 1 decimal place.",
+                        answer = eff, unit = "%", decimals = 1,
+                        explanation = "The same current flows in and out, so η = V_out/V_in × 100 = ${fmt(vout)}/${fmt(vin)} × 100 = " +
+                            "${fmt(eff, 1)}%"
+                    )
+                },
+                generator("pe_ni5") { r ->
+                    val vin = buckInputs.pick(r)
+                    val vout = buckTargets.pick(r)
+                    val d = vout / vin
+                    Numeric(
+                        text = "A buck converter must produce ${fmt(vout)}V from ${fmt(vin)}V. What duty cycle is needed? " +
+                            "Round to 3 decimal places.",
+                        answer = d, unit = "", decimals = 3,
+                        explanation = "D = V_out/V_in = ${fmt(vout)}/${fmt(vin)} = ${fmt(d, 3)}"
+                    )
+                },
+                generator("pe_ni6") { r ->
+                    val vin = buckInputs.pick(r)
+                    val vout = buckTargets.pick(r)
+                    val iout = outputCurrents.pick(r)
+                    val eff = converterEfficiencies.pick(r)
+                    val iin = vout * iout / (eff / 100 * vin)
+                    Numeric(
+                        text = "A switching converter delivers ${fmt(vout)}V at ${fmt(iout)}A from a ${fmt(vin)}V input with " +
+                            "${fmt(eff)}% efficiency. What is the input current, in Amps? Round to 3 decimal places.",
+                        answer = iin, unit = "A", decimals = 3,
+                        explanation = "P_out = ${fmt(vout)} × ${fmt(iout)} = ${fmt(vout * iout)}W, so P_in = P_out/η = " +
+                            "${fmt(vout * iout / (eff / 100), 3)}W and I_in = P_in/V_in = ${fmt(iin, 3)}A"
+                    )
+                }
             )
         )
     )
