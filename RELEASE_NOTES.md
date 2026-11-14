@@ -1,6 +1,6 @@
 # CircuitQuEEst v2.7 — Deeper Practice
 
-**Release Date:** November 2026
+**Release Date:** November 13, 2026
 **APK size:** ~2 MB (R8-shrunk release build)
 **Requires:** Android 8.0+
 

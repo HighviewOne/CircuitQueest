@@ -237,7 +237,7 @@
       <tbody>
         <tr><td><code>home</code></td><td>HomeScreen — category list + search</td></tr>
         <tr><td><code>lesson/{topicId}</code></td><td>LessonScreen — scrollable lesson sections</td></tr>
-        <tr><td><code>quiz/{topicId}</code></td><td>QuizScreen — 7-question quiz</td></tr>
+        <tr><td><code>quiz/{topicId}</code></td><td>QuizScreen — 7 questions drawn from the topic's pool</td></tr>
         <tr><td><code>review/{topicId}</code></td><td>QuizScreen in review mode — missed questions for one topic, or <code>all</code></td></tr>
         <tr><td><code>result/{topicId}/{score}/{total}/{xp}</code></td><td>ResultScreen — score + XP actually awarded</td></tr>
       </tbody>
@@ -262,7 +262,14 @@ data class Lesson(val title: String, val sections: List&lt;LessonSection&gt;)
 data class LessonSection(val heading: String, val content: String,
                          val formula: String? = null, val keyPoint: String? = null)
 
-data class Quiz(val title: String, val questions: List&lt;Question&gt;)
+// A pool of 10–11 per topic; each attempt draws 7 in random order, options shuffled
+data class Quiz(val title: String, val questions: List&lt;Question&gt;,
+                val generators: List&lt;QuestionGenerator&gt; = emptyList()) {
+    fun drawAttempt(random: Random = Random.Default): List&lt;Question&gt;
+    fun find(id: String, random: Random = Random.Default): Question?  // for review
+}
+// Numeric questions with fresh values on every draw; the id stays fixed so a miss can be reviewed
+class QuestionGenerator(val id: String, private val make: (Random) -&gt; Question)
 sealed class Question {
     data class MultipleChoice(val options: List&lt;String&gt;, val correctIndex: Int, ...) : Question()
     data class NumericInput(val correctAnswer: Double, val tolerance: Double, ...) : Question()
