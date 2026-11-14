@@ -1,3 +1,32 @@
+# CircuitQuEEst v2.7 — Deeper Practice
+
+**Release Date:** November 2026
+**APK size:** ~2 MB (R8-shrunk release build)
+**Requires:** Android 8.0+
+
+> Installs as an update over any earlier version and keeps your progress, including your review queue.
+
+### New
+- **A fresh quiz every time.** Each of the 42 topics now has a pool of 10–11 questions, and every attempt draws 7 of them in a random order. Retaking a quiz is real practice instead of a memory test.
+- **New numbers on every attempt.** Calculation questions generate their own values each time (resistor values, frequencies, turns ratios, battery capacities and so on), and the explanation works through the numbers you got. If you round your answer the way the question asks, it is always accepted.
+- **Shuffled answers.** Multiple-choice options appear in a different order each attempt.
+- **141 new questions** (435 in all) across all nine categories, including NAND-only gate counts for every basic gate, the Betz limit as a calculation, pack energy from series/parallel cells, Friis noise figure, Coriolis force in MEMS gyroscopes and heart rate from the R-R interval.
+- **Review keeps working.** Mistakes you'd already queued still come up in review. A missed calculation comes back with new numbers, so you practise the method, not the answer.
+
+### Fixes
+Converting the questions turned up a few wrong ones, now corrected:
+- **PCB Design:** a 100 mm × 0.25 mm, 1 oz trace was said to be about 23 mΩ; it is about 197 mΩ.
+- **RF Circuits:** a two-stage Friis noise figure gave 1.6 dB (it is 1.76 dB), and its tolerance rejected the right answer; an insertion-loss question asked for a negative "S21 in dB".
+- **Electric Vehicles:** cells-in-series used 4.2 V as the Li-ion nominal voltage; nominal is 3.6–3.7 V.
+- **Signal Integrity:** a shielding question asked for the energy blocked but expected the field-amplitude figure.
+- **Biomedical Electronics:** a CMRR question asked for the interference at the output but expected the input-referred value.
+
+### Engineering
+- New `QuizPoolTest` checks every topic: pool sizes, generated numerics, that shuffling keeps the right answer, and that generators stay in sensible ranges.
+- UI and screenshot tests no longer assume a fixed first question.
+
+---
+
 # CircuitQuEEst v2.6 — Study Streaks
 
 **Release Date:** October 23, 2026

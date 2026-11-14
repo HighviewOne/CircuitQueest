@@ -2,7 +2,7 @@
 
 ## Overview
 
-CircuitQuEEst has 223 JVM unit tests and 55 instrumented tests (plus 6 store-screenshot tests that run separately). This guide explains the testing strategy, how to run tests, and how to add new ones.
+CircuitQuEEst has 235 JVM unit tests and 55 instrumented tests (plus 6 store-screenshot tests that run separately). This guide explains the testing strategy, how to run tests, and how to add new ones.
 
 ## Test Pyramid
 
@@ -14,7 +14,7 @@ CircuitQuEEst has 223 JVM unit tests and 55 instrumented tests (plus 6 store-scr
         ║   Database Tests (30 tests)       ║
         ║   Room DAOs, Migrations, Import   ║
         ╠═══════════════════════════════════╣
-        ║   Unit Tests (223 tests)          ║
+        ║   Unit Tests (235 tests)          ║
         ║   Logic, Repository, Edge         ║
         ║   Cases, Content Modules          ║
         ╚═══════════════════════════════════╝
@@ -131,9 +131,9 @@ Coverage isn't measured (no JaCoCo/Kover set up), so this lists test counts only
 
 | Area | Unit (JVM) | Instrumented |
 |------|-----------:|-------------:|
-| Content modules + TopicsService | 84 | - |
+| Content modules, question pools + TopicsService | 94 | - |
 | Scoring + edge cases | 35 | - |
-| ViewModels | 25 | - |
+| ViewModels | 27 | - |
 | Room DAOs, migrations, legacy import | 22 | 30 |
 | ProgressRepository | 21 | - |
 | Streaks | 8 | - |
@@ -142,7 +142,7 @@ Coverage isn't measured (no JaCoCo/Kover set up), so this lists test counts only
 | UI helpers (search, numeric parsing, fonts) | 9 | - |
 | Compose components | - | 9 |
 | Screens (Home, Quiz, Result) | - | 16 |
-| **Total** | **223** | **55** |
+| **Total** | **235** | **55** |
 
 `StoreScreenshots` (6 tests) only runs in `screenshots.yml`; `build.yml` excludes it.
 
