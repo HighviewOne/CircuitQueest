@@ -1,4 +1,7 @@
+# Content Signals (https://contentsignals.org/): search and AI answers that cite
+# and link back are welcome; please don't use this site's content to train models.
 User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=no
 Allow: /
 
 Sitemap: https://circuitquest.mirarver.com/sitemap.xml
